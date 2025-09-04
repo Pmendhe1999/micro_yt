@@ -2,6 +2,7 @@ package com.question.QuestionService.controllers;
 
 import com.question.QuestionService.entities.Question;
 import com.question.QuestionService.services.QuestionService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class QuestionController {
 
     //    get all
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<Question> getAll() {
         return questionService.get();

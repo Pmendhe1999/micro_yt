@@ -2,6 +2,7 @@ package com.quiz.controllers;
 
 import com.quiz.entities.Quiz;
 import com.quiz.services.QuizService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,12 @@ public class QuizController {
     @GetMapping("/{id}")
     public Quiz getOne(@PathVariable Long id) {
         return quizService.get(id);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/checkAdmin")
+    public String checkAdmin(){
+        return "only admin can check this admin";
     }
 
 
