@@ -44,4 +44,10 @@ public class QuestionController {
         return questionService.getQuestionsOfQuiz(quizId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/questions")
+    public String  getQuestions() {
+        return "Questions got";
+    }
+
 }

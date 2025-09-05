@@ -11,8 +11,6 @@ import java.util.List;
 @FeignClient(name = "QUESTION-SERVICE")
 public interface QuestionClient {
 
-//
-
     @GetMapping("/question/quiz/{quizId}")
     List<Question> getQuestionOfQuiz(@PathVariable Long quizId);
 }

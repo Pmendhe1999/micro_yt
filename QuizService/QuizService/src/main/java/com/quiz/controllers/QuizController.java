@@ -24,7 +24,7 @@ public class QuizController {
     }
 
 //    get all
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public List<Quiz> get() {
         return quizService.get();
