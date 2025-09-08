@@ -62,4 +62,19 @@ public class JwtService {
         return Jwts.parserBuilder().setSigningKey(getSignKey()).build()
                 .parseClaimsJws(token).getBody();
     }
+    // ✅ Extract username (from "sub")
+    public String extractUsername(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    // ✅ Extract first role from "roles"
+    @SuppressWarnings("unchecked")
+    public String extractRole(String token) {
+        Claims claims = extractAllClaims(token);
+        List<String> roles = claims.get("roles", List.class);
+        if (roles != null && !roles.isEmpty()) {
+            return roles.get(0); // Take first role
+        }
+        return null;
+    }
 }

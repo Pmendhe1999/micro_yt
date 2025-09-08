@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SignatureException;
+import java.time.LocalDateTime;
 
 @Service
 public class AuthService {
@@ -28,21 +29,27 @@ public class AuthService {
     private JwtService jwtService;
 
 
-    public String saveUser(UserCredential credential) {
-        try {
-            if (credential.getPassword() == null || credential.getPassword().isEmpty()) {
-                throw new IllegalArgumentException("Password cannot be null or empty");
-            }
-
-            credential.setPassword(passwordEncoder.encode(credential.getPassword()));
-            repository.save(credential);
-
-            return "User added to the system";
-        } catch (IllegalArgumentException e) {
-            throw e; // Let controller/global handler manage this
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to save user", e);
+    public String saveUser(UserCredential credential, String token) {
+        if (credential.getPassword() == null || credential.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
         }
+
+        // ✅ Extract details from token
+        String createdByUser = jwtService.extractUsername(token); // "sub"
+        String role = jwtService.extractRole(token);              // "roles"
+
+        // ✅ Encode password
+        credential.setPassword(passwordEncoder.encode(credential.getPassword()));
+
+        // ✅ Set audit fields
+        credential.setCreatedBy(createdByUser + " (" + role + ")");
+        credential.setCreatedDate(LocalDateTime.now());
+        credential.setLastModifiedBy(createdByUser + " (" + role + ")");
+        credential.setLastModifiedDate(LocalDateTime.now());
+
+        repository.save(credential);
+
+        return "User registered successfully by " + createdByUser + " with role " + role;
     }
 
     public String generateToken(String username) {

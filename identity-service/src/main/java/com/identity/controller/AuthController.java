@@ -19,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.SignatureException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,10 +35,11 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/register")
-    public ResponseEntity<?> addNewUser(@Valid @RequestBody UserCredential user,
-                                        BindingResult bindingResult) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserCredential user,
+                                          BindingResult bindingResult,
+                                          @RequestHeader("Authorization") String authHeader) {
         try {
-            // check validation errors first
+            // 1. Validate request body
             if (bindingResult.hasErrors()) {
                 Map<String, String> errors = new HashMap<>();
                 bindingResult.getFieldErrors().forEach(error ->
@@ -46,14 +48,21 @@ public class AuthController {
                 return ResponseEntity.badRequest().body(errors);
             }
 
-            String response = service.saveUser(user);
-            return ResponseEntity.ok(response);
+            // 2. Extract JWT token (remove "Bearer ")
+            String token = authHeader.replace("Bearer ", "");
+
+            // 3. Save user with audit fields
+            String response = service.saveUser(user, token);
+            return ResponseEntity.ok(Collections.singletonMap("message", response));
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid user data: " + e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    Collections.singletonMap("error", "Invalid user data: " + e.getMessage())
+            );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An unexpected error occurred while registering user: " + e.getMessage());
+                    .body(Collections.singletonMap("error",
+                            "An unexpected error occurred while registering user: " + e.getMessage()));
         }
     }
 
