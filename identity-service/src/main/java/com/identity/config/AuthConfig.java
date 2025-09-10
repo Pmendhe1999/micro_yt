@@ -32,13 +32,14 @@ public class AuthConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // ✅ No deprecated csrf()
-                .authorizeHttpRequests(auth -> auth // ✅ New lambda style
-                        .requestMatchers("/auth/register", "/auth/token", "/auth/validate").permitAll()
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**", "/users/**", "/authorities/**", "/auth-types/**", "/projects/**").permitAll()  // allow all under /auth and /users
                         .anyRequest().authenticated()
                 );
         return http.build();
     }
+
 
 
     @Bean
