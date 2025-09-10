@@ -13,7 +13,7 @@ public class AuthTypes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "auth_type_id")
-    private Long auth_type_id;
+    private Long authTypeId;
 
     @Column(name = "auth_type_name", nullable = false, unique = true, length = 50)
     private String authTypeName;
@@ -39,12 +39,13 @@ public class AuthTypes {
         LOGIN, REGISTRATION, BOTH
     }
 
-    public Long getAuth_type_id() {
-        return auth_type_id;
+
+    public Long getAuthTypeId() {
+        return authTypeId;
     }
 
-    public void setAuth_type_id(Long auth_type_id) {
-        this.auth_type_id = auth_type_id;
+    public void setAuthTypeId(Long authTypeId) {
+        this.authTypeId = authTypeId;
     }
 
     public String getAuthTypeName() {

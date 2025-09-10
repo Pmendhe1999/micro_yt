@@ -1,18 +1,22 @@
 package com.identity.service;
 
+import com.identity.dto.AuthTypeDTO;
 import com.identity.entity.AuthTypes;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface AuthTypesService {
-    String saveAuthType(AuthTypes authType, String token);
+    AuthTypes saveAuthType(AuthTypeDTO authTypeDTO, String token);
 
-    List<AuthTypes> getAllAuthTypes();
+    Page<AuthTypes> getAllAuthTypes(String search, Pageable pageable);
 
     Optional<AuthTypes> getAuthTypeById(Long id);
 
-    String updateAuthType(Long id, AuthTypes updatedAuthType, String token);
+    // Interface
+    AuthTypes updateAuthTypeReturnEntity(Long id, AuthTypeDTO updatedAuthTypeDTO, String token);
 
-    String deleteAuthType(Long id, String token);
+    AuthTypes deleteAuthTypeReturnEntity(Long id, String token);
 }
