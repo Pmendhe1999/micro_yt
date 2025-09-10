@@ -1,8 +1,7 @@
 package com.identity.controller;
 
-
-import com.identity.entity.AuthenticationType;
-import com.identity.service.AuthenticationTypeService;
+import com.identity.entity.AuthTypes;
+import com.identity.service.AuthTypesService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,14 +13,13 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/auth-types")
-public class AuthenticationTypeController {
+public class AuthTypesController {
 
     @Autowired
-    private AuthenticationTypeService service;
+    private AuthTypesService service;
 
-    // CREATE
     @PostMapping
-    public ResponseEntity<?> createAuthType(@Valid @RequestBody AuthenticationType authType,
+    public ResponseEntity<?> createAuthType(@Valid @RequestBody AuthTypes authType,
                                             BindingResult bindingResult,
                                             @RequestHeader("Authorization") String authHeader) {
         try {
@@ -47,7 +45,7 @@ public class AuthenticationTypeController {
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<List<AuthenticationType>> getAllAuthTypes() {
+    public ResponseEntity<List<AuthTypes>> getAllAuthTypes() {
         return ResponseEntity.ok(service.getAllAuthTypes());
     }
 
@@ -57,13 +55,13 @@ public class AuthenticationTypeController {
         return service.getAuthTypeById(id)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Collections.singletonMap("error", "Authentication type not found")));
+                        .body(Collections.singletonMap("error", "Auth type not found")));
     }
 
     // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<?> updateAuthType(@PathVariable Long id,
-                                            @Valid @RequestBody AuthenticationType updatedAuthType,
+                                            @Valid @RequestBody AuthTypes updatedAuthType,
                                             BindingResult bindingResult,
                                             @RequestHeader("Authorization") String authHeader) {
         try {

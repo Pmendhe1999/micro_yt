@@ -1,9 +1,9 @@
 package com.identity.serviceImpl;
 
 import com.identity.dto.ProjectRegisterDto;
-import com.identity.entity.AuthenticationType;
+import com.identity.entity.AuthTypes;
 import com.identity.entity.ProjectRegistrationMaster;
-import com.identity.reository.AuthenticationTypeRepository;
+import com.identity.reository.AuthTypesRepository;
 import com.identity.reository.ProjectRegistrationRepository;
 import com.identity.service.JwtService;
 import com.identity.service.ProjectRegistrationService;
@@ -23,7 +23,7 @@ public class ProjectRegistrationServiceImpl implements ProjectRegistrationServic
     private ProjectRegistrationRepository repository;
 
     @Autowired
-    private AuthenticationTypeRepository authTypeRepo;
+    private AuthTypesRepository authTypeRepo;
 
     @Autowired
     private JwtService jwtService;
@@ -34,7 +34,7 @@ public class ProjectRegistrationServiceImpl implements ProjectRegistrationServic
             throw new IllegalArgumentException("Project name already exists");
         }
 
-        AuthenticationType authType = authTypeRepo.findById(dto.getAuthTypeId())
+        AuthTypes authType = authTypeRepo.findById(dto.getAuthTypeId())
                 .orElseThrow(() -> new NoSuchElementException("Authentication type not found with id " + dto.getAuthTypeId()));
 
         String createdByUser = jwtService.extractUsername(token);
@@ -75,7 +75,7 @@ public class ProjectRegistrationServiceImpl implements ProjectRegistrationServic
         existing.setStatus(updatedProject.isStatus());
 
         if (authTypeId != null) {
-            AuthenticationType authType = authTypeRepo.findById(authTypeId)
+            AuthTypes authType = authTypeRepo.findById(authTypeId)
                     .orElseThrow(() -> new NoSuchElementException("Authentication type not found with id " + authTypeId));
             existing.setAuthenticationType(authType);
         }

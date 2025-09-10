@@ -41,7 +41,7 @@ public class ProjectRegistrationMaster {
     // 🔹 Foreign Key to AuthenticationType
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "authentication_type_id", nullable = false)
-    private AuthenticationType authenticationType;
+    private AuthTypes authenticationType;
 
 
     public Long getId() {
@@ -100,11 +100,11 @@ public class ProjectRegistrationMaster {
         this.lastModifiedDate = lastModifiedDate;
     }
 
-    public AuthenticationType getAuthenticationType() {
+    public AuthTypes getAuthenticationType() {
         return authenticationType;
     }
 
-    public void setAuthenticationType(AuthenticationType authenticationType) {
+    public void setAuthenticationType(AuthTypes authenticationType) {
         this.authenticationType = authenticationType;
     }
 }
