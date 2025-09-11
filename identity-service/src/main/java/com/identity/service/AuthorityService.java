@@ -1,18 +1,21 @@
 package com.identity.service;
 
+import com.identity.dto.AuthorityDTO;
 import com.identity.entity.Authority;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface AuthorityService {
-    String saveAuthority(Authority authority, String token);
+    Authority saveAuthority(AuthorityDTO authorityDTO, String token);
 
-    List<Authority> getAllAuthorities();
+    Page<Authority> getAllAuthorities(String search, Pageable pageable);
 
     Optional<Authority> getAuthorityById(Long id);
 
-    String updateAuthority(Long id, Authority updatedAuthority, String token);
+    Authority updateAuthorityReturnEntity(Long id, AuthorityDTO updatedAuthorityDTO, String token);
 
-    String deleteAuthority(Long id, String token);
+    Authority deleteAuthorityReturnEntity(Long id, String token);
 }

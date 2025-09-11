@@ -9,89 +9,34 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "authority")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
 public class Authority {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "authority_id")
+    private Long authorityId;
 
-    @NotBlank(message = "Authority name is required")
-    @Column(unique = true, nullable = false, length = 50)
-    private String name; // e.g., ROLE_ADMIN, ROLE_USER
+    @Column(name = "name", nullable = false, unique = true, length = 50)
+    private String name;
 
-    @Column(length = 200)
-    private String description; // optional (explain role purpose)
-
-    @Column(name = "created_by", length = 50)
-    private String createdBy;
-
-    @Column(name = "created_date")
-    private LocalDateTime createdDate = LocalDateTime.now();
-
-    @Column(name = "last_modified_by", length = 50)
-    private String lastModifiedBy;
-
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate = LocalDateTime.now();
-
-    public Long getId() {
-        return id;
+    public Long getAuthorityId() {
+        return authorityId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setAuthorityId(Long authorityId) {
+        this.authorityId = authorityId;
     }
 
-    public @NotBlank(message = "Authority name is required") String getName() {
+    public String getName() {
         return name;
     }
 
-    public void setName(@NotBlank(message = "Authority name is required") String name) {
+    public void setName(String name) {
         this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public LocalDateTime getLastModifiedDate() {
-        return lastModifiedDate;
-    }
-
-    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
     }
 
     // 🔹 Many-to-Many with UserCredential
