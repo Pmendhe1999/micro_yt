@@ -27,7 +27,7 @@ public class PasswordMigration {
             if (!pwd.startsWith("$2a$") && !pwd.startsWith("$2b$")) {
                 user.setPassword(passwordEncoder.encode(pwd));
                 repository.save(user);
-                System.out.println("Updated password for user: " + user.getName());
+                System.out.println("Updated password for user: " + user.getUsername());
             }
         }
     }

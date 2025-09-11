@@ -17,39 +17,43 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
+@Table(name = "users")
 public class UserCredential {
+    public enum Status {
+        PENDING,
+        ACTIVE,
+        BLOCKED
+    }
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @NotBlank(message = "Name is required")
-    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
-    private String name;
+    // ✅ Foreign Key → applications(application_id)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "application_id", nullable = false)
+    private Application application;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @Column(name = "username", nullable = false, length = 100)
+    private String username;
+
+    @Column(name = "email", length = 150, unique = true)
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters long")
-    private String password;
+    @Column(name = "phone", length = 20)
+    private String phone;
 
-    @NotBlank(message = "Role is required")
-    @Pattern(regexp = "ADMIN|USER", message = "Role must be either ADMIN or USER")
-    private String role;
+    @Column(name = "password_hash", length = 255)
+    private String passwordHash;
 
-    @Column(name = "created_by", length = 50)
-    private String createdBy;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status = Status.PENDING;  // default
 
-    @Column(name = "created_date")
-    private LocalDateTime createdDate = LocalDateTime.now();
-
-    @Column(name = "last_modified_by", length = 50)
-    private String lastModifiedBy;
-
-    @Column(name = "last_modified_date")
-    private LocalDateTime lastModifiedDate = LocalDateTime.now();
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // 🔹 Many-to-Many with Authority
     @ManyToMany(fetch = FetchType.EAGER)
@@ -60,78 +64,68 @@ public class UserCredential {
     )
     private Set<Authority> authorities = new HashSet<>();
 
-
-    public int getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public String getPassword() {
-        return password;
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Application getApplication() {
+        return application;
+    }
+
+    public void setApplication(Application application) {
+        this.application = application;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
         return email;
     }
 
-    public String getName() {
-        return name;
-    }
-
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getPhone() {
+        return phone;
     }
 
-    public String getRole() {
-        return role;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public String getPassword() {
+        return passwordHash;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public void setPassword(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public Status getStatus() {
+        return status;
     }
 
-    public LocalDateTime getLastModifiedDate() {
-        return lastModifiedDate;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
-    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    public void setLastModifiedBy(String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public Set<Authority> getAuthorities() {

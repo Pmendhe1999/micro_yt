@@ -41,11 +41,7 @@ public class AuthService {
         // ✅ Encode password
         credential.setPassword(passwordEncoder.encode(credential.getPassword()));
 
-        // ✅ Set audit fields
-        credential.setCreatedBy(createdByUser + " (" + role + ")");
-        credential.setCreatedDate(LocalDateTime.now());
-        credential.setLastModifiedBy(createdByUser + " (" + role + ")");
-        credential.setLastModifiedDate(LocalDateTime.now());
+
 
         repository.save(credential);
 
