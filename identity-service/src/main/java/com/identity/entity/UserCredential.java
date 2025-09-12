@@ -32,8 +32,8 @@ public class UserCredential {
     private Long userId;
 
     // ✅ Foreign Key → applications(application_id)
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "application_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = true)
+    @JoinColumn(name = "application_id", nullable = true)
     private Application application;
 
     @Column(name = "username", nullable = false, length = 100)

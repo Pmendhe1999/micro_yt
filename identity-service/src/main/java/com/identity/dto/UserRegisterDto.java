@@ -17,7 +17,7 @@ public class UserRegisterDto {
 
         private Long userId;
 
-        @NotNull(message = "Application ID is required")
+
         private Long applicationId;
 
         @NotBlank(message = "Username is required")

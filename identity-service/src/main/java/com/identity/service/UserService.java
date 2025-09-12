@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface UserService {
 
-    UserCredential saveUser(UserRegisterDto dto, String token);
+    UserCredential saveUser(UserRegisterDto dto);
 
     Page<UserCredential> getAllUsers(String search, Pageable pageable);
 

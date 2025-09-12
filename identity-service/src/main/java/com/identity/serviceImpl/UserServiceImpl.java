@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
 
         // CREATE
         @Override
-        public UserCredential saveUser(UserRegisterDto dto, String token) {
+        public UserCredential saveUser(UserRegisterDto dto) {
             try {
                 if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
                     log.warn("Password missing while creating User: {}", dto.getUsername());
@@ -62,8 +62,7 @@ import java.util.stream.Collectors;
                     throw new IllegalArgumentException("Username already exists");
                 }
 
-                String createdByUser = jwtService.extractUsername(token);
-                String role = jwtService.extractRole(token);
+
 
                 UserCredential credential = new UserCredential();
                 credential.setUsername(dto.getUsername());
@@ -79,9 +78,14 @@ import java.util.stream.Collectors;
 
                 credential.setCreatedAt(LocalDateTime.now());
 
-                Application app = applicationRepository.findById(dto.getApplicationId())
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid Application ID"));
-                credential.setApplication(app);
+                // Map application only if provided
+                if (dto.getApplicationId() != null) {
+                    Application app = applicationRepository.findById(dto.getApplicationId())
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid Application ID"));
+                    credential.setApplication(app);
+                } else {
+                    credential.setApplication(null); // allow NULL for superadmin
+                }
 
                 if (dto.getAuthorities() != null && !dto.getAuthorities().isEmpty()) {
                     Set<Authority> authorities = new HashSet<>(authorityRepository.findAllById(dto.getAuthorities()));
@@ -89,7 +93,7 @@ import java.util.stream.Collectors;
                 }
 
                 UserCredential saved = repository.save(credential);
-                log.info("User '{}' created by {} (role={})", saved.getUsername(), createdByUser, role);
+                log.info("User '{}' created by {} (role={})", saved.getUsername());
 
                 String loginUrl = "http://yourdomain.com/login"; // put your actual login URL
                 emailService.sendCredentialsEmail(saved.getEmail(), saved.getUsername(), dto.getPassword(), loginUrl);

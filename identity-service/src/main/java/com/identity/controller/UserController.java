@@ -34,8 +34,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<ResponceData> registerUser(
             @Valid @RequestBody UserRegisterDto dto,
-            BindingResult bindingResult,
-            @RequestHeader("Authorization") String authHeader) {
+            BindingResult bindingResult) {
         try {
             log.info("Received request to create User: {}", dto);
 
@@ -50,8 +49,8 @@ public class UserController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            String token = authHeader.replace("Bearer ", "");
-            UserCredential savedUser = userService.saveUser(dto, token);
+
+            UserCredential savedUser = userService.saveUser(dto);
 
             log.info("User created successfully with id={} and username={}",
                     savedUser.getUserId(), savedUser.getUsername());
