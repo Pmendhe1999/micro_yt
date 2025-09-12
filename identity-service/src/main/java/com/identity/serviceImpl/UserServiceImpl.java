@@ -42,6 +42,9 @@ import java.util.stream.Collectors;
         @Autowired
         private ApplicationRepository applicationRepository;
 
+        @Autowired
+        private EmailService emailService;
+
         // CREATE
         @Override
         public UserCredential saveUser(UserRegisterDto dto, String token) {
@@ -87,6 +90,9 @@ import java.util.stream.Collectors;
 
                 UserCredential saved = repository.save(credential);
                 log.info("User '{}' created by {} (role={})", saved.getUsername(), createdByUser, role);
+
+                String loginUrl = "http://yourdomain.com/login"; // put your actual login URL
+                emailService.sendCredentialsEmail(saved.getEmail(), saved.getUsername(), dto.getPassword(), loginUrl);
 
                 return saved;
 
