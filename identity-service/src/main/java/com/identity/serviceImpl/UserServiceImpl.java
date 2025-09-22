@@ -79,14 +79,13 @@ import java.util.stream.Collectors;
                 credential.setCreatedAt(LocalDateTime.now());
 
                 // Map application only if provided
-                if (dto.getApplicationId() != null) {
-                    Application app = applicationRepository.findById(dto.getApplicationId())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid Application ID"));
-                    credential.setApplication(app);
-                } else {
-                    credential.setApplication(null); // allow NULL for superadmin
+                if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
+                    Set<Application> applications = new HashSet<>(applicationRepository.findAllById(dto.getApplicationIds()));
+                    if (applications.isEmpty()) {
+                        throw new IllegalArgumentException("Invalid Application IDs");
+                    }
+                    credential.setApplications(applications);
                 }
-
                 if (dto.getAuthorities() != null && !dto.getAuthorities().isEmpty()) {
                     Set<Authority> authorities = new HashSet<>(authorityRepository.findAllById(dto.getAuthorities()));
                     credential.setAuthorities(authorities);
@@ -156,10 +155,12 @@ import java.util.stream.Collectors;
                     existing.setStatus(UserCredential.Status.valueOf(dto.getStatus().toUpperCase()));
                 }
 
-                if (dto.getApplicationId() != null) {
-                    Application app = applicationRepository.findById(dto.getApplicationId())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid Application ID"));
-                    existing.setApplication(app);
+                if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
+                    Set<Application> applications = new HashSet<>(applicationRepository.findAllById(dto.getApplicationIds()));
+                    if (applications.isEmpty()) {
+                        throw new IllegalArgumentException("Invalid Application IDs");
+                    }
+                    existing.setApplications(applications);
                 }
 
                 if (dto.getAuthorities() != null) {

@@ -18,7 +18,8 @@ public class UserRegisterDto {
         private Long userId;
 
 
-        private Long applicationId;
+        // 🔹 One user can have many applications
+        private Set<Long> applicationIds;
 
         @NotBlank(message = "Username is required")
         @Size(max = 100, message = "Username must not exceed 100 characters")
@@ -47,12 +48,12 @@ public class UserRegisterDto {
                 this.userId = userId;
         }
 
-        public  Long getApplicationId() {
-                return applicationId;
+        public Set<Long> getApplicationIds() {
+                return applicationIds;
         }
 
-        public void setApplicationId( Long applicationId) {
-                this.applicationId = applicationId;
+        public void setApplicationIds(Set<Long> applicationIds) {
+                this.applicationIds = applicationIds;
         }
 
         public  String getUsername() {

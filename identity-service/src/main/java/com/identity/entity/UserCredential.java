@@ -31,10 +31,15 @@ public class UserCredential {
     @Column(name = "user_id")
     private Long userId;
 
-    // ✅ Foreign Key → applications(application_id)
-    @ManyToOne(fetch = FetchType.EAGER, optional = true)
-    @JoinColumn(name = "application_id", nullable = true)
-    private Application application;
+
+    // 🔹 Many-to-Many with Application (one user can have many applications)
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_application",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "application_id")
+    )
+    private Set<Application> applications = new HashSet<>();
 
     @Column(name = "username", nullable = false, length = 100)
     private String username;
@@ -72,12 +77,12 @@ public class UserCredential {
         this.userId = userId;
     }
 
-    public Application getApplication() {
-        return application;
+    public Set<Application> getApplications() {
+        return applications;
     }
 
-    public void setApplication(Application application) {
-        this.application = application;
+    public void setApplications(Set<Application> applications) {
+        this.applications = applications;
     }
 
     public String getUsername() {
