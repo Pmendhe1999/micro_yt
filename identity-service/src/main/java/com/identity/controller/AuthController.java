@@ -1,9 +1,12 @@
 package com.identity.controller;
 
 
+import com.identity.config.CustomUserDetails;
 import com.identity.dto.AuthRequest;
 import com.identity.entity.UserCredential;
 import com.identity.service.AuthService;
+import com.identity.service.CustomUserDetailsService;
+import com.identity.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.Valid;
@@ -14,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +36,13 @@ public class AuthController {
     private AuthService service;
 
     @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+    @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtService jwtService; // ✅ Make sure you have a JwtService bean
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserCredential user,
@@ -67,7 +77,7 @@ public class AuthController {
     }
 
     @PostMapping("/token")
-    public ResponseEntity<String> getToken(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?>getToken(@RequestBody AuthRequest authRequest) {
         try {
             Authentication authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -77,8 +87,22 @@ public class AuthController {
             );
 
             if (authenticate.isAuthenticated()) {
-                String token = service.generateToken(authRequest.getUsername());
-                return ResponseEntity.ok(token);
+
+                // ✅ Load user details
+                CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(authRequest.getUsername());
+// ✅ Generate JWT token with full UserDetails
+                String token = jwtService.generateToken(userDetails);
+
+                // ✅ Prepare response
+                Map<String, Object> response = new HashMap<>();
+                response.put("token", token);
+                response.put("userId", userDetails.getUserId());
+                response.put("roles", userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .toList());
+
+                return ResponseEntity.ok(response);
+
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid access");
             }

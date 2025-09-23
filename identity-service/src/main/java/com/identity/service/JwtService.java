@@ -1,5 +1,6 @@
 package com.identity.service;
 
+import com.identity.config.CustomUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
@@ -32,12 +33,14 @@ public class JwtService {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
 
-        // Extract roles and put in claims
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)  // "ROLE_ADMIN"
-                .map(a -> a.startsWith("ROLE_") ? a.substring(5) : a) // "ADMIN"
-                .toList();
-        claims.put("roles", roles);
+        if (userDetails instanceof CustomUserDetails customUser) {
+            claims.put("userId", customUser.getUserId());
+
+            List<String> roles = customUser.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .toList();
+            claims.put("roles", roles);
+        }
 
         return createToken(claims, userDetails.getUsername());
     }

@@ -81,6 +81,10 @@ public class UserCredential {
         return applications;
     }
 
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
     public void setApplications(Set<Application> applications) {
         this.applications = applications;
     }
