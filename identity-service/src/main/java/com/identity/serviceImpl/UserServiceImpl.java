@@ -75,9 +75,9 @@ import java.util.stream.Collectors;
                 credential.setLastName(dto.getLastName());
 
                 // ✅ defaults for others
-                credential.setActivated(false);
-                credential.setAuthStatus(false);
-                credential.setStatus(UserCredential.Status.PENDING);
+                credential.setActivated(true);
+                credential.setAuthStatus(true);
+                credential.setStatus(UserCredential.Status.ACTIVE);
                 credential.setCreatedDate(LocalDateTime.now());
                 credential.setLastModifyDate(LocalDateTime.now());
                 credential.setResetDate(null); // only when reset requested
@@ -151,7 +151,7 @@ import java.util.stream.Collectors;
 
                 // ✅ Update new fields
                 existing.setUsername(dto.getUsername());
-            
+
                 existing.setEmail(dto.getEmail());
                 existing.setMobileNumber(dto.getMobileNumber());
 
