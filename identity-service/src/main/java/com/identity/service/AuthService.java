@@ -30,7 +30,7 @@ public class AuthService {
 
 
     public String saveUser(UserCredential credential, String token) {
-        if (credential.getPassword() == null || credential.getPassword().isEmpty()) {
+        if (credential.getPasswordHash() == null || credential.getPasswordHash().isEmpty()) {
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
 
@@ -39,7 +39,7 @@ public class AuthService {
         String role = jwtService.extractRole(token);              // "roles"
 
         // ✅ Encode password
-        credential.setPassword(passwordEncoder.encode(credential.getPassword()));
+        credential.setPasswordHash(passwordEncoder.encode(credential.getPasswordHash()));
 
 
 

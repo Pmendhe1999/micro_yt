@@ -62,22 +62,25 @@ import java.util.stream.Collectors;
                     throw new IllegalArgumentException("Username already exists");
                 }
 
-
-
                 UserCredential credential = new UserCredential();
                 credential.setUsername(dto.getUsername());
+
                 credential.setEmail(dto.getEmail());
-                credential.setPhone(dto.getPhone());
-                credential.setPassword(passwordEncoder.encode(dto.getPassword()));
+                credential.setCountry(dto.getCountry());
+                credential.setMobileNumber(dto.getMobileNumber());
+                credential.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
 
-                if (dto.getStatus() != null) {
-                    credential.setStatus(UserCredential.Status.valueOf(dto.getStatus().toUpperCase()));
-                } else {
-                    credential.setStatus(UserCredential.Status.PENDING);
-                }
+                // ✅ required fields from payload
+                credential.setFirstName(dto.getFirstName());
+                credential.setLastName(dto.getLastName());
 
+                // ✅ defaults for others
+                credential.setActivated(false);
+                credential.setAuthStatus(false);
+                credential.setStatus(UserCredential.Status.PENDING);
                 credential.setCreatedDate(LocalDateTime.now());
                 credential.setLastModifyDate(LocalDateTime.now());
+                credential.setResetDate(null); // only when reset requested
 
                 // Map application only if provided
                 if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
@@ -93,7 +96,7 @@ import java.util.stream.Collectors;
                 }
 
                 UserCredential saved = repository.save(credential);
-                log.info("User '{}' created by {} (role={})", saved.getUsername());
+                log.info("User '{}' created successfully", saved.getUsername());
 
                 String loginUrl = "http://yourdomain.com/login"; // put your actual login URL
                 emailService.sendCredentialsEmail(saved.getEmail(), saved.getUsername(), dto.getPassword(), loginUrl);
@@ -105,6 +108,8 @@ import java.util.stream.Collectors;
                 throw e;
             }
         }
+
+
 
         // READ ALL (with search & pagination)
         @Override
@@ -144,18 +149,36 @@ import java.util.stream.Collectors;
                 String modifiedByUser = jwtService.extractUsername(token);
                 String role = jwtService.extractRole(token);
 
+                // ✅ Update new fields
                 existing.setUsername(dto.getUsername());
+            
                 existing.setEmail(dto.getEmail());
-                existing.setPhone(dto.getPhone());
+                existing.setMobileNumber(dto.getMobileNumber());
 
                 if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
-                    existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+                    existing.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
                 }
 
+                // Activated / Activation Key / Auth Status
+                existing.setActivated(dto.getActivated());
+                existing.setActivationKey(dto.getActivationKey());
+                existing.setAuthStatus(dto.getAuthStatus());
+
+                // Profile info
+                existing.setCountry(dto.getCountry());
+                existing.setFirstName(dto.getFirstName());
+                existing.setLastName(dto.getLastName());
+                existing.setLangKey(dto.getLangKey());
+
+                // Reset key (if provided)
+                existing.setResetKey(dto.getResetKey());
+
+                // Status (enum mapping)
                 if (dto.getStatus() != null) {
                     existing.setStatus(UserCredential.Status.valueOf(dto.getStatus().toUpperCase()));
                 }
 
+                // Applications
                 if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
                     Set<Application> applications = new HashSet<>(applicationRepository.findAllById(dto.getApplicationIds()));
                     if (applications.isEmpty()) {
@@ -164,6 +187,7 @@ import java.util.stream.Collectors;
                     existing.setApplications(applications);
                 }
 
+                // Authorities
                 if (dto.getAuthorities() != null) {
                     Set<Authority> authorities = dto.getAuthorities().stream()
                             .map(authId -> authorityRepository.findById(authId)
@@ -171,6 +195,9 @@ import java.util.stream.Collectors;
                             .collect(Collectors.toSet());
                     existing.setAuthorities(authorities);
                 }
+
+                // Update last modified timestamp
+                existing.setLastModifyDate(LocalDateTime.now());
 
                 UserCredential updated = repository.save(existing);
                 log.info("User id={} updated by {} (role={})", updated.getUserId(), modifiedByUser, role);

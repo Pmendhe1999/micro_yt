@@ -19,18 +19,17 @@ import java.util.Set;
 @Setter
 @Table(name = "users")
 public class UserCredential {
+
     public enum Status {
         PENDING,
         ACTIVE,
         BLOCKED
     }
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
-
 
     // 🔹 Many-to-Many with Application (one user can have many applications)
     @ManyToMany(fetch = FetchType.EAGER)
@@ -44,14 +43,42 @@ public class UserCredential {
     @Column(name = "username", nullable = false, length = 100)
     private String username;
 
+
     @Column(name = "email", length = 150, unique = true)
     private String email;
 
-    @Column(name = "phone", length = 20)
-    private String phone;
+    @Column(name = "mobile_number", length = 255)
+    private String mobileNumber;  // ✅ replaced phone
 
     @Column(name = "password_hash", length = 255)
     private String passwordHash;
+
+    @Column(name = "activated", nullable = false)
+    private Boolean activated = false;
+
+    @Column(name = "activation_key", length = 100)
+    private String activationKey;
+
+    @Column(name = "auth_status")
+    private Boolean authStatus;
+
+    @Column(name = "country", length = 255)
+    private String country;
+
+    @Column(name = "first_name", length = 50)
+    private String firstName;
+
+    @Column(name = "last_name", length = 50)
+    private String lastName;
+
+    @Column(name = "lang_key", length = 6)
+    private String langKey;
+
+    @Column(name = "reset_key", length = 100)
+    private String resetKey;
+
+    @Column(name = "reset_date")
+    private LocalDateTime resetDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -60,7 +87,7 @@ public class UserCredential {
     @Column(name = "created_date", nullable = false, updatable = false)
     private LocalDateTime createdDate = LocalDateTime.now();
 
-    @Column(name = "last_modify_date", nullable = true, updatable = false)
+    @Column(name = "last_modify_date", nullable = false)
     private LocalDateTime lastModifyDate = LocalDateTime.now();
 
     // 🔹 Many-to-Many with Authority
@@ -84,10 +111,6 @@ public class UserCredential {
         return applications;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
     public void setApplications(Set<Application> applications) {
         this.applications = applications;
     }
@@ -100,6 +123,7 @@ public class UserCredential {
         this.username = username;
     }
 
+
     public String getEmail() {
         return email;
     }
@@ -108,20 +132,92 @@ public class UserCredential {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getMobileNumber() {
+        return mobileNumber;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setMobileNumber(String mobileNumber) {
+        this.mobileNumber = mobileNumber;
     }
 
-    public String getPassword() {
+    public String getPasswordHash() {
         return passwordHash;
     }
 
-    public void setPassword(String passwordHash) {
+    public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public Boolean getActivated() {
+        return activated;
+    }
+
+    public void setActivated(Boolean activated) {
+        this.activated = activated;
+    }
+
+    public String getActivationKey() {
+        return activationKey;
+    }
+
+    public void setActivationKey(String activationKey) {
+        this.activationKey = activationKey;
+    }
+
+    public Boolean getAuthStatus() {
+        return authStatus;
+    }
+
+    public void setAuthStatus(Boolean authStatus) {
+        this.authStatus = authStatus;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getLangKey() {
+        return langKey;
+    }
+
+    public void setLangKey(String langKey) {
+        this.langKey = langKey;
+    }
+
+    public String getResetKey() {
+        return resetKey;
+    }
+
+    public void setResetKey(String resetKey) {
+        this.resetKey = resetKey;
+    }
+
+    public LocalDateTime getResetDate() {
+        return resetDate;
+    }
+
+    public void setResetDate(LocalDateTime resetDate) {
+        this.resetDate = resetDate;
     }
 
     public Status getStatus() {
@@ -136,16 +232,8 @@ public class UserCredential {
         return createdDate;
     }
 
-    public void setCreatedDate(LocalDateTime createdAt) {
-        this.createdDate = createdAt;
-    }
-
-    public Set<Authority> getAuthorities() {
-        return authorities;
-    }
-
-    public void setAuthorities(Set<Authority> authorities) {
-        this.authorities = authorities;
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 
     public LocalDateTime getLastModifyDate() {
@@ -154,5 +242,13 @@ public class UserCredential {
 
     public void setLastModifyDate(LocalDateTime lastModifyDate) {
         this.lastModifyDate = lastModifyDate;
+    }
+
+    public Set<Authority> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<Authority> authorities) {
+        this.authorities = authorities;
     }
 }

@@ -17,7 +17,6 @@ public class UserRegisterDto {
 
         private Long userId;
 
-
         // 🔹 One user can have many applications
         private Set<Long> applicationIds;
 
@@ -29,12 +28,31 @@ public class UserRegisterDto {
         @Size(max = 150, message = "Email must not exceed 150 characters")
         private String email;
 
-        @Size(max = 20, message = "Phone must not exceed 20 characters")
-        private String phone;
+        @Size(max = 255, message = "Mobile number must not exceed 255 characters")
+        private String mobileNumber;
 
         @NotBlank(message = "Password is required")
-        @Size(min = 2, max = 255, message = "Password must be between 6 and 255 characters")
+        @Size(min = 6, max = 255, message = "Password must be between 6 and 255 characters")
         private String password;
+
+        private Boolean activated;
+
+        private String activationKey;
+
+        private Boolean authStatus;
+
+        private String country;
+
+        @Size(max = 50, message = "First name must not exceed 50 characters")
+        private String firstName;
+
+        @Size(max = 50, message = "Last name must not exceed 50 characters")
+        private String lastName;
+
+        @Size(max = 6, message = "Lang key must not exceed 6 characters")
+        private String langKey;
+
+        private String resetKey;
 
         private String status;     // "PENDING", "ACTIVE", "BLOCKED"
 
@@ -60,11 +78,11 @@ public class UserRegisterDto {
                 return username;
         }
 
-        public void setUsername(String username) {
+        public void setUsername( String username) {
                 this.username = username;
         }
 
-        public String getEmail() {
+        public  String getEmail() {
                 return email;
         }
 
@@ -72,12 +90,12 @@ public class UserRegisterDto {
                 this.email = email;
         }
 
-        public String getPhone() {
-                return phone;
+        public String getMobileNumber() {
+                return mobileNumber;
         }
 
-        public void setPhone(String phone) {
-                this.phone = phone;
+        public void setMobileNumber( String mobileNumber) {
+                this.mobileNumber = mobileNumber;
         }
 
         public  String getPassword() {
@@ -86,6 +104,70 @@ public class UserRegisterDto {
 
         public void setPassword( String password) {
                 this.password = password;
+        }
+
+        public Boolean getActivated() {
+                return activated;
+        }
+
+        public void setActivated(Boolean activated) {
+                this.activated = activated;
+        }
+
+        public String getActivationKey() {
+                return activationKey;
+        }
+
+        public void setActivationKey(String activationKey) {
+                this.activationKey = activationKey;
+        }
+
+        public Boolean getAuthStatus() {
+                return authStatus;
+        }
+
+        public void setAuthStatus(Boolean authStatus) {
+                this.authStatus = authStatus;
+        }
+
+        public String getCountry() {
+                return country;
+        }
+
+        public void setCountry(String country) {
+                this.country = country;
+        }
+
+        public  String getFirstName() {
+                return firstName;
+        }
+
+        public void setFirstName( String firstName) {
+                this.firstName = firstName;
+        }
+
+        public  String getLastName() {
+                return lastName;
+        }
+
+        public void setLastName(String lastName) {
+                this.lastName = lastName;
+        }
+
+        public  String getLangKey() {
+                return langKey;
+        }
+
+        public void setLangKey( String langKey) {
+                this.langKey = langKey;
+        }
+
+        public String getResetKey() {
+                return resetKey;
+        }
+
+        public void setResetKey(String resetKey) {
+                this.resetKey = resetKey;
         }
 
         public String getStatus() {
@@ -103,5 +185,4 @@ public class UserRegisterDto {
         public void setAuthorities(Set<Long> authorities) {
                 this.authorities = authorities;
         }
-
 }

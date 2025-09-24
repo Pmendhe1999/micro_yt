@@ -22,10 +22,10 @@ public class PasswordMigration {
     public void migratePasswords() {
         List<UserCredential> users = repository.findAll();
         for (UserCredential user : users) {
-            String pwd = user.getPassword();
+            String pwd = user.getPasswordHash();
             // BCrypt hashes start with $2a$, $2b$, etc.
             if (!pwd.startsWith("$2a$") && !pwd.startsWith("$2b$")) {
-                user.setPassword(passwordEncoder.encode(pwd));
+                user.setPasswordHash(passwordEncoder.encode(pwd));
                 repository.save(user);
                 System.out.println("Updated password for user: " + user.getUsername());
             }
