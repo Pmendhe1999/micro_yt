@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -136,6 +137,17 @@ public class ContactServiceImpl implements ContactService {
         } catch (Exception e) {
             log.error("Unexpected error while deleting Contact id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting Contact with id " + id + ": " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public List<Contact> getContactsByUserId(Long userId) {
+        try {
+            log.debug("Fetching contacts for userId={}", userId);
+            return repository.findByUser_UserId(userId);
+        } catch (Exception e) {
+            log.error("Error occurred while fetching contacts for userId={}: {}", userId, e.getMessage(), e);
+            throw new RuntimeException("Error occurred while fetching contacts for userId " + userId + ": " + e.getMessage(), e);
         }
     }
 }

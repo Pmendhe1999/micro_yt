@@ -76,7 +76,7 @@ public class UserController {
     // READ ALL
     @GetMapping
     public ResponseEntity<ResponceData> getAllUsers(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "userId") String sortBy,
@@ -87,7 +87,7 @@ public class UserController {
 
             Sort sort = sortDir.equalsIgnoreCase("desc") ?
                     Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            Pageable pageable = PageRequest.of(page, size, sort);
+            Pageable pageable = PageRequest.of(page-1, size, sort);
 
             Page<UserCredential> result = userService.getAllUsers(search, pageable);
 

@@ -57,8 +57,11 @@ public class UserCredential {
     @Column(name = "status", nullable = false)
     private Status status = Status.PENDING;  // default
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "created_date", nullable = false, updatable = false)
+    private LocalDateTime createdDate = LocalDateTime.now();
+
+    @Column(name = "last_modify_date", nullable = true, updatable = false)
+    private LocalDateTime lastModifyDate = LocalDateTime.now();
 
     // 🔹 Many-to-Many with Authority
     @ManyToMany(fetch = FetchType.EAGER)
@@ -129,12 +132,12 @@ public class UserCredential {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedDate(LocalDateTime createdAt) {
+        this.createdDate = createdAt;
     }
 
     public Set<Authority> getAuthorities() {
@@ -143,5 +146,13 @@ public class UserCredential {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
+    }
+
+    public LocalDateTime getLastModifyDate() {
+        return lastModifyDate;
+    }
+
+    public void setLastModifyDate(LocalDateTime lastModifyDate) {
+        this.lastModifyDate = lastModifyDate;
     }
 }

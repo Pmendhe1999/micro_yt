@@ -17,10 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/contacts")
@@ -201,4 +198,37 @@ public class ContactController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    // GET Contacts by userId
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ResponceData> getContactsByUserId(@PathVariable Long userId) {
+        try {
+            log.info("Fetching contacts for userId={}", userId);
+
+            List<Contact> contacts = service.getContactsByUserId(userId);
+
+            if (contacts.isEmpty()) {
+                log.warn("No contacts found for userId={}", userId);
+                ResponceData response = new ResponceData(
+                        "fail", 404, "No contacts found for userId " + userId,
+                        Collections.emptyList(), 0);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            log.info("Retrieved {} contacts for userId={}", contacts.size(), userId);
+            ResponceData response = new ResponceData(
+                    "success", 200, "Retrieved contacts successfully",
+                    contacts, contacts.size());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Unexpected error while fetching contacts for userId={}: {}", userId, e.getMessage(), e);
+            ResponceData response = new ResponceData(
+                    "fail", 500, "Unexpected error: " + e.getMessage(),
+                    Collections.emptyList(), 0);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+
 }

@@ -76,7 +76,8 @@ import java.util.stream.Collectors;
                     credential.setStatus(UserCredential.Status.PENDING);
                 }
 
-                credential.setCreatedAt(LocalDateTime.now());
+                credential.setCreatedDate(LocalDateTime.now());
+                credential.setLastModifyDate(LocalDateTime.now());
 
                 // Map application only if provided
                 if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
