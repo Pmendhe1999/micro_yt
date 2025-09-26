@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
-    boolean existsByApplicationName(String applicationName);
-    Page<Application> findByApplicationNameContainingIgnoreCase(String name, Pageable pageable);
+    boolean existsByName(String name);
+
+    Page<Application> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }

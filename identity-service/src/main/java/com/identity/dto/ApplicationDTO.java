@@ -12,29 +12,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ApplicationDTO {
 
+
     @NotBlank(message = "Application name is required")
     @Size(max = 100, message = "Application name must not exceed 100 characters")
-    private String applicationName;
-
-    @NotNull(message = "Auth type is required")
-    private Long authTypeId;   // ✅ maps to auth_types FK
+    private String name;
 
     private String description;
 
-    public String getApplicationName() {
-        return applicationName;
+    private String status;  // optional field
+
+    public @NotBlank(message = "Application name is required") @Size(max = 100, message = "Application name must not exceed 100 characters") String getName() {
+        return name;
     }
 
-    public void setApplicationName( String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public Long getAuthTypeId() {
-        return authTypeId;
-    }
-
-    public void setAuthTypeId( Long authTypeId) {
-        this.authTypeId = authTypeId;
+    public void setName(@NotBlank(message = "Application name is required") @Size(max = 100, message = "Application name must not exceed 100 characters") String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -43,5 +35,13 @@ public class ApplicationDTO {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

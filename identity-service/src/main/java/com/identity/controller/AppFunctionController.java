@@ -1,9 +1,9 @@
 package com.identity.controller;
 
-import com.identity.dto.ApplicationDTO;
+import com.identity.dto.AppFunctionDTO;
 import com.identity.dto.ResponceData;
-import com.identity.entity.Application;
-import com.identity.service.ApplicationService;
+import com.identity.entity.AppFunction;
+import com.identity.service.AppFunctionService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,30 +23,29 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/applications")
-public class ApplicationController {
+@RequestMapping("/app-functions")
+public class AppFunctionController {
 
 
     @Autowired
-    private ApplicationService service;
+    private AppFunctionService service;
 
-    private static final Logger log = LoggerFactory.getLogger(ApplicationController.class);
+    private static final Logger log = LoggerFactory.getLogger(AppFunctionController.class);
 
     // CREATE
     @PostMapping
-    public ResponseEntity<ResponceData> createApplication(
-            @Valid @RequestBody ApplicationDTO applicationDTO,
+    public ResponseEntity<ResponceData> createAppFunction(
+            @Valid @RequestBody AppFunctionDTO dto,
             BindingResult bindingResult,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            log.info("Received request to create Application: {}", applicationDTO);
+            log.info("Received request to create AppFunction: {}", dto);
 
             if (bindingResult.hasErrors()) {
                 Map<String, String> errors = new HashMap<>();
                 bindingResult.getFieldErrors().forEach(error ->
                         errors.put(error.getField(), error.getDefaultMessage()));
-
-                log.warn("Validation failed for ApplicationDTO: {}", errors);
+                log.warn("Validation failed for AppFunctionDTO: {}", errors);
 
                 ResponceData response = new ResponceData(
                         "fail", 400, "Validation failed", errors, errors.size());
@@ -54,22 +53,21 @@ public class ApplicationController {
             }
 
             String token = authHeader.replace("Bearer ", "");
-            Application savedApp = service.saveApplication(applicationDTO, token);
+            AppFunction saved = service.saveAppFunction(dto, token);
 
-            log.info("Application created successfully with id={} and name={}",
-                    savedApp.getApplicationId(), savedApp.getName());
+            log.info("AppFunction created successfully with id={}", saved.getId());
 
             ResponceData response = new ResponceData(
-                    "success", 200, "Application created successfully", savedApp, 1);
+                    "success", 200, "AppFunction created successfully", saved, 1);
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
-            log.warn("Failed to create Application: {}", e.getMessage());
+            log.warn("Failed to create AppFunction: {}", e.getMessage());
             ResponceData response = new ResponceData(
                     "fail", 400, e.getMessage(), null, 0);
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            log.error("Unexpected error while creating Application: {}", e.getMessage(), e);
+            log.error("Unexpected error while creating AppFunction: {}", e.getMessage(), e);
             ResponceData response = new ResponceData(
                     "error", 500, "Unexpected error: " + e.getMessage(), null, 0);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -78,31 +76,31 @@ public class ApplicationController {
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<ResponceData> getAllApplications(
+    public ResponseEntity<ResponceData> getAllAppFunctions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         try {
-            log.info("Fetching Applications page={}, size={}, search={}, sortBy={}, sortDir={}",
+            log.info("Fetching AppFunctions page={}, size={}, search={}, sortBy={}, sortDir={}",
                     page, size, search, sortBy, sortDir);
 
             Sort sort = sortDir.equalsIgnoreCase("desc") ?
                     Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
             Pageable pageable = PageRequest.of(page, size, sort);
 
-            Page<Application> result = service.getAllApplications(search, pageable);
+            Page<AppFunction> result = service.getAllAppFunctions(search, pageable);
 
-            log.info("Retrieved {} Applications", result.getTotalElements());
+            log.info("Retrieved {} AppFunctions", result.getTotalElements());
 
             ResponceData response = new ResponceData(
-                    "success", 200, "Retrieved Applications",
+                    "success", 200, "Retrieved AppFunctions",
                     result.getContent(), (int) result.getTotalElements());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("Unexpected error while fetching Applications: {}", e.getMessage(), e);
+            log.error("Unexpected error while fetching AppFunctions: {}", e.getMessage(), e);
             ResponceData response = new ResponceData(
                     "fail", 500, "Unexpected error: " + e.getMessage(),
                     Collections.emptyList(), 0);
@@ -112,28 +110,28 @@ public class ApplicationController {
 
     // READ BY ID
     @GetMapping("/{id}")
-    public ResponseEntity<ResponceData> getApplicationById(@PathVariable Long id) {
+    public ResponseEntity<ResponceData> getAppFunctionById(@PathVariable Long id) {
         try {
-            log.info("Fetching Application by id={}", id);
+            log.info("Fetching AppFunction by id={}", id);
 
-            Optional<Application> app = service.getApplicationById(id);
+            Optional<AppFunction> appFun = service.getAppFunctionById(id);
 
-            if (app.isPresent()) {
-                log.info("Found Application with id={}", id);
+            if (appFun.isPresent()) {
+                log.info("Found AppFunction with id={}", id);
                 ResponceData response = new ResponceData(
-                        "success", 200, "Retrieved Application",
-                        Collections.singletonList(app.get()), 1);
+                        "success", 200, "Retrieved AppFunction",
+                        Collections.singletonList(appFun.get()), 1);
                 return ResponseEntity.ok(response);
             } else {
-                log.warn("Application not found with id={}", id);
+                log.warn("AppFunction not found with id={}", id);
                 ResponceData response = new ResponceData(
-                        "fail", 404, "Application not found with id " + id,
+                        "fail", 404, "AppFunction not found with id " + id,
                         Collections.emptyList(), 0);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
 
         } catch (Exception e) {
-            log.error("Unexpected error while fetching Application id={}: {}", id, e.getMessage(), e);
+            log.error("Unexpected error while fetching AppFunction id={}: {}", id, e.getMessage(), e);
             ResponceData response = new ResponceData(
                     "fail", 500, "Unexpected error: " + e.getMessage(),
                     Collections.emptyList(), 0);
@@ -143,38 +141,37 @@ public class ApplicationController {
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<ResponceData> updateApplication(
+    public ResponseEntity<ResponceData> updateAppFunction(
             @PathVariable Long id,
-            @Valid @RequestBody ApplicationDTO updatedApplicationDTO,
+            @Valid @RequestBody AppFunctionDTO dto,
             BindingResult bindingResult,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            log.info("Updating Application id={} with payload={}", id, updatedApplicationDTO);
+            log.info("Updating AppFunction id={} with payload={}", id, dto);
 
             if (bindingResult.hasErrors()) {
                 Map<String, String> errors = new HashMap<>();
                 bindingResult.getFieldErrors().forEach(error ->
                         errors.put(error.getField(), error.getDefaultMessage()));
-                log.warn("Validation failed for update Application id={}, errors={}", id, errors);
+                log.warn("Validation failed for update AppFunction id={}, errors={}", id, errors);
 
                 ResponceData response = new ResponceData(
-                        "fail", 400, "Validation errors",
-                        Collections.emptyList(), 0);
+                        "fail", 400, "Validation errors", errors, errors.size());
                 return ResponseEntity.badRequest().body(response);
             }
 
             String token = authHeader.replace("Bearer ", "");
-            Application updatedApp = service.updateApplicationReturnEntity(id, updatedApplicationDTO, token);
+            AppFunction updated = service.updateAppFunction(id, dto, token);
 
-            log.info("Application updated successfully id={}", updatedApp.getApplicationId());
+            log.info("AppFunction updated successfully id={}", updated.getId());
 
             ResponceData response = new ResponceData(
-                    "success", 200, "Application updated successfully",
-                    Collections.singletonList(updatedApp), 1);
+                    "success", 200, "AppFunction updated successfully",
+                    Collections.singletonList(updated), 1);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("Unexpected error while updating Application id={}: {}", id, e.getMessage(), e);
+            log.error("Unexpected error while updating AppFunction id={}: {}", id, e.getMessage(), e);
             ResponceData response = new ResponceData(
                     "fail", 500, "Unexpected error: " + e.getMessage(),
                     Collections.emptyList(), 0);
@@ -184,24 +181,24 @@ public class ApplicationController {
 
     // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<ResponceData> deleteApplication(
+    public ResponseEntity<ResponceData> deleteAppFunction(
             @PathVariable Long id,
             @RequestHeader("Authorization") String authHeader) {
         try {
-            log.info("Deleting Application id={}", id);
+            log.info("Deleting AppFunction id={}", id);
 
             String token = authHeader.replace("Bearer ", "");
-            Application deletedApp = service.deleteApplicationReturnEntity(id, token);
+            AppFunction deleted = service.deleteAppFunction(id, token);
 
-            log.info("Application deleted successfully id={}", deletedApp.getApplicationId());
+            log.info("AppFunction deleted successfully id={}", deleted.getId());
 
             ResponceData response = new ResponceData(
-                    "success", 200, "Application deleted successfully",
-                    Collections.singletonList(deletedApp), 1);
+                    "success", 200, "AppFunction deleted successfully",
+                    Collections.singletonList(deleted), 1);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("Unexpected error while deleting Application id={}: {}", id, e.getMessage(), e);
+            log.error("Unexpected error while deleting AppFunction id={}: {}", id, e.getMessage(), e);
             ResponceData response = new ResponceData(
                     "fail", 500, "Unexpected error: " + e.getMessage(),
                     Collections.emptyList(), 0);

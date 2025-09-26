@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface ApplicationService {
     Application saveApplication(ApplicationDTO applicationDTO, String token);
     Page<Application> getAllApplications(String search, Pageable pageable);
-    Optional<Application> getApplicationById(Long id);
-    Application updateApplicationReturnEntity(Long id, ApplicationDTO updatedApplicationDTO, String token);
-    Application deleteApplicationReturnEntity(Long id, String token);
+    Optional<Application> getApplicationById(Long applicationId);
+    Application updateApplicationReturnEntity(Long applicationId, ApplicationDTO updatedApplicationDTO, String token);
+    Application deleteApplicationReturnEntity(Long applicationId, String token);
 }

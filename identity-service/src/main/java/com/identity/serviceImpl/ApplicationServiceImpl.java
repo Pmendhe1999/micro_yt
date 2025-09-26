@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -26,9 +27,6 @@ public class ApplicationServiceImpl  implements ApplicationService {
     private ApplicationRepository repository;
 
     @Autowired
-    private AuthTypesRepository authTypesRepository;
-
-    @Autowired
     private JwtService jwtService;
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationServiceImpl.class);
@@ -36,26 +34,25 @@ public class ApplicationServiceImpl  implements ApplicationService {
     @Override
     public Application saveApplication(ApplicationDTO applicationDTO, String token) {
         try {
-            if (repository.existsByApplicationName(applicationDTO.getApplicationName())) {
-                log.warn("Attempt to create duplicate Application: {}", applicationDTO.getApplicationName());
+            if (repository.existsByName(applicationDTO.getName())) {
+                log.warn("Attempt to create duplicate Application: {}", applicationDTO.getName());
                 throw new IllegalArgumentException("Application already exists");
             }
 
             String createdByUser = jwtService.extractUsername(token);
             String role = jwtService.extractRole(token);
 
-            AuthTypes authType = authTypesRepository.findById(applicationDTO.getAuthTypeId())
-                    .orElseThrow(() -> new NoSuchElementException("AuthType not found"));
-
             Application app = new Application();
-            app.setApplicationName(applicationDTO.getApplicationName());
-            app.setAuthType(authType);
+            app.setName(applicationDTO.getName());
             app.setDescription(applicationDTO.getDescription());
+            app.setStatus(applicationDTO.getStatus());
+            app.setCreatedDate(LocalDateTime.now());
+            app.setLastModifiedDate(LocalDateTime.now());
 
             Application savedApp = repository.save(app);
 
             log.info("Application '{}' created by user={} role={}",
-                    savedApp.getApplicationName(), createdByUser, role);
+                    savedApp.getName(), createdByUser, role);
 
             return savedApp;
 
@@ -73,7 +70,7 @@ public class ApplicationServiceImpl  implements ApplicationService {
         try {
             if (search != null && !search.isEmpty()) {
                 log.debug("Fetching Applications with search filter: {}", search);
-                return repository.findByApplicationNameContainingIgnoreCase(search, pageable);
+                return repository.findByNameContainingIgnoreCase(search, pageable);
             }
             log.debug("Fetching all Applications without filter");
             return repository.findAll(pageable);
@@ -84,38 +81,36 @@ public class ApplicationServiceImpl  implements ApplicationService {
     }
 
     @Override
-    public Optional<Application> getApplicationById(Long id) {
+    public Optional<Application> getApplicationById(Long applicationId) {
         try {
-            log.debug("Fetching Application by id={}", id);
-            return repository.findById(id);
+            log.debug("Fetching Application by applicationId={}", applicationId);
+            return repository.findById(applicationId);
         } catch (Exception e) {
-            log.error("Error occurred while fetching Application with id={}: {}", id, e.getMessage(), e);
-            throw new RuntimeException("Error occurred while fetching Application with id " + id + ": " + e.getMessage(), e);
+            log.error("Error occurred while fetching Application with applicationId={}: {}", applicationId, e.getMessage(), e);
+            throw new RuntimeException("Error occurred while fetching Application with applicationId " + applicationId + ": " + e.getMessage(), e);
         }
     }
 
     @Override
-    public Application updateApplicationReturnEntity(Long id, ApplicationDTO updatedApplicationDTO, String token) {
+    public Application updateApplicationReturnEntity(Long applicationId, ApplicationDTO updatedApplicationDTO, String token) {
         try {
-            Application existing = repository.findById(id)
+            Application existing = repository.findById(applicationId)
                     .orElseThrow(() -> {
-                        log.warn("Attempted update on non-existing Application with id={}", id);
-                        return new NoSuchElementException("Application not found with id " + id);
+                        log.warn("Attempted update on non-existing Application with applicationId={}", applicationId);
+                        return new NoSuchElementException("Application not found with id " + applicationId);
                     });
 
             String modifiedByUser = jwtService.extractUsername(token);
             String role = jwtService.extractRole(token);
 
-            AuthTypes authType = authTypesRepository.findById(updatedApplicationDTO.getAuthTypeId())
-                    .orElseThrow(() -> new NoSuchElementException("AuthType not found"));
-
-            existing.setApplicationName(updatedApplicationDTO.getApplicationName());
-            existing.setAuthType(authType);
+            existing.setName(updatedApplicationDTO.getName());
             existing.setDescription(updatedApplicationDTO.getDescription());
+            existing.setStatus(updatedApplicationDTO.getStatus());
+            existing.setLastModifiedDate(LocalDateTime.now());
 
             repository.save(existing);
 
-            log.info("Application id={} updated by user={} role={}", id, modifiedByUser, role);
+            log.info("Application applicationId={} updated by user={} role={}", applicationId, modifiedByUser, role);
 
             return existing;
 
@@ -123,18 +118,18 @@ public class ApplicationServiceImpl  implements ApplicationService {
             log.error("Update failed: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error while updating Application id={}: {}", id, e.getMessage(), e);
-            throw new RuntimeException("Error occurred while updating Application with id " + id + ": " + e.getMessage(), e);
+            log.error("Unexpected error while updating Application applicationId={}: {}", applicationId, e.getMessage(), e);
+            throw new RuntimeException("Error occurred while updating Application with id " + applicationId + ": " + e.getMessage(), e);
         }
     }
 
     @Override
-    public Application deleteApplicationReturnEntity(Long id, String token) {
+    public Application deleteApplicationReturnEntity(Long applicationId, String token) {
         try {
-            Application existing = repository.findById(id)
+            Application existing = repository.findById(applicationId)
                     .orElseThrow(() -> {
-                        log.warn("Attempted delete on non-existing Application with id={}", id);
-                        return new NoSuchElementException("Application not found with id " + id);
+                        log.warn("Attempted delete on non-existing Application with applicationId={}", applicationId);
+                        return new NoSuchElementException("Application not found with id " + applicationId);
                     });
 
             String deletedByUser = jwtService.extractUsername(token);
@@ -142,7 +137,7 @@ public class ApplicationServiceImpl  implements ApplicationService {
 
             repository.delete(existing);
 
-            log.info("Application id={} deleted by user={} role={}", id, deletedByUser, role);
+            log.info("Application applicationId={} deleted by user={} role={}", applicationId, deletedByUser, role);
 
             return existing;
 
@@ -150,9 +145,8 @@ public class ApplicationServiceImpl  implements ApplicationService {
             log.error("Delete failed: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("Unexpected error while deleting Application id={}: {}", id, e.getMessage(), e);
-            throw new RuntimeException("Error occurred while deleting Application with id " + id + ": " + e.getMessage(), e);
+            log.error("Unexpected error while deleting Application applicationId={}: {}", applicationId, e.getMessage(), e);
+            throw new RuntimeException("Error occurred while deleting Application with id " + applicationId + ": " + e.getMessage(), e);
         }
     }
-
 }

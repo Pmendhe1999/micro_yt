@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "applications")
 @Data
@@ -13,19 +15,23 @@ import lombok.NoArgsConstructor;
 public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "application_id")
+    @Column(name = "application_id")   // renamed column
     private Long applicationId;
 
-    @Column(name = "application_name", nullable = false, length = 100)
-    private String applicationName;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "auth_type_id", nullable = false)
-    private AuthTypes authType;   // ✅ foreign key to auth_types(auth_type_id)
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "status", length = 50)
+    private String status;
+
+    @Column(name = "created_date")
+    private LocalDateTime createdDate;
+
+    @Column(name = "last_modified_date")
+    private LocalDateTime lastModifiedDate;
 
     public Long getApplicationId() {
         return applicationId;
@@ -35,20 +41,12 @@ public class Application {
         this.applicationId = applicationId;
     }
 
-    public String getApplicationName() {
-        return applicationName;
+    public String getName() {
+        return name;
     }
 
-    public void setApplicationName(String applicationName) {
-        this.applicationName = applicationName;
-    }
-
-    public AuthTypes getAuthType() {
-        return authType;
-    }
-
-    public void setAuthType(AuthTypes authType) {
-        this.authType = authType;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -57,5 +55,29 @@ public class Application {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public LocalDateTime getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 }
