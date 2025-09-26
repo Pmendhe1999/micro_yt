@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 @Service
@@ -79,19 +80,23 @@ public class AppFunctionServiceImpl implements AppFunctionService {
     }
 
     @Override
-    public Page<AppFunction> getAllAppFunctions(String search, Pageable pageable) {
+    public Page<AppFunction> getAllAppFunctions(String search, List<Long> applicationIds, List<Long> appFunTypesMasterIds, Pageable pageable) {
         try {
-            if (search != null && !search.isEmpty()) {
-                log.debug("Fetching AppFunctions with search filter: {}", search);
-                return repository.findByNameContainingIgnoreCase(search, pageable);
+            log.debug("Fetching AppFunctions with search={}, applicationIds={}, appFunTypesMasterIds={}", search, applicationIds, appFunTypesMasterIds);
+
+            if ((search != null && !search.isEmpty()) ||
+                    (applicationIds != null && !applicationIds.isEmpty()) ||
+                    (appFunTypesMasterIds != null && !appFunTypesMasterIds.isEmpty())) {
+                return repository.findByFilters(search, applicationIds, appFunTypesMasterIds, pageable);
             }
-            log.debug("Fetching all AppFunctions without filter");
+
             return repository.findAll(pageable);
         } catch (Exception e) {
             log.error("Error occurred while fetching AppFunctions: {}", e.getMessage(), e);
             throw new RuntimeException("Error occurred while fetching AppFunctions: " + e.getMessage(), e);
         }
     }
+
 
     @Override
     public Optional<AppFunction> getAppFunctionById(Long id) {

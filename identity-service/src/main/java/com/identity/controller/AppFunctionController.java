@@ -17,10 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/app-functions")
@@ -77,20 +74,22 @@ public class AppFunctionController {
     // READ ALL
     @GetMapping
     public ResponseEntity<ResponceData> getAllAppFunctions(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) List<Long> applicationIds,
+            @RequestParam(required = false) List<Long> appFunTypesMasterIds) {
         try {
-            log.info("Fetching AppFunctions page={}, size={}, search={}, sortBy={}, sortDir={}",
-                    page, size, search, sortBy, sortDir);
+            log.info("Fetching AppFunctions page={}, size={}, search={}, sortBy={}, sortDir={}, appIds={}, typeIds={}",
+                    page, size, search, sortBy, sortDir, applicationIds, appFunTypesMasterIds);
 
             Sort sort = sortDir.equalsIgnoreCase("desc") ?
                     Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            Pageable pageable = PageRequest.of(page, size, sort);
+            Pageable pageable = PageRequest.of(page-1, size, sort);
 
-            Page<AppFunction> result = service.getAllAppFunctions(search, pageable);
+            Page<AppFunction> result = service.getAllAppFunctions(search, applicationIds, appFunTypesMasterIds, pageable);
 
             log.info("Retrieved {} AppFunctions", result.getTotalElements());
 
@@ -107,7 +106,6 @@ public class AppFunctionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
     // READ BY ID
     @GetMapping("/{id}")
     public ResponseEntity<ResponceData> getAppFunctionById(@PathVariable Long id) {
