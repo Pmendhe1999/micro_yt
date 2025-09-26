@@ -79,10 +79,10 @@ public class ApplicationController {
     // READ ALL
     @GetMapping
     public ResponseEntity<ResponceData> getAllApplications(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "applicationId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         try {
             log.info("Fetching Applications page={}, size={}, search={}, sortBy={}, sortDir={}",
@@ -90,7 +90,7 @@ public class ApplicationController {
 
             Sort sort = sortDir.equalsIgnoreCase("desc") ?
                     Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            Pageable pageable = PageRequest.of(page, size, sort);
+            Pageable pageable = PageRequest.of(page-1, size, sort);
 
             Page<Application> result = service.getAllApplications(search, pageable);
 

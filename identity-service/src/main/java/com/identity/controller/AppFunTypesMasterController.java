@@ -77,7 +77,7 @@ public class AppFunTypesMasterController {
     // READ ALL
     @GetMapping
     public ResponseEntity<ResponceData> getAll(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -88,7 +88,7 @@ public class AppFunTypesMasterController {
 
             Sort sort = sortDir.equalsIgnoreCase("desc") ?
                     Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            Pageable pageable = PageRequest.of(page, size, sort);
+            Pageable pageable = PageRequest.of(page-1, size, sort);
 
             Page<AppFunTypesMaster> result = service.getAll(search, pageable);
 

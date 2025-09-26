@@ -25,7 +25,7 @@ public class Application {
     private String description;
 
     @Column(name = "status", length = 50)
-    private String status;
+    private Boolean status;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
@@ -57,11 +57,11 @@ public class Application {
         this.description = description;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 

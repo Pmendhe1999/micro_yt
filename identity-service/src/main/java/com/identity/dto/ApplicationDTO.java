@@ -19,7 +19,7 @@ public class ApplicationDTO {
 
     private String description;
 
-    private String status;  // optional field
+    private Boolean status;  // optional field
 
     public @NotBlank(message = "Application name is required") @Size(max = 100, message = "Application name must not exceed 100 characters") String getName() {
         return name;
@@ -37,11 +37,11 @@ public class ApplicationDTO {
         this.description = description;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 }

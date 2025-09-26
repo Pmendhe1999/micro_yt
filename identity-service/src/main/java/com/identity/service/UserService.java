@@ -12,7 +12,32 @@ public interface UserService {
 
     UserCredential saveUser(UserRegisterDto dto);
 
-    Page<UserCredential> getAllUsers(String search, Pageable pageable);
+    /**
+     * Fetch all users with optional filters and pagination.
+     *
+     * @param username       Filter by username (optional)
+     * @param email          Filter by email (optional)
+     * @param mobileNumber   Filter by mobile number (optional)
+     * @param country        Filter by country (optional)
+     * @param firstName      Filter by first name (optional)
+     * @param lastName       Filter by last name (optional)
+     * @param applicationIds Filter by multiple application IDs (optional)
+     * @param authorityIds   Filter by multiple authority IDs (optional)
+     * @param pageable       Pagination and sorting information
+     * @return Page of UserCredential matching the filters
+     */
+    Page<UserCredential> getAllUsersWithFilters(
+            String username,
+            String email,
+            String mobileNumber,
+            String country,
+            String firstName,
+            String lastName,
+            List<Long> applicationIds,
+            List<Long> authorityIds,
+            Pageable pageable
+    );
+
 
     Optional<UserCredential> getUserById(Long id);
 

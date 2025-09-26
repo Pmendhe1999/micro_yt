@@ -112,20 +112,35 @@ import java.util.stream.Collectors;
 
 
 
-        // READ ALL (with search & pagination)
+//        // READ ALL (with search & pagination)
+//        @Override
+//        public Page<UserCredential> getAllUsers(String search, Pageable pageable) {
+//            try {
+//                if (search != null && !search.isEmpty()) {
+//                    log.debug("Fetching Users with search filter: {}", search);
+//                    return repository.searchUsers(search, pageable); // 🔹 Replace with custom search if needed
+//                }
+//                log.debug("Fetching all Users");
+//                return repository.findAll(pageable);
+//            } catch (Exception e) {
+//                log.error("Error while fetching Users: {}", e.getMessage(), e);
+//                throw e;
+//            }
+//        }
+
         @Override
-        public Page<UserCredential> getAllUsers(String search, Pageable pageable) {
-            try {
-                if (search != null && !search.isEmpty()) {
-                    log.debug("Fetching Users with search filter: {}", search);
-                    return repository.findAll(pageable); // 🔹 Replace with custom search if needed
-                }
-                log.debug("Fetching all Users");
-                return repository.findAll(pageable);
-            } catch (Exception e) {
-                log.error("Error while fetching Users: {}", e.getMessage(), e);
-                throw e;
-            }
+        public Page<UserCredential> getAllUsersWithFilters(
+                String username,
+                String email,
+                String mobileNumber,
+                String country,
+                String firstName,
+                String lastName,
+                List<Long> applicationIds,
+                List<Long> authorityIds,
+                Pageable pageable) {
+
+            return repository.searchUsersAdvanced(username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds, pageable);
         }
 
         // READ BY ID

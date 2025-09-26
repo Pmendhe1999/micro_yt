@@ -78,34 +78,43 @@ public class UserController {
     public ResponseEntity<ResponceData> getAllUsers(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String mobileNumber,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) List<Long> applicationIds,
+            @RequestParam(required = false) List<Long> authorityIds,
             @RequestParam(defaultValue = "userId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         try {
-            log.info("Fetching Users page={}, size={}, search={}, sortBy={}, sortDir={}",
-                    page, size, search, sortBy, sortDir);
+            log.info("Fetching Users with filters: username={}, email={}, mobile={}, country={}, firstName={}, lastName={}, applicationIds={}, authorityIds={}",
+                    username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds);
 
-            Sort sort = sortDir.equalsIgnoreCase("desc") ?
-                    Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            Pageable pageable = PageRequest.of(page-1, size, sort);
+            Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+            Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-            Page<UserCredential> result = userService.getAllUsers(search, pageable);
-
-            log.info("Retrieved {} Users", result.getTotalElements());
+            Page<UserCredential> result = userService.getAllUsersWithFilters(
+                    username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds, pageable
+            );
 
             ResponceData response = new ResponceData(
                     "success", 200, "Retrieved Users",
-                    result.getContent(), (int) result.getTotalElements());
+                    result.getContent(), (int) result.getTotalElements()
+            );
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             log.error("Unexpected error while fetching Users: {}", e.getMessage(), e);
             ResponceData response = new ResponceData(
                     "fail", 500, "Unexpected error: " + e.getMessage(),
-                    Collections.emptyList(), 0);
+                    Collections.emptyList(), 0
+            );
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 
     // READ BY ID
     @GetMapping("/{id}")
