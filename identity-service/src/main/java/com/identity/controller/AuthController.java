@@ -76,6 +76,11 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/getString")
+    public String getString(){
+        return "you hit the api";
+    }
+
     @PostMapping("/token")
     public ResponseEntity<?>getToken(@RequestBody AuthRequest authRequest) {
         try {

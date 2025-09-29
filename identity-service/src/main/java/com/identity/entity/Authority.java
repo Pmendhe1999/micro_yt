@@ -39,7 +39,4 @@ public class Authority {
         this.name = name;
     }
 
-    // 🔹 Many-to-Many with UserCredential
-    @ManyToMany(mappedBy = "authorities", fetch = FetchType.LAZY)
-    private Set<UserCredential> users = new HashSet<>();
 }

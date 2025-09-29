@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -21,14 +22,16 @@ public class PasswordMigration {
     @PostConstruct
     public void migratePasswords() {
         List<UserCredential> users = repository.findAll();
+        List<UserCredential> toUpdate = new ArrayList<>();
         for (UserCredential user : users) {
             String pwd = user.getPasswordHash();
-            // BCrypt hashes start with $2a$, $2b$, etc.
-            if (!pwd.startsWith("$2a$") && !pwd.startsWith("$2b$")) {
+            if (pwd != null && !pwd.startsWith("$2a$") && !pwd.startsWith("$2b$")) {
                 user.setPasswordHash(passwordEncoder.encode(pwd));
-                repository.save(user);
-                System.out.println("Updated password for user: " + user.getUsername());
+                toUpdate.add(user);  // collect updated users
             }
         }
+
+        repository.saveAll(toUpdate);  // batch save outside the loop
+        System.out.println("Updated " + toUpdate.size() + " users");
     }
 }
