@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/notification-types")
+@RequestMapping("/notification-types-master")
 public class NotificationTypesMasterController {
 
     private static final Logger log = LoggerFactory.getLogger(NotificationTypesMasterController.class);

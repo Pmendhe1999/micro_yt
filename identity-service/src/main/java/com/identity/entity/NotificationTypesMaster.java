@@ -32,7 +32,7 @@ public class NotificationTypesMaster {
     private String name;
 
     @Column(name = "status", length = 255)
-    private String status;
+    private Boolean status;
 
     public Long getId() {
         return id;
@@ -74,11 +74,11 @@ public class NotificationTypesMaster {
         this.name = name;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 }
