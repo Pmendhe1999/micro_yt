@@ -34,7 +34,7 @@ public class AuthConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/users/**", "/authorities/**", "/auth-types/**", "/projects/**", "/applications/**", "/notification-types-master/**", "/contacts/**", "/countries/**", "/countries/**", "/app-fun-types/**", "/app-functions/**", "/service-providers/**").permitAll()  // allow all under /auth and /users
+                        .requestMatchers("/auth/**", "/users/**", "/authorities/**", "/auth-types/**", "/projects/**", "/applications/**", "/notification-types-master/**", "/contacts/**", "/countries/**", "/countries/**", "/app-fun-types/**", "/app-functions/**", "/service-providers/**", "/notification-tech-details/**").permitAll()  // allow all under /auth and /users
                         .anyRequest().authenticated()
                 );
         return http.build();
