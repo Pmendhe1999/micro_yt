@@ -2,9 +2,7 @@ package com.identity.serviceImpl;
 
 import com.identity.dto.ApplicationDTO;
 import com.identity.entity.Application;
-import com.identity.entity.AuthTypes;
 import com.identity.reository.ApplicationRepository;
-import com.identity.reository.AuthTypesRepository;
 import com.identity.service.ApplicationService;
 import com.identity.service.JwtService;
 import lombok.RequiredArgsConstructor;

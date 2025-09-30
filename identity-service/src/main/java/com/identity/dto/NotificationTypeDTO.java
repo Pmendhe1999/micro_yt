@@ -16,7 +16,7 @@ public class NotificationTypeDTO {
 
     private String description;
 
-    private String status;
+    private Boolean status;
 
     @NotNull(message = "App Function ID is required")
     private Long appFunctionId;
@@ -44,11 +44,11 @@ public class NotificationTypeDTO {
         this.description = description;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 
