@@ -15,7 +15,7 @@ public interface AuthTypeRepository extends JpaRepository<AuthType, Long> {
             "AND (:appFuncIds IS NULL OR at.appFunction.id IN :appFuncIds) " +
             "AND (:authTypeMasterIds IS NULL OR at.authTypeMaster.id IN :authTypeMasterIds)")
     Page<AuthType> findByFilters(@Param("search") String search,
-                                 @Param("authFuncIds") java.util.List<Long> authFuncIds,
+                                 @Param("appFuncIds") java.util.List<Long> appFuncIds,
                                  @Param("authTypeMasterIds") java.util.List<Long> authTypeMasterIds,
                                  Pageable pageable);
 }
