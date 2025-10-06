@@ -1,6 +1,8 @@
 package com.identity.reository;
 
+import com.identity.entity.AppFunTypesMaster;
 import com.identity.entity.AppFunction;
+import com.identity.entity.Application;
 import com.identity.entity.Authority;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AppFunctionRepository extends JpaRepository<AppFunction, Long> {
     Page<AppFunction> findByNameContainingIgnoreCase(String name, Pageable pageable);
@@ -22,4 +25,8 @@ public interface AppFunctionRepository extends JpaRepository<AppFunction, Long> 
                                     @Param("applicationIds") List<Long> applicationIds,
                                     @Param("appFunTypesMasterIds") List<Long> appFunTypesMasterIds,
                                     Pageable pageable);
+
+    Optional<AppFunction> findByAppFunTypesMasterAndApplication(AppFunTypesMaster funType, Application application);
+
 }
+

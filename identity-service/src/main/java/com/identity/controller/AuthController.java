@@ -3,10 +3,12 @@ package com.identity.controller;
 
 import com.identity.config.CustomUserDetails;
 import com.identity.dto.AuthRequest;
+import com.identity.dto.OtpRequestDTO;
 import com.identity.entity.UserCredential;
 import com.identity.service.AuthService;
 import com.identity.service.CustomUserDetailsService;
 import com.identity.service.JwtService;
+import com.identity.service.OtpService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.Valid;
@@ -43,6 +45,8 @@ public class AuthController {
 
     @Autowired
     private JwtService jwtService; // ✅ Make sure you have a JwtService bean
+
+    private OtpService otpService;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserCredential user,
@@ -136,5 +140,29 @@ public class AuthController {
                     .body("An unexpected error occurred while validating token");
         }
     }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        String username = request.get("userName");
+
+        String message = service.sendOtpForReset(email, username);
+        return ResponseEntity.ok(Map.of("message", message));
+    }
+
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(@RequestBody OtpRequestDTO dto) {
+        String result = otpService.verifyOtp(dto.getEmail(), dto.getUserName(), dto.getOtp());
+
+        if ("OTP verified successfully".equals(result)) {
+            return ResponseEntity.ok(Map.of("message", result));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", result));
+        }
+    }
+
+
+
 
 }

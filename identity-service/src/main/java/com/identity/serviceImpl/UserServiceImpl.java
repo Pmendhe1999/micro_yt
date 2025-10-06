@@ -1,12 +1,8 @@
 package com.identity.serviceImpl;
 
 import com.identity.dto.UserRegisterDto;
-import com.identity.entity.Application;
-import com.identity.entity.Authority;
-import com.identity.entity.UserCredential;
-import com.identity.reository.ApplicationRepository;
-import com.identity.reository.AuthorityRepository;
-import com.identity.reository.UserRepository;
+import com.identity.entity.*;
+import com.identity.reository.*;
 import com.identity.service.JwtService;
 import com.identity.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +40,15 @@ import java.util.stream.Collectors;
 
         @Autowired
         private EmailService emailService;
+
+        @Autowired
+        private  AppFunTypesMasterRepository appFunTypesMasterRepository;
+
+        @Autowired
+        private AppFunctionRepository appFunctionRepository;
+
+        @Autowired
+        private AuthTypeRepository authTypeRepository;
 
         // CREATE
         @Override
@@ -96,8 +101,49 @@ import java.util.stream.Collectors;
                     credential.setAuthorities(authorities);
                 }
 
+                Long appId = dto.getApplicationIds().iterator().next();
+                Application application = applicationRepository.findById(appId)
+                        .orElseThrow(() -> new NoSuchElementException("Application not found with ID: " + appId));
+
+                // 5️⃣ Find "Registration" AppFunTypesMaster
+                AppFunTypesMaster regFunType = appFunTypesMasterRepository.findByNameIgnoreCase("Registration")
+                        .orElseThrow(() -> new NoSuchElementException("AppFunTypesMaster 'Registration' not found"));
+
+                // 6️⃣ Find AppFunction by AppFunTypesMaster + Application
+                AppFunction appFunction = appFunctionRepository
+                        .findByAppFunTypesMasterAndApplication(regFunType, application)
+                        .orElseThrow(() -> new NoSuchElementException(
+                                "AppFunction not found for AppFunTypesMaster '" + regFunType.getName() +
+                                        "' and Application ID " + application.getApplicationId()
+                        ));
+
+                // 7️⃣ Find AuthType for this AppFunction
+                AuthType authType = authTypeRepository.findByAppFunction(appFunction)
+                        .orElseThrow(() -> new NoSuchElementException(
+                                "AuthType not found for AppFunction ID " + appFunction.getId()
+                        ));
+
+                AuthTypeMaster authTypeMaster = authType.getAuthTypeMaster();
+                if (authTypeMaster == null) {
+                    throw new NoSuchElementException("AuthTypeMaster not linked with AuthType ID: " + authType.getId());
+                }
+
                 UserCredential saved = repository.save(credential);
                 log.info("User '{}' created successfully", saved.getUsername());
+
+                // 9️⃣ Send email only if AuthTypeMaster name = email_notification
+                if ("email_notification".equalsIgnoreCase(authTypeMaster.getName())) {
+                    String loginUrl = "http://yourdomain.com/login";
+                    emailService.sendCredentialsEmail(
+                            saved.getEmail(),
+                            saved.getUsername(),
+                            credential.getPasswordHash(), // Use plain password if needed (DTO should carry it)
+                            loginUrl
+                    );
+                    log.info("Credentials email sent to '{}'", saved.getEmail());
+                } else {
+                    log.info("AuthTypeMaster is '{}', skipping email notification", authTypeMaster.getName());
+                }
 
                 String loginUrl = "http://yourdomain.com/login"; // put your actual login URL
                 emailService.sendCredentialsEmail(saved.getEmail(), saved.getUsername(), dto.getPassword(), loginUrl);

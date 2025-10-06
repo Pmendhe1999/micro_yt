@@ -1,11 +1,14 @@
 package com.identity.reository;
 
+import com.identity.entity.AppFunction;
 import com.identity.entity.AuthType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
 
 public interface AuthTypeRepository extends JpaRepository<AuthType, Long> {
     boolean existsByName(String name);
@@ -18,4 +21,7 @@ public interface AuthTypeRepository extends JpaRepository<AuthType, Long> {
                                  @Param("appFuncIds") java.util.List<Long> appFuncIds,
                                  @Param("authTypeMasterIds") java.util.List<Long> authTypeMasterIds,
                                  Pageable pageable);
+
+    // ✅ Add this method to fix the error
+    Optional<AuthType> findByAppFunction(AppFunction appFunction);
 }
