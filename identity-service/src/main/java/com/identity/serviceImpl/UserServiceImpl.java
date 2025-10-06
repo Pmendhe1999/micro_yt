@@ -1,5 +1,6 @@
 package com.identity.serviceImpl;
 
+import com.identity.dto.ChangePasswordRequest;
 import com.identity.dto.UserRegisterDto;
 import com.identity.entity.*;
 import com.identity.reository.*;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -290,6 +292,46 @@ import java.util.stream.Collectors;
             } catch (Exception e) {
                 log.error("Error while deleting User id={}: {}", id, e.getMessage(), e);
                 throw e;
+            }
+        }
+
+        @Override
+        public ResponseEntity<?> changePassword(ChangePasswordRequest request) {
+            try {
+                log.info("[UserServiceImpl] Attempting to change password for email: {}", request.getEmail());
+
+                if (request.getEmail() == null || request.getOldPassword() == null || request.getNewPassword() == null) {
+                    log.warn("[UserServiceImpl] Missing required fields");
+                    return ResponseEntity.badRequest().body("All fields are required");
+                }
+
+                // Step 1: Find user
+                UserCredential user = repository.findByEmail(request.getEmail())
+                        .orElse(null);
+
+                if (user == null) {
+                    log.warn("[UserServiceImpl] User not found for email: {}", request.getEmail());
+                    return ResponseEntity.status(404).body("User not found");
+                }
+
+                // Step 2: Check old password
+                if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
+                    log.warn("[UserServiceImpl] Old password is incorrect for email: {}", request.getEmail());
+                    return ResponseEntity.badRequest().body("Old password is incorrect");
+                }
+
+                // Step 3: Hash new password and update
+                String hashedPassword = passwordEncoder.encode(request.getNewPassword());
+                user.setPasswordHash(hashedPassword);
+                user.setLastModifyDate(LocalDateTime.now());
+                repository.save(user);
+
+                log.info("[UserServiceImpl] Password changed successfully for email: {}", request.getEmail());
+                return ResponseEntity.ok("Password changed successfully!");
+
+            } catch (Exception e) {
+                log.error("[UserServiceImpl] Error changing password: {}", e.getMessage(), e);
+                return ResponseEntity.internalServerError().body("Internal server error");
             }
         }
 }

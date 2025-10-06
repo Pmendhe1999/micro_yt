@@ -85,4 +85,34 @@ public class EmailService {
             throw new RuntimeException("Failed to send OTP email: " + e.getMessage(), e);
         }
     }
+
+    public void sendPasswordResetSuccessEmail(String toEmail, String username) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+            helper.setFrom("itariumtechmail@gmail.com", "Ethosh Company");
+            helper.setTo(toEmail);
+            helper.setSubject("Password Reset Successful");
+
+            String content = """
+                <h2>Password Reset Successful</h2>
+                <p>Dear %s,</p>
+                <p>Your password has been successfully reset.</p>
+                <p>If you did not request this change, please contact support immediately.</p>
+                <br>
+                <p>Best regards,<br><b>Ethosh Security Team</b></p>
+                """.formatted(username != null ? username : "User");
+
+            helper.setText(content, true);
+
+            mailSender.send(message);
+            log.info("✅ Password reset confirmation email sent to {}", toEmail);
+
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            log.error("❌ Failed to send password reset confirmation email to {}: {}", toEmail, e.getMessage());
+            throw new RuntimeException("Failed to send password reset email: " + e.getMessage(), e);
+        }
+    }
+
 }

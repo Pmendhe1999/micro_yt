@@ -1,9 +1,11 @@
 package com.identity.service;
 
+import com.identity.dto.ChangePasswordRequest;
 import com.identity.dto.UserRegisterDto;
 import com.identity.entity.UserCredential;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +13,7 @@ import java.util.Optional;
 public interface UserService {
 
     UserCredential saveUser(UserRegisterDto dto);
-
+    ResponseEntity<?> changePassword(ChangePasswordRequest request);
     /**
      * Fetch all users with optional filters and pagination.
      *

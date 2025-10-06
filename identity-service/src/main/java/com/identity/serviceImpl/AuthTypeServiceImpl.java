@@ -155,4 +155,6 @@ public class AuthTypeServiceImpl implements AuthTypeService {
             throw new RuntimeException("Error occurred while deleting AuthType with id " + id, e);
         }
     }
+
+
 }

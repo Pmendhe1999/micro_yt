@@ -1,5 +1,7 @@
 package com.identity.service;
 
+import com.identity.entity.UserCredential;
+import com.identity.reository.UserRepository;
 import com.identity.serviceImpl.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,6 +22,9 @@ public class OtpService {
     private JdbcTemplate jdbcTemplate;
 
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     private static class OtpData {
@@ -39,7 +45,7 @@ public class OtpService {
         return otp;
     }
 
-    // ✅ Verify OTP (called by controller)
+    // ✅ Verify OTP
     public String verifyOtp(String email, String userName, String otp) {
         log.info("[verifyOtp] Verifying OTP for email: {}, userName: {}", email, userName);
 
@@ -49,19 +55,17 @@ public class OtpService {
         }
 
         try {
-            // ✅ Step 1: Check if user exists
-            String query = "SELECT id, email FROM users WHERE email = ? AND username = ? LIMIT 1";
-            Map<String, Object> user = jdbcTemplate.queryForMap(query, email, userName);
-
-            if (user == null || user.isEmpty()) {
-                log.warn("[verifyOtp] User not found for email {}", email);
+            // Step 1: Check user existence
+            Optional<UserCredential> userOpt = userRepository.findByEmailAndUsername(email, userName);
+            if (userOpt.isEmpty()) {
+                log.warn("[verifyOtp] User not found for email: {}", email);
                 return "User not found";
             }
 
-            // ✅ Step 2: Check if OTP exists and is valid
+            // Step 2: Check OTP validity
             OtpData data = otpStore.get(email);
             if (data == null) {
-                log.warn("[verifyOtp] No OTP found for {}", email);
+                log.warn("[verifyOtp] OTP not found for {}", email);
                 return "OTP not found or expired";
             }
 
@@ -76,7 +80,6 @@ public class OtpService {
                 return "Invalid OTP";
             }
 
-            // ✅ Step 3: OTP verified successfully
             otpStore.remove(email);
             log.info("[verifyOtp] OTP verified successfully for {}", email);
             return "OTP verified successfully";
@@ -86,8 +89,5 @@ public class OtpService {
             return "Internal server error";
         }
     }
-
-
-
 
 }

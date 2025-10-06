@@ -1,5 +1,6 @@
 package com.identity.service;
 
+import com.identity.dto.PasswordResetRequest;
 import com.identity.entity.UserCredential;
 import com.identity.reository.UserCredentialRepository;
 import com.identity.reository.UserRepository;
@@ -118,6 +119,48 @@ public class AuthService {
 
         log.info("[AuthService] OTP sent successfully to {}", email);
         return "OTP sent successfully. Check your email.";
+    }
+
+    public String resetPassword(PasswordResetRequest dto) {
+        log.info("[AuthService] resetPassword for email: {}", dto.getEmail());
+
+        // ✅ Step 1: Validate input
+        if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (dto.getNewPassword() == null || dto.getConfirmPassword() == null) {
+            throw new IllegalArgumentException("Both passwords are required");
+        }
+        if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+
+        // ✅ Step 2: Find the user by email or username
+        Optional<UserCredential> userOpt;
+        if (dto.getUserName() != null && !dto.getUserName().isEmpty()) {
+            userOpt = userRepository.findByEmailAndUsername(dto.getEmail(), dto.getUserName());
+        } else {
+            userOpt = userRepository.findByEmail(dto.getEmail());
+        }
+
+        if (userOpt.isEmpty()) {
+            log.warn("[AuthService] User not found for email: {}", dto.getEmail());
+            throw new IllegalArgumentException("User not found");
+        }
+
+        UserCredential user = userOpt.get();
+
+        // ✅ Step 3: Encode and update new password
+        String hashedPassword = passwordEncoder.encode(dto.getNewPassword());
+        user.setPasswordHash(hashedPassword);
+        user.setLastModifyDate(LocalDateTime.now());
+        userRepository.save(user);
+
+        // ✅ Step 4: Send password reset confirmation email
+        emailService.sendPasswordResetSuccessEmail(user.getEmail(), user.getUsername());
+
+        log.info("[AuthService] Password reset successfully for: {}", user.getEmail());
+        return "Password reset successfully. A confirmation email has been sent.";
     }
 
 }

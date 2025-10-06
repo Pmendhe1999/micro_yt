@@ -3,12 +3,11 @@ package com.identity.controller;
 
 import com.identity.config.CustomUserDetails;
 import com.identity.dto.AuthRequest;
+import com.identity.dto.ChangePasswordRequest;
 import com.identity.dto.OtpRequestDTO;
+import com.identity.dto.PasswordResetRequest;
 import com.identity.entity.UserCredential;
-import com.identity.service.AuthService;
-import com.identity.service.CustomUserDetailsService;
-import com.identity.service.JwtService;
-import com.identity.service.OtpService;
+import com.identity.service.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.Valid;
@@ -38,6 +37,9 @@ public class AuthController {
     private AuthService service;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private CustomUserDetailsService userDetailsService;
 
     @Autowired
@@ -46,6 +48,7 @@ public class AuthController {
     @Autowired
     private JwtService jwtService; // ✅ Make sure you have a JwtService bean
 
+    @Autowired
     private OtpService otpService;
 
     @PostMapping("/register")
@@ -153,16 +156,33 @@ public class AuthController {
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody OtpRequestDTO dto) {
-        String result = otpService.verifyOtp(dto.getEmail(), dto.getUserName(), dto.getOtp());
 
-        if ("OTP verified successfully".equals(result)) {
-            return ResponseEntity.ok(Map.of("message", result));
+
+        String message = otpService.verifyOtp(dto.getEmail(), dto.getUserName(), dto.getOtp());
+
+        if ("OTP verified successfully".equalsIgnoreCase(message)) {
+            return ResponseEntity.ok(Map.of("message", message));
         } else {
-            return ResponseEntity.badRequest().body(Map.of("message", result));
+            return ResponseEntity.badRequest().body(Map.of("message", message));
         }
     }
 
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest dto) {
+        try {
+            String message = service.resetPassword(dto);
+            return ResponseEntity.ok(Map.of("message", message));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of("message", "Internal server error"));
+        }
+    }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        return userService.changePassword(request);
+    }
 
 
 }
