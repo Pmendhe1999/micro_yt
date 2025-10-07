@@ -146,19 +146,28 @@ public class AuthController {
 
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
         String username = request.get("userName");
 
-        String message = service.sendOtpForReset(email, username);
-        return ResponseEntity.ok(Map.of("message", message));
+        if (username == null || username.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Username is required"));
+        }
+
+        try {
+            String message = service.sendOtpForReset(username);
+            return ResponseEntity.ok(Map.of("message", message));
+        } catch (IllegalArgumentException e) {
+            // ✅ Custom application error (bad request)
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            // ✅ Unexpected error
+            return ResponseEntity.internalServerError().body(Map.of("message", "Internal server error"));
+        }
     }
 
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody OtpRequestDTO dto) {
-
-
-        String message = otpService.verifyOtp(dto.getEmail(), dto.getUserName(), dto.getOtp());
+        String message = otpService.verifyOtp(dto.getUserName(), dto.getOtp());
 
         if ("OTP verified successfully".equalsIgnoreCase(message)) {
             return ResponseEntity.ok(Map.of("message", message));
@@ -166,6 +175,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", message));
         }
     }
+
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest dto) {

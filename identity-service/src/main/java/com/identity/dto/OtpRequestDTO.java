@@ -9,17 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OtpRequestDTO {
 
-    private String email;
+
     private String userName;
     private String otp;
 
-    public String getEmail() {
-        return email;
-    }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+
 
     public String getUserName() {
         return userName;

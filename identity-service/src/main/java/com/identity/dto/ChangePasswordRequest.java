@@ -8,16 +8,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChangePasswordRequest {
-    private String email;
+    private String userName;
     private String oldPassword;
     private String newPassword;
 
-    public String getEmail() {
-        return email;
+
+    public String getUserName() {
+        return userName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public String getOldPassword() {

@@ -10,18 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PasswordResetRequest {
 
-    private String email;
+    private String userName;
     private String newPassword;
     private String confirmPassword;
-    private String userName; // optional
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getNewPassword() {
         return newPassword;

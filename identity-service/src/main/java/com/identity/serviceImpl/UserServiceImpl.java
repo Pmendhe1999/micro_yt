@@ -298,35 +298,36 @@ import java.util.stream.Collectors;
         @Override
         public ResponseEntity<?> changePassword(ChangePasswordRequest request) {
             try {
-                log.info("[UserServiceImpl] Attempting to change password for email: {}", request.getEmail());
+                log.info("[UserServiceImpl] Attempting to change password for username: {}", request.getUserName());
 
-                if (request.getEmail() == null || request.getOldPassword() == null || request.getNewPassword() == null) {
+                // ✅ Step 1: Validate input
+                if (request.getUserName() == null || request.getOldPassword() == null || request.getNewPassword() == null) {
                     log.warn("[UserServiceImpl] Missing required fields");
                     return ResponseEntity.badRequest().body("All fields are required");
                 }
 
-                // Step 1: Find user
-                UserCredential user = repository.findByEmail(request.getEmail())
+                // ✅ Step 2: Find user by username
+                UserCredential user = repository.findByUsername(request.getUserName())
                         .orElse(null);
 
                 if (user == null) {
-                    log.warn("[UserServiceImpl] User not found for email: {}", request.getEmail());
+                    log.warn("[UserServiceImpl] User not found for username: {}", request.getUserName());
                     return ResponseEntity.status(404).body("User not found");
                 }
 
-                // Step 2: Check old password
+                // ✅ Step 3: Verify old password
                 if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
-                    log.warn("[UserServiceImpl] Old password is incorrect for email: {}", request.getEmail());
+                    log.warn("[UserServiceImpl] Old password is incorrect for username: {}", request.getUserName());
                     return ResponseEntity.badRequest().body("Old password is incorrect");
                 }
 
-                // Step 3: Hash new password and update
+                // ✅ Step 4: Update to new password
                 String hashedPassword = passwordEncoder.encode(request.getNewPassword());
                 user.setPasswordHash(hashedPassword);
                 user.setLastModifyDate(LocalDateTime.now());
                 repository.save(user);
 
-                log.info("[UserServiceImpl] Password changed successfully for email: {}", request.getEmail());
+                log.info("[UserServiceImpl] Password changed successfully for username: {}", request.getUserName());
                 return ResponseEntity.ok("Password changed successfully!");
 
             } catch (Exception e) {
@@ -334,4 +335,5 @@ import java.util.stream.Collectors;
                 return ResponseEntity.internalServerError().body("Internal server error");
             }
         }
-}
+
+    }

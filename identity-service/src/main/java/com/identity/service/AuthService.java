@@ -92,41 +92,45 @@ public class AuthService {
     }
 
 
-    public String sendOtpForReset(String email, String username) {
-        log.info("[AuthService] sendOtpForReset for email: {}", email);
+    public String sendOtpForReset(String username) {
+        log.info("[AuthService] sendOtpForReset for username: {}", username);
 
-        if (email == null || email.isEmpty()) {
-            throw new IllegalArgumentException("Email is required");
+        if (username == null || username.isEmpty()) {
+            throw new IllegalArgumentException("Username is required");
         }
 
-        Optional<UserCredential> userOpt;
-
-        if (username != null && !username.isEmpty()) {
-            userOpt = userRepository.findByUsername(username);
-        } else {
-            userOpt = userRepository.findByEmail(email);
-        }
+        // ✅ Find user by username
+        Optional<UserCredential> userOpt = userRepository.findByUsername(username);
 
         if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("User not found with given email or username");
+            log.warn("[AuthService] User not found for username: {}", username);
+            throw new IllegalArgumentException("User not found with given username");
         }
 
-        // ✅ Generate and store OTP
-        String otp = otpService.generateOtp(email);
+        UserCredential user = userOpt.get();
 
-        // ✅ Send OTP via email
-        emailService.sendOtpEmail(email, otp);
+        // ✅ Check if email exists
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            log.warn("[AuthService] No email found for username: {}", username);
+            throw new IllegalArgumentException("No email associated with this username");
+        }
 
-        log.info("[AuthService] OTP sent successfully to {}", email);
-        return "OTP sent successfully. Check your email.";
+        // ✅ Generate OTP
+        String otp = otpService.generateOtp(user.getEmail());
+
+        // ✅ Send OTP to user's email
+        emailService.sendOtpEmail(user.getEmail(), otp);
+
+        log.info("[AuthService] OTP sent successfully to {}", user.getEmail());
+        return "OTP sent successfully to " + user.getEmail();
     }
 
     public String resetPassword(PasswordResetRequest dto) {
-        log.info("[AuthService] resetPassword for email: {}", dto.getEmail());
+        log.info("[AuthService] resetPassword for username: {}", dto.getUserName());
 
         // ✅ Step 1: Validate input
-        if (dto.getEmail() == null || dto.getEmail().isEmpty()) {
-            throw new IllegalArgumentException("Email is required");
+        if (dto.getUserName() == null || dto.getUserName().isEmpty()) {
+            throw new IllegalArgumentException("Username is required");
         }
         if (dto.getNewPassword() == null || dto.getConfirmPassword() == null) {
             throw new IllegalArgumentException("Both passwords are required");
@@ -135,32 +139,27 @@ public class AuthService {
             throw new IllegalArgumentException("Passwords do not match");
         }
 
-        // ✅ Step 2: Find the user by email or username
-        Optional<UserCredential> userOpt;
-        if (dto.getUserName() != null && !dto.getUserName().isEmpty()) {
-            userOpt = userRepository.findByEmailAndUsername(dto.getEmail(), dto.getUserName());
-        } else {
-            userOpt = userRepository.findByEmail(dto.getEmail());
-        }
-
+        // ✅ Step 2: Find the user by username
+        Optional<UserCredential> userOpt = userRepository.findByUsername(dto.getUserName());
         if (userOpt.isEmpty()) {
-            log.warn("[AuthService] User not found for email: {}", dto.getEmail());
+            log.warn("[AuthService] User not found for username: {}", dto.getUserName());
             throw new IllegalArgumentException("User not found");
         }
 
         UserCredential user = userOpt.get();
 
-        // ✅ Step 3: Encode and update new password
+        // ✅ Step 3: Encode and update the new password
         String hashedPassword = passwordEncoder.encode(dto.getNewPassword());
         user.setPasswordHash(hashedPassword);
         user.setLastModifyDate(LocalDateTime.now());
         userRepository.save(user);
 
-        // ✅ Step 4: Send password reset confirmation email
-        emailService.sendPasswordResetSuccessEmail(user.getEmail(), user.getUsername());
+        // ✅ Step 4: Send confirmation email (only if user has an email)
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            emailService.sendPasswordResetSuccessEmail(user.getEmail(), user.getUsername());
+        }
 
-        log.info("[AuthService] Password reset successfully for: {}", user.getEmail());
-        return "Password reset successfully. A confirmation email has been sent.";
+        log.info("[AuthService] Password reset successfully for username: {}", dto.getUserName());
+        return "Password reset successfully. A confirmation email has been sent "+user.getEmail();
     }
-
 }
