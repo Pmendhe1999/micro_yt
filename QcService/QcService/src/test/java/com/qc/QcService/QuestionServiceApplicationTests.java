@@ -1,4 +1,4 @@
-package com.question.QuestionService;
+package com.qc.QcService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

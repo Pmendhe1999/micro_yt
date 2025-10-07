@@ -1,4 +1,4 @@
-package com.question.QuestionService;
+package com.qc.QcService;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

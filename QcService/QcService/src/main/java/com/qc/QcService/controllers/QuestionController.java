@@ -1,7 +1,7 @@
-package com.question.QuestionService.controllers;
+package com.qc.QcService.controllers;
 
-import com.question.QuestionService.entities.Question;
-import com.question.QuestionService.services.QuestionService;
+import com.qc.QcService.entities.Question;
+import com.qc.QcService.services.QuestionService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 

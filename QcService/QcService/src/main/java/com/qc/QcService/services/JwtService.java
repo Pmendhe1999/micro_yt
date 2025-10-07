@@ -1,4 +1,4 @@
-package com.question.QuestionService.services;
+package com.qc.QcService.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

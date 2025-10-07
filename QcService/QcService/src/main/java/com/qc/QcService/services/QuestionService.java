@@ -1,6 +1,6 @@
-package com.question.QuestionService.services;
+package com.qc.QcService.services;
 
-import com.question.QuestionService.entities.Question;
+import com.qc.QcService.entities.Question;
 
 import java.util.List;
 

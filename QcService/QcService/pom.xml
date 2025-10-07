@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.question</groupId>
-	<artifactId>QuestionService</artifactId>
+	<artifactId>QcService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>QuestionService</name>
 	<description>This is question service</description>

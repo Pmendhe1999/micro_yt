@@ -1,6 +1,6 @@
-package com.question.QuestionService.config;
+package com.qc.QcService.config;
 
-import com.question.QuestionService.services.JwtService;
+import com.qc.QcService.services.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

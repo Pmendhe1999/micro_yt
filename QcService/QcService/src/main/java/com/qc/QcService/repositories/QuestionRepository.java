@@ -1,6 +1,6 @@
-package com.question.QuestionService.repositories;
+package com.qc.QcService.repositories;
 
-import com.question.QuestionService.entities.Question;
+import com.qc.QcService.entities.Question;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
