@@ -9,7 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="QuizService" />
         <module name="ServiceRegistry" />
-        <module name="QuestionService" />
+        <module name="QcService" />
         <module name="ApiGateway" />
       </profile>
       <profile name="Annotation profile for identity-service" enabled="true">
@@ -27,7 +27,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ApiGateway" options="-parameters" />
-      <module name="QuestionService" options="-parameters" />
+      <module name="QcService" options="-parameters" />
       <module name="QuizService" options="-parameters" />
       <module name="ServiceRegistry" options="-parameters" />
       <module name="identity-service" options="-parameters" />
