@@ -297,28 +297,30 @@ import java.util.stream.Collectors;
 
         @Override
         public ResponseEntity<?> changePassword(ChangePasswordRequest request) {
+            Map<String, Object> response = new HashMap<>();
             try {
                 log.info("[UserServiceImpl] Attempting to change password for username: {}", request.getUserName());
 
                 // ✅ Step 1: Validate input
                 if (request.getUserName() == null || request.getOldPassword() == null || request.getNewPassword() == null) {
                     log.warn("[UserServiceImpl] Missing required fields");
-                    return ResponseEntity.badRequest().body("All fields are required");
+                    response.put("message", "All fields are required");
+                    return ResponseEntity.badRequest().body(response);
                 }
 
                 // ✅ Step 2: Find user by username
-                UserCredential user = repository.findByUsername(request.getUserName())
-                        .orElse(null);
-
+                UserCredential user = repository.findByUsername(request.getUserName()).orElse(null);
                 if (user == null) {
                     log.warn("[UserServiceImpl] User not found for username: {}", request.getUserName());
-                    return ResponseEntity.status(404).body("User not found");
+                    response.put("message", "User not found with given username");
+                    return ResponseEntity.status(404).body(response);
                 }
 
                 // ✅ Step 3: Verify old password
                 if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
                     log.warn("[UserServiceImpl] Old password is incorrect for username: {}", request.getUserName());
-                    return ResponseEntity.badRequest().body("Old password is incorrect");
+                    response.put("message", "Old password is incorrect");
+                    return ResponseEntity.badRequest().body(response);
                 }
 
                 // ✅ Step 4: Update to new password
@@ -328,12 +330,13 @@ import java.util.stream.Collectors;
                 repository.save(user);
 
                 log.info("[UserServiceImpl] Password changed successfully for username: {}", request.getUserName());
-                return ResponseEntity.ok("Password changed successfully!");
+                response.put("message", "Password changed successfully!");
+                return ResponseEntity.ok(response);
 
             } catch (Exception e) {
                 log.error("[UserServiceImpl] Error changing password: {}", e.getMessage(), e);
-                return ResponseEntity.internalServerError().body("Internal server error");
+                response.put("message", "Internal server error");
+                return ResponseEntity.internalServerError().body(response);
             }
         }
-
     }
