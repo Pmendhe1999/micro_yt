@@ -2,12 +2,16 @@ package com.identity.serviceImpl;
 
 import com.identity.dto.MediaDTO;
 import com.identity.entity.Media;
+import com.identity.entity.MediaDetails;
+import com.identity.reository.MediaDetailsRepository;
 import com.identity.reository.MediaRepository;
+import com.identity.reository.UserCredentialRepository;
 import com.identity.service.JwtService;
 import com.identity.service.MediaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,11 +22,31 @@ import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import org.springframework.web.multipart.MultipartFile;
+
 @Service
 public class MediaServiceImpl implements MediaService {
 
     @Autowired
+    private  AmazonS3 s3Client;
+    @Autowired
+    private  MediaRepository mediaRepository;
+
+    @Autowired
+    private  MediaDetailsRepository mediaDetailsRepository;
+
+    @Autowired
     private MediaRepository repository;
+
+    @Autowired
+    private UserCredentialRepository userRepository;
 
     @Autowired
     private JwtService jwtService;
@@ -144,6 +168,53 @@ public class MediaServiceImpl implements MediaService {
         } catch (Exception e) {
             log.error("Unexpected error while deleting Media id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting Media with id " + id + ": " + e.getMessage(), e);
+        }
+    }
+
+
+    @Value("${aws.s3.bucketName}")
+    private String bucketName;
+
+
+    @Override
+    public MediaDetails uploadMedia(Long userId, MultipartFile file, String description, String mediaFor) {
+        try {
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+            // Convert MultipartFile to File
+            File convertedFile = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
+            try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
+                fos.write(file.getBytes());
+            }
+
+            // Upload to S3
+            s3Client.putObject(new PutObjectRequest(bucketName, fileName, convertedFile));
+            String fileUrl = s3Client.getUrl(bucketName, fileName).toString();
+
+            // Save Media
+            Media media = new Media();
+            media.setName(fileName);
+            media.setBaseImageUrl(fileUrl);
+            media.setCreatedDate(LocalDateTime.now());
+            media.setStatus("ACTIVE");
+            mediaRepository.save(media);
+
+            // Save Media Details
+            MediaDetails details = new MediaDetails();
+            details.setCreatedDate(LocalDateTime.now());
+            details.setDescription(description);
+            details.setMediaFor(mediaFor);
+            details.setType(file.getContentType());
+            details.setMedia(media);
+            details.setUser(userRepository.findById(userId).orElse(null));
+            mediaDetailsRepository.save(details);
+
+            convertedFile.delete();
+
+            return details;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error uploading media: " + e.getMessage(), e);
         }
     }
 }

@@ -3,6 +3,7 @@ package com.identity.controller;
 import com.identity.dto.MediaDTO;
 import com.identity.dto.ResponceData;
 import com.identity.entity.Media;
+import com.identity.entity.MediaDetails;
 import com.identity.service.MediaService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.Collections;
@@ -136,5 +137,15 @@ public class MediaController {
             ResponceData response = new ResponceData("fail", 500, "Unexpected error: " + e.getMessage(), Collections.emptyList(), 0);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+
+    @PostMapping("/upload")
+    public ResponseEntity<MediaDetails> uploadMedia(
+            @RequestParam Long userId,
+            @RequestParam MultipartFile file,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String mediaFor) {
+        return ResponseEntity.ok(service.uploadMedia(userId, file, description, mediaFor));
     }
 }
