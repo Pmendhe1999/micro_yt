@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface  MediaDetailsRepository extends JpaRepository<MediaDetails, Long> {
 
@@ -14,4 +15,6 @@ public interface  MediaDetailsRepository extends JpaRepository<MediaDetails, Lon
     List<MediaDetails> findByUser_UserId(Long userId);
 
     List<MediaDetails> findByMedia_Id(Long mediaId);
+
+    Optional<MediaDetails> findByUserUserId(Long userId);
 }

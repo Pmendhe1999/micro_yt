@@ -1,5 +1,6 @@
 package com.identity.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -98,6 +99,18 @@ public class UserCredential {
             inverseJoinColumns = @JoinColumn(name = "authority_id")
     )
     private Set<Authority> authorities = new HashSet<>();
+
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "user")
+    @JsonManagedReference
+    private MediaDetails mediaDetails;
+
+    public MediaDetails getMediaDetails() {
+        return mediaDetails;
+    }
+
+    public void setMediaDetails(MediaDetails mediaDetails) {
+        this.mediaDetails = mediaDetails;
+    }
 
     public Long getUserId() {
         return userId;

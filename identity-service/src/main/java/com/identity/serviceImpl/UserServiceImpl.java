@@ -103,49 +103,68 @@ import java.util.stream.Collectors;
                     credential.setAuthorities(authorities);
                 }
 
-                Long appId = dto.getApplicationIds().iterator().next();
-                Application application = applicationRepository.findById(appId)
-                        .orElseThrow(() -> new NoSuchElementException("Application not found with ID: " + appId));
-
-                // 5️⃣ Find "Registration" AppFunTypesMaster
-                AppFunTypesMaster regFunType = appFunTypesMasterRepository.findByNameIgnoreCase("Registration")
-                        .orElseThrow(() -> new NoSuchElementException("AppFunTypesMaster 'Registration' not found"));
-
-                // 6️⃣ Find AppFunction by AppFunTypesMaster + Application
-                AppFunction appFunction = appFunctionRepository
-                        .findByAppFunTypesMasterAndApplication(regFunType, application)
-                        .orElseThrow(() -> new NoSuchElementException(
-                                "AppFunction not found for AppFunTypesMaster '" + regFunType.getName() +
-                                        "' and Application ID " + application.getApplicationId()
-                        ));
-
-                // 7️⃣ Find AuthType for this AppFunction
-                AuthType authType = authTypeRepository.findByAppFunction(appFunction)
-                        .orElseThrow(() -> new NoSuchElementException(
-                                "AuthType not found for AppFunction ID " + appFunction.getId()
-                        ));
-
-                AuthTypeMaster authTypeMaster = authType.getAuthTypeMaster();
-                if (authTypeMaster == null) {
-                    throw new NoSuchElementException("AuthTypeMaster not linked with AuthType ID: " + authType.getId());
+                Long appId = null;
+                if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
+                    appId = dto.getApplicationIds().iterator().next();
                 }
+
+                Application application = null;
+                if (appId != null) {
+                    application = applicationRepository.findById(appId).orElse(null);
+                }
+
+//                if (application == null) {
+//                    throw new IllegalArgumentException("Application not found or no Application IDs provided");
+//                }
+
+// 5️⃣ Find "Registration" AppFunTypesMaster
+                AppFunTypesMaster regFunType = appFunTypesMasterRepository.findByNameIgnoreCase("Registration").orElse(null);
+//                if (regFunType == null) {
+//                    throw new IllegalArgumentException("AppFunTypesMaster 'Registration' not found");
+//                }
+
+// 6️⃣ Find AppFunction by AppFunTypesMaster + Application
+                AppFunction appFunction = null;
+                if (regFunType != null && application != null) {
+                    appFunction = appFunctionRepository.findByAppFunTypesMasterAndApplication(regFunType, application).orElse(null);
+                }
+
+//                if (appFunction == null) {
+//                    throw new IllegalArgumentException("AppFunction not found for given AppFunTypesMaster and Application");
+//                }
+
+// 7️⃣ Find AuthType for this AppFunction
+                AuthType authType = null;
+                if (appFunction != null) {
+                    authType = authTypeRepository.findByAppFunction(appFunction).orElse(null);
+                }
+
+//                if (authType == null) {
+//                    throw new IllegalArgumentException("AuthType not found for AppFunction ID: " + (appFunction != null ? appFunction.getId() : "null"));
+//                }
+
+// AuthTypeMaster
+                AuthTypeMaster authTypeMaster = authType != null ? authType.getAuthTypeMaster() : null;
+//                if (authTypeMaster == null) {
+//                    throw new IllegalArgumentException("AuthTypeMaster not linked with AuthType");
+//                }
 
                 UserCredential saved = repository.save(credential);
                 log.info("User '{}' created successfully", saved.getUsername());
 
                 // 9️⃣ Send email only if AuthTypeMaster name = email_notification
-                if ("email_notification".equalsIgnoreCase(authTypeMaster.getName())) {
-                    String loginUrl = "http://yourdomain.com/login";
-                    emailService.sendCredentialsEmail(
-                            saved.getEmail(),
-                            saved.getUsername(),
-                            credential.getPasswordHash(), // Use plain password if needed (DTO should carry it)
-                            loginUrl
-                    );
-                    log.info("Credentials email sent to '{}'", saved.getEmail());
-                } else {
-                    log.info("AuthTypeMaster is '{}', skipping email notification", authTypeMaster.getName());
-                }
+//                if ("email_notification".equalsIgnoreCase(authTypeMaster.getName())) {
+//                    String loginUrl = "http://yourdomain.com/login";
+//                    emailService.sendCredentialsEmail(
+//                            saved.getEmail(),
+//                            saved.getUsername(),
+//                            credential.getPasswordHash(), // Use plain password if needed (DTO should carry it)
+//                            loginUrl
+//                    );
+//                    log.info("Credentials email sent to '{}'", saved.getEmail());
+//                } else {
+//                    log.info("AuthTypeMaster is '{}', skipping email notification", authTypeMaster.getName());
+//                }
 
                 String loginUrl = "http://yourdomain.com/login"; // put your actual login URL
                 emailService.sendCredentialsEmail(saved.getEmail(), saved.getUsername(), dto.getPassword(), loginUrl);

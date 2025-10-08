@@ -3,11 +3,13 @@ package com.identity.serviceImpl;
 import com.identity.dto.MediaDTO;
 import com.identity.entity.Media;
 import com.identity.entity.MediaDetails;
+import com.identity.entity.UserCredential;
 import com.identity.reository.MediaDetailsRepository;
 import com.identity.reository.MediaRepository;
 import com.identity.reository.UserCredentialRepository;
 import com.identity.service.JwtService;
 import com.identity.service.MediaService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,43 +177,81 @@ public class MediaServiceImpl implements MediaService {
     @Value("${aws.s3.bucketName}")
     private String bucketName;
 
-
+    @Transactional
     @Override
     public MediaDetails uploadMedia(Long userId, MultipartFile file, String description, String mediaFor) {
         try {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            // 1️⃣ Fetch existing media details for the user (if any)
+            MediaDetails existingMediaDetails = mediaDetailsRepository.findByUserUserId(userId).orElse(null);
 
-            // Convert MultipartFile to File
+            // 2️⃣ Upload new file to S3
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             File convertedFile = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
             try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
                 fos.write(file.getBytes());
             }
 
-            // Upload to S3
             s3Client.putObject(new PutObjectRequest(bucketName, fileName, convertedFile));
             String fileUrl = s3Client.getUrl(bucketName, fileName).toString();
 
-            // Save Media
-            Media media = new Media();
-            media.setName(fileName);
-            media.setBaseImageUrl(fileUrl);
-            media.setCreatedDate(LocalDateTime.now());
-            media.setStatus("ACTIVE");
-            mediaRepository.save(media);
+            convertedFile.delete(); // clean temp file
 
-            // Save Media Details
-            MediaDetails details = new MediaDetails();
-            details.setCreatedDate(LocalDateTime.now());
-            details.setDescription(description);
-            details.setMediaFor(mediaFor);
-            details.setType(file.getContentType());
-            details.setMedia(media);
-            details.setUser(userRepository.findById(userId).orElse(null));
-            mediaDetailsRepository.save(details);
+            // 3️⃣ If record exists, update it; else create new ones
+            Media media;
+            MediaDetails mediaDetails;
 
-            convertedFile.delete();
+            if (existingMediaDetails != null) {
+                // ✅ Update existing
+                media = existingMediaDetails.getMedia();
+                if (media == null) {
+                    media = new Media();
+                }
 
-            return details;
+                // Delete old file from S3 (optional)
+                if (media.getName() != null) {
+                    try {
+                        s3Client.deleteObject(bucketName, media.getName());
+                    } catch (Exception e) {
+                        System.err.println("Warning: Failed to delete old file from S3: " + e.getMessage());
+                    }
+                }
+
+                // Update media info
+                media.setName(fileName);
+                media.setBaseImageUrl(fileUrl);
+                media.setLastModifiedDate(LocalDateTime.now());
+                media.setStatus("ACTIVE");
+                mediaRepository.save(media);
+
+                // Update media details
+                existingMediaDetails.setDescription(description);
+                existingMediaDetails.setMediaFor(mediaFor);
+                existingMediaDetails.setType(file.getContentType());
+                existingMediaDetails.setLastModifiedDate(LocalDateTime.now());
+                existingMediaDetails.setMedia(media);
+                mediaDetailsRepository.save(existingMediaDetails);
+
+                mediaDetails = existingMediaDetails;
+            } else {
+                // ✅ Create new
+                media = new Media();
+                media.setName(fileName);
+                media.setBaseImageUrl(fileUrl);
+                media.setCreatedDate(LocalDateTime.now());
+                media.setStatus("ACTIVE");
+                mediaRepository.save(media);
+
+                mediaDetails = new MediaDetails();
+                mediaDetails.setCreatedDate(LocalDateTime.now());
+                mediaDetails.setDescription(description);
+                mediaDetails.setMediaFor(mediaFor);
+                mediaDetails.setType(file.getContentType());
+                mediaDetails.setMedia(media);
+                mediaDetails.setUser(userRepository.findById(userId).orElseThrow());
+                mediaDetailsRepository.save(mediaDetails);
+            }
+
+            return mediaDetails;
 
         } catch (Exception e) {
             throw new RuntimeException("Error uploading media: " + e.getMessage(), e);

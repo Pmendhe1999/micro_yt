@@ -1,5 +1,6 @@
 package com.identity.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,9 +42,9 @@ public class MediaDetails {
     @JoinColumn(name = "media_id")
     private Media media;
 
-    // 🔹 Many media details belong to one user
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
+    @OneToOne
+    @JoinColumn(name = "user_id", unique = true)
+    @JsonBackReference
     private UserCredential user;
 
     public Long getId() {
