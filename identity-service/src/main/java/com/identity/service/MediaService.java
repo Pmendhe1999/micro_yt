@@ -23,6 +23,6 @@ public interface MediaService {
 
     Media deleteMediaReturnEntity(Long id, String token);
 
-    MediaDetails uploadMedia(Long userId, MultipartFile file, String description, String mediaFor);
+    MediaDetails uploadMedia(Long userId, Long applicationId, MultipartFile file, String description, String mediaFor);
 
 }

@@ -17,4 +17,7 @@ public interface  MediaDetailsRepository extends JpaRepository<MediaDetails, Lon
     List<MediaDetails> findByMedia_Id(Long mediaId);
 
     Optional<MediaDetails> findByUserUserId(Long userId);
+
+    Optional<MediaDetails> findByApplicationApplicationId(Long applicationId);
+
 }

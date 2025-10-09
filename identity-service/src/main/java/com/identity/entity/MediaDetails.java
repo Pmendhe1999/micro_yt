@@ -43,9 +43,23 @@ public class MediaDetails {
     private Media media;
 
     @OneToOne
-    @JoinColumn(name = "user_id", unique = true)
+    @JoinColumn(name = "user_id", nullable = true)
     @JsonBackReference
     private UserCredential user;
+
+    // 🔹 Optional: for Application
+    @OneToOne
+    @JoinColumn(name = "application_id", nullable = true)
+    @JsonBackReference
+    private Application application;
+
+    public Application getApplication() {
+        return application;
+    }
+
+    public void setApplication(Application application) {
+        this.application = application;
+    }
 
     public Long getId() {
         return id;

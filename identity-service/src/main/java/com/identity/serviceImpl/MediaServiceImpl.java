@@ -4,6 +4,7 @@ import com.identity.dto.MediaDTO;
 import com.identity.entity.Media;
 import com.identity.entity.MediaDetails;
 import com.identity.entity.UserCredential;
+import com.identity.reository.ApplicationRepository;
 import com.identity.reository.MediaDetailsRepository;
 import com.identity.reository.MediaRepository;
 import com.identity.reository.UserCredentialRepository;
@@ -43,6 +44,9 @@ public class MediaServiceImpl implements MediaService {
 
     @Autowired
     private  MediaDetailsRepository mediaDetailsRepository;
+
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     @Autowired
     private MediaRepository repository;
@@ -179,10 +183,15 @@ public class MediaServiceImpl implements MediaService {
 
     @Transactional
     @Override
-    public MediaDetails uploadMedia(Long userId, MultipartFile file, String description, String mediaFor) {
+    public MediaDetails uploadMedia(Long userId, Long applicationId, MultipartFile file, String description, String mediaFor) {
         try {
-            // 1️⃣ Fetch existing media details for the user (if any)
-            MediaDetails existingMediaDetails = mediaDetailsRepository.findByUserUserId(userId).orElse(null);
+            // 1️⃣ Identify target (user or application)
+            MediaDetails existingMediaDetails = null;
+            if (userId != null) {
+                existingMediaDetails = mediaDetailsRepository.findByUserUserId(userId).orElse(null);
+            } else if (applicationId != null) {
+                existingMediaDetails = mediaDetailsRepository.findByApplicationApplicationId(applicationId).orElse(null);
+            }
 
             // 2️⃣ Upload new file to S3
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -193,47 +202,40 @@ public class MediaServiceImpl implements MediaService {
 
             s3Client.putObject(new PutObjectRequest(bucketName, fileName, convertedFile));
             String fileUrl = s3Client.getUrl(bucketName, fileName).toString();
+            convertedFile.delete();
 
-            convertedFile.delete(); // clean temp file
-
-            // 3️⃣ If record exists, update it; else create new ones
+            // 3️⃣ Create or update Media + MediaDetails
             Media media;
             MediaDetails mediaDetails;
 
             if (existingMediaDetails != null) {
-                // ✅ Update existing
                 media = existingMediaDetails.getMedia();
-                if (media == null) {
-                    media = new Media();
-                }
+                if (media == null) media = new Media();
 
-                // Delete old file from S3 (optional)
+                // Delete old S3 file
                 if (media.getName() != null) {
                     try {
                         s3Client.deleteObject(bucketName, media.getName());
                     } catch (Exception e) {
-                        System.err.println("Warning: Failed to delete old file from S3: " + e.getMessage());
+                        log.warn("Could not delete old file from S3: {}", e.getMessage());
                     }
                 }
 
-                // Update media info
                 media.setName(fileName);
                 media.setBaseImageUrl(fileUrl);
                 media.setLastModifiedDate(LocalDateTime.now());
                 media.setStatus("ACTIVE");
                 mediaRepository.save(media);
 
-                // Update media details
                 existingMediaDetails.setDescription(description);
                 existingMediaDetails.setMediaFor(mediaFor);
                 existingMediaDetails.setType(file.getContentType());
                 existingMediaDetails.setLastModifiedDate(LocalDateTime.now());
                 existingMediaDetails.setMedia(media);
-                mediaDetailsRepository.save(existingMediaDetails);
 
+                mediaDetailsRepository.save(existingMediaDetails);
                 mediaDetails = existingMediaDetails;
             } else {
-                // ✅ Create new
                 media = new Media();
                 media.setName(fileName);
                 media.setBaseImageUrl(fileUrl);
@@ -247,13 +249,22 @@ public class MediaServiceImpl implements MediaService {
                 mediaDetails.setMediaFor(mediaFor);
                 mediaDetails.setType(file.getContentType());
                 mediaDetails.setMedia(media);
-                mediaDetails.setUser(userRepository.findById(userId).orElseThrow());
+
+                if (userId != null) {
+                    mediaDetails.setUser(userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("User not found")));
+                } else if (applicationId != null) {
+                    mediaDetails.setApplication(applicationRepository.findById(applicationId)
+                            .orElseThrow(() -> new RuntimeException("Application not found")));
+                }
+
                 mediaDetailsRepository.save(mediaDetails);
             }
 
             return mediaDetails;
 
         } catch (Exception e) {
+            log.error("Error uploading media: {}", e.getMessage(), e);
             throw new RuntimeException("Error uploading media: " + e.getMessage(), e);
         }
     }

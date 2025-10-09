@@ -140,12 +140,25 @@ public class MediaController {
     }
 
 
+    // ✅ Existing user upload endpoint
     @PostMapping("/upload")
-    public ResponseEntity<MediaDetails> uploadMedia(
+    public ResponseEntity<MediaDetails> uploadUserMedia(
             @RequestParam Long userId,
             @RequestParam MultipartFile file,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String mediaFor) {
-        return ResponseEntity.ok(service.uploadMedia(userId, file, description, mediaFor));
+        return ResponseEntity.ok(service.uploadMedia(userId, null, file, description, mediaFor));
     }
+
+    // ✅ New endpoint for application media upload
+    @PostMapping("/upload/application")
+    public ResponseEntity<MediaDetails> uploadApplicationMedia(
+            @RequestParam Long applicationId,
+            @RequestParam MultipartFile file,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String mediaFor) {
+        return ResponseEntity.ok(service.uploadMedia(null, applicationId, file, description, mediaFor));
+    }
+
+
 }

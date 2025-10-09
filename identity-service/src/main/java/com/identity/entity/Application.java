@@ -1,5 +1,6 @@
 package com.identity.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +33,10 @@ public class Application {
 
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
+
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "application")
+    @JsonManagedReference
+    private MediaDetails mediaDetails;
 
     public Long getApplicationId() {
         return applicationId;
