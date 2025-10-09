@@ -129,19 +129,32 @@ public class AuthController {
         }
     }
 
+//    @GetMapping("/validate")
+//    public ResponseEntity<String> validateToken(@RequestParam("token") String token) {
+//        try {
+//            service.validateToken(token);
+//            return ResponseEntity.ok("Token is valid");
+//        } catch (ExpiredJwtException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has expired");
+//        } catch (MalformedJwtException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("An unexpected error occurred while validating token");
+//        }
+//    }
+
+
     @GetMapping("/validate")
-    public ResponseEntity<String> validateToken(@RequestParam("token") String token) {
-        try {
-            service.validateToken(token);
-            return ResponseEntity.ok("Token is valid");
-        } catch (ExpiredJwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token has expired");
-        } catch (MalformedJwtException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An unexpected error occurred while validating token");
-        }
+    public ResponseEntity<Map<String, Object>> validateToken(@RequestParam String token) {
+        jwtService.validateToken(token);
+        String username = jwtService.extractUsername(token);
+        String role = jwtService.extractRole(token);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("username", username);
+        response.put("role", role);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/send-otp")
