@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,11 +53,14 @@ import java.util.stream.Collectors;
         @Autowired
         private AuthTypeRepository authTypeRepository;
 
+        private AuthTypeMasterRepository authTypeMasterRepository;
+
         // CREATE
         @Override
         public UserCredential saveUser(UserRegisterDto dto) {
             try {
-                dto.setPassword("Asdf@123");
+                String generatedPassword = generateRandomPassword();
+                dto.setPassword(generatedPassword);
                 if (dto.getPassword() == null || dto.getPassword().isEmpty()) {
                     log.warn("Password missing while creating User: {}", dto.getUsername());
                     throw new IllegalArgumentException("Password cannot be null or empty");
@@ -103,6 +107,7 @@ import java.util.stream.Collectors;
                     credential.setAuthorities(authorities);
                 }
 
+                // 🔹 Get the first application from DTO
                 Long appId = null;
                 if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
                     appId = dto.getApplicationIds().iterator().next();
@@ -113,58 +118,55 @@ import java.util.stream.Collectors;
                     application = applicationRepository.findById(appId).orElse(null);
                 }
 
-//                if (application == null) {
-//                    throw new IllegalArgumentException("Application not found or no Application IDs provided");
-//                }
-
-// 5️⃣ Find "Registration" AppFunTypesMaster
+                // 🔹 Get AppFunTypesMaster with name "Registration"
                 AppFunTypesMaster regFunType = appFunTypesMasterRepository.findByNameIgnoreCase("Registration").orElse(null);
-//                if (regFunType == null) {
-//                    throw new IllegalArgumentException("AppFunTypesMaster 'Registration' not found");
-//                }
 
-// 6️⃣ Find AppFunction by AppFunTypesMaster + Application
+                // 🔹 Find AppFunction by AppFunTypesMaster + Application
                 AppFunction appFunction = null;
                 if (regFunType != null && application != null) {
                     appFunction = appFunctionRepository.findByAppFunTypesMasterAndApplication(regFunType, application).orElse(null);
                 }
 
-//                if (appFunction == null) {
-//                    throw new IllegalArgumentException("AppFunction not found for given AppFunTypesMaster and Application");
-//                }
-
-// 7️⃣ Find AuthType for this AppFunction
+                // 🔹 Find AuthType by AppFunction
                 AuthType authType = null;
                 if (appFunction != null) {
                     authType = authTypeRepository.findByAppFunction(appFunction).orElse(null);
                 }
 
-//                if (authType == null) {
-//                    throw new IllegalArgumentException("AuthType not found for AppFunction ID: " + (appFunction != null ? appFunction.getId() : "null"));
-//                }
+                // 🔹 Retrieve AuthTypeMaster — prefer "self-authentication" if available
+                AuthTypeMaster authTypeMaster = null;
+                if (authType != null) {
+                    authTypeMaster = authType.getAuthTypeMaster();
+                }
 
-// AuthTypeMaster
-                AuthTypeMaster authTypeMaster = authType != null ? authType.getAuthTypeMaster() : null;
-//                if (authTypeMaster == null) {
-//                    throw new IllegalArgumentException("AuthTypeMaster not linked with AuthType");
-//                }
+                // If not found from AuthType, find explicitly by name = "self-authentication"
+                if (authTypeMaster == null) {
+                    authTypeMaster = authTypeMasterRepository.findByNameIgnoreCase("self-authentication").orElse(null);
+                }
+                // ✅ Set selfAuthentication flag based on auth type
+                if (authTypeMaster != null &&
+                        authTypeMaster.getName().equalsIgnoreCase("self-authentication")) {
+                    credential.setSelfAuthentication(true);
+                } else {
+                    credential.setSelfAuthentication(false);
+                }
 
                 UserCredential saved = repository.save(credential);
                 log.info("User '{}' created successfully", saved.getUsername());
 
                 // 9️⃣ Send email only if AuthTypeMaster name = email_notification
-//                if ("email_notification".equalsIgnoreCase(authTypeMaster.getName())) {
-//                    String loginUrl = "http://yourdomain.com/login";
-//                    emailService.sendCredentialsEmail(
-//                            saved.getEmail(),
-//                            saved.getUsername(),
-//                            credential.getPasswordHash(), // Use plain password if needed (DTO should carry it)
-//                            loginUrl
-//                    );
-//                    log.info("Credentials email sent to '{}'", saved.getEmail());
-//                } else {
-//                    log.info("AuthTypeMaster is '{}', skipping email notification", authTypeMaster.getName());
-//                }
+                if ("email_notification".equalsIgnoreCase(authTypeMaster.getName())) {
+                    String loginUrl = "http://yourdomain.com/login";
+                    emailService.sendCredentialsEmail(
+                            saved.getEmail(),
+                            saved.getUsername(),
+                            credential.getPasswordHash(), // Use plain password if needed (DTO should carry it)
+                            loginUrl
+                    );
+                    log.info("Credentials email sent to '{}'", saved.getEmail());
+                } else {
+                    log.info("AuthTypeMaster is '{}', skipping email notification", authTypeMaster.getName());
+                }
 
                 String loginUrl = "http://yourdomain.com/login"; // put your actual login URL
                 emailService.sendCredentialsEmail(saved.getEmail(), saved.getUsername(), dto.getPassword(), loginUrl);
@@ -175,6 +177,37 @@ import java.util.stream.Collectors;
                 log.error("Error while creating User: {}", e.getMessage(), e);
                 throw e;
             }
+        }
+        private String generateRandomPassword() {
+            int length = 10;
+            String upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            String lowerCase = "abcdefghijklmnopqrstuvwxyz";
+            String digits = "0123456789";
+            String specialChars = "@#$%&*!";
+            String allChars = upperCase + lowerCase + digits + specialChars;
+
+            SecureRandom random = new SecureRandom();
+            StringBuilder password = new StringBuilder();
+
+            // Ensure password has at least one of each type
+            password.append(upperCase.charAt(random.nextInt(upperCase.length())));
+            password.append(lowerCase.charAt(random.nextInt(lowerCase.length())));
+            password.append(digits.charAt(random.nextInt(digits.length())));
+            password.append(specialChars.charAt(random.nextInt(specialChars.length())));
+
+            // Fill remaining characters randomly
+            for (int i = 4; i < length; i++) {
+                password.append(allChars.charAt(random.nextInt(allChars.length())));
+            }
+
+            // Shuffle for randomness
+            List<Character> chars = password.chars()
+                    .mapToObj(c -> (char) c)
+                    .collect(Collectors.toList());
+            Collections.shuffle(chars);
+            return chars.stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining());
         }
 
 

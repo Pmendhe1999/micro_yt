@@ -17,6 +17,11 @@ public class CustomUserDetails implements UserDetails {
 
     private final UserCredential user;
 
+    // ✅ Add this getter manually
+    public UserCredential getUser() {
+        return user;
+    }
+
     public CustomUserDetails(UserCredential user) {
         this.user = user;
     }
@@ -24,6 +29,20 @@ public class CustomUserDetails implements UserDetails {
     public Long getUserId() {
         return user.getUserId();
     }
+
+    public String getFirstName() {
+        return user.getFirstName();
+    }
+
+    public String getLastName() {
+        return user.getLastName();
+    }
+
+    public Boolean getSelfAuthentication() {
+        return user.getSelfAuthentication();
+    }
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

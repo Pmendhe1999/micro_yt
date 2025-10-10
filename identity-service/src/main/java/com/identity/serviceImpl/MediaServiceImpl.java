@@ -193,15 +193,21 @@ public class MediaServiceImpl implements MediaService {
                 existingMediaDetails = mediaDetailsRepository.findByApplicationApplicationId(applicationId).orElse(null);
             }
 
-            // 2️⃣ Upload new file to S3
+            // 2️⃣ Upload new file to S3 (inside folder platfrom_images/)
+            String folderName = "platfrom_images/";
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String fileKey = folderName + fileName; // 👈 include folder name
+
             File convertedFile = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
             try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
                 fos.write(file.getBytes());
             }
 
-            s3Client.putObject(new PutObjectRequest(bucketName, fileName, convertedFile));
-            String fileUrl = s3Client.getUrl(bucketName, fileName).toString();
+            // Upload file to S3 under the folder
+            s3Client.putObject(new PutObjectRequest(bucketName, fileKey, convertedFile));
+
+//            // Get S3 file URL
+//            String fileUrl = s3Client.getUrl(bucketName, fileKey).toString();
             convertedFile.delete();
 
             // 3️⃣ Create or update Media + MediaDetails
@@ -222,7 +228,7 @@ public class MediaServiceImpl implements MediaService {
                 }
 
                 media.setName(fileName);
-                media.setBaseImageUrl(fileUrl);
+                media.setBaseImageUrl(fileName);
                 media.setLastModifiedDate(LocalDateTime.now());
                 media.setStatus("ACTIVE");
                 mediaRepository.save(media);
@@ -238,7 +244,7 @@ public class MediaServiceImpl implements MediaService {
             } else {
                 media = new Media();
                 media.setName(fileName);
-                media.setBaseImageUrl(fileUrl);
+                media.setBaseImageUrl(fileName);
                 media.setCreatedDate(LocalDateTime.now());
                 media.setStatus("ACTIVE");
                 mediaRepository.save(media);

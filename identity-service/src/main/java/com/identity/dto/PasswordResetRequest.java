@@ -13,7 +13,15 @@ public class PasswordResetRequest {
     private String userName;
     private String newPassword;
     private String confirmPassword;
+    private String type;
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     public String getNewPassword() {
         return newPassword;

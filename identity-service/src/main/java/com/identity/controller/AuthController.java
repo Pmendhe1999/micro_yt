@@ -109,6 +109,20 @@ public class AuthController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("token", token);
                 response.put("userId", userDetails.getUserId());
+                response.put("firstName", userDetails.getFirstName());
+                response.put("lastName", userDetails.getLastName());
+                response.put("selfAuthentication", userDetails.getSelfAuthentication());
+
+                // ✅ Include Base Image URL if available
+                if (userDetails.getUser().getMediaDetails() != null
+                        && userDetails.getUser().getMediaDetails().getMedia() != null) {
+                    response.put("baseImageUrl", userDetails.getUser()
+                            .getMediaDetails()
+                            .getMedia()
+                            .getBaseImageUrl());
+                } else {
+                    response.put("baseImageUrl", null);
+                }
                 response.put("roles", userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList());

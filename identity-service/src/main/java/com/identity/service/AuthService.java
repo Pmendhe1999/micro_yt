@@ -148,10 +148,18 @@ public class AuthService {
 
         UserCredential user = userOpt.get();
 
+        // ✅ Step 3: Check for type (e.g., "SA")
+        if (dto.getType() != null && dto.getType().equalsIgnoreCase("SA")) {
+            user.setSelfAuthentication(false);
+            log.info("[AuthService] Type is SA — selfAuthentication set to false for user: {}", user.getUsername());
+        }
+
+
         // ✅ Step 3: Encode and update the new password
         String hashedPassword = passwordEncoder.encode(dto.getNewPassword());
         user.setPasswordHash(hashedPassword);
         user.setLastModifyDate(LocalDateTime.now());
+        user.setSelfAuthentication(false);
         userRepository.save(user);
 
         // ✅ Step 4: Send confirmation email (only if user has an email)

@@ -104,6 +104,18 @@ public class UserCredential {
     @JsonManagedReference
     private MediaDetails mediaDetails;
 
+    // ✅ New field to indicate if user is self-authenticated
+    @Column(name = "self_authentication")
+    private Boolean selfAuthentication = false;
+
+    public Boolean getSelfAuthentication() {
+        return selfAuthentication;
+    }
+
+    public void setSelfAuthentication(Boolean selfAuthentication) {
+        this.selfAuthentication = selfAuthentication;
+    }
+
     public MediaDetails getMediaDetails() {
         return mediaDetails;
     }
