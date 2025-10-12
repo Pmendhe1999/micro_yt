@@ -26,7 +26,6 @@ public class ProductMasterServiceImpl implements ProductMasterService {
     @Autowired
     private ProductMasterRepository repository;
 
-//    @Autowired
 //    private JwtService jwtService;
     @Autowired
     private IdentityClient identityClient;
