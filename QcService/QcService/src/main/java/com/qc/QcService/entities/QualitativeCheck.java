@@ -8,12 +8,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "quantitative_check")
+@Table(name = "qualitative_check")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class QuantitativeCheck {
-
+public class QualitativeCheck {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,8 +30,8 @@ public class QuantitativeCheck {
     private String value;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "quantitative_check_master_id", nullable = false)
-    private QuantitativeCheckMaster quantitativeCheckMaster;
+    @JoinColumn(name = "qualitative_check_master_id", nullable = false)
+    private QualitativeCheckMaster qualitativeCheckMaster;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
@@ -80,12 +79,12 @@ public class QuantitativeCheck {
         this.value = value;
     }
 
-    public QuantitativeCheckMaster getQuantitativeCheckMaster() {
-        return quantitativeCheckMaster;
+    public QualitativeCheckMaster getQualitativeCheckMaster() {
+        return qualitativeCheckMaster;
     }
 
-    public void setQuantitativeCheckMaster(QuantitativeCheckMaster quantitativeCheckMaster) {
-        this.quantitativeCheckMaster = quantitativeCheckMaster;
+    public void setQualitativeCheckMaster(QualitativeCheckMaster qualitativeCheckMaster) {
+        this.qualitativeCheckMaster = qualitativeCheckMaster;
     }
 
     public LocalDateTime getCreatedDate() {
