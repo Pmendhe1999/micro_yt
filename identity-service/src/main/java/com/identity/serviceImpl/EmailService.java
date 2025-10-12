@@ -115,4 +115,33 @@ public class EmailService {
         }
     }
 
+    public void sendUserCreatedToSuperAdminEmail(String toEmail, String newUsername, String password, String newUserEmail, String loginUrl) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom("itariumtechmail@gmail.com", "Ethosh Company");
+            helper.setTo(toEmail);
+            helper.setSubject("New User Created Notification");
+
+            String content = """
+                <h2>New User Created</h2>
+                <p>A new user has been registered in the system.</p>
+                <ul>
+                    <li><b>Username:</b> %s</li>
+                    <li><b>Email:</b> %s</li>
+                    <li><b>Password:</b> %s</li>
+                    <li><b>Login URL:</b> <a href="%s">%s</a></li>
+                </ul>
+                <p>Please review and activate if needed.</p>
+                <p>Best regards,<br>System Notification Service</p>
+                """.formatted(newUsername, newUserEmail, password, loginUrl, loginUrl);
+
+            helper.setText(content, true);
+            mailSender.send(message);
+
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException("❌ Failed to send SuperAdmin email: " + e.getMessage(), e);
+        }
+    }
+
 }

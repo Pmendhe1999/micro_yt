@@ -57,8 +57,9 @@ public class UserCredential {
     @Column(name = "activated", nullable = false)
     private Boolean activated = false;
 
-    @Column(name = "activation_key", length = 100)
-    private String activationKey;
+    @Column(name = "activation_key", nullable = true)
+    private Boolean activationKey = false;
+
 
     @Column(name = "auth_status")
     private Boolean authStatus;
@@ -193,11 +194,11 @@ public class UserCredential {
         this.activated = activated;
     }
 
-    public String getActivationKey() {
+    public Boolean getActivationKey() {
         return activationKey;
     }
 
-    public void setActivationKey(String activationKey) {
+    public void setActivationKey(Boolean activationKey) {
         this.activationKey = activationKey;
     }
 

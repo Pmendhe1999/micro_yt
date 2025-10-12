@@ -221,4 +221,33 @@ public class UserController {
         }
     }
 
+    @PutMapping("/activate/{id}")
+    public ResponseEntity<ResponceData> activateUser(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            log.info("Activating user with ID {}", id);
+
+            String token = authHeader.replace("Bearer ", "");
+            UserCredential activatedUser = userService.activateUser(id, token);
+
+            ResponceData response = new ResponceData(
+                    "success", 200, "User activated successfully and credentials sent.",
+                    Collections.singletonList(activatedUser), 1
+            );
+            return ResponseEntity.ok(response);
+
+        } catch (NoSuchElementException e) {
+            log.warn("User not found for activation, id={}", id);
+            ResponceData response = new ResponceData("fail", 404, e.getMessage(), Collections.emptyList(), 0);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        } catch (Exception e) {
+            log.error("Error activating user id={}: {}", id, e.getMessage(), e);
+            ResponceData response = new ResponceData("fail", 500, "Unexpected error: " + e.getMessage(), Collections.emptyList(), 0);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+
+
 }

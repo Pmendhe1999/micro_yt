@@ -188,6 +188,27 @@ import java.util.stream.Collectors;
 //                        emailService.sendOtpEmail(saved.getEmail(), otp);
 //                        log.info("🔐 OTP authentication selected — OTP sent to {}", saved.getEmail());
                     }
+                    case "admin authentication" -> {
+                        // 🔹 Find SuperAdmin
+                        Optional<UserCredential> superAdminOpt = repository.findByAuthorityName("superadmin");
+
+                        if (superAdminOpt.isPresent()) {
+                            UserCredential superAdmin = superAdminOpt.get();
+                            String loginUrl = "http://yourdomain.com/login";
+
+                            emailService.sendUserCreatedToSuperAdminEmail(
+                                    superAdmin.getEmail(),
+                                    saved.getUsername(),
+                                    dto.getPassword(),
+                                    saved.getEmail(),
+                                    loginUrl
+                            );
+
+                            log.info("📩 Notification email sent to SuperAdmin ({})", superAdmin.getEmail());
+                        } else {
+                            log.warn("⚠️ No SuperAdmin found — skipping notification email");
+                        }
+                    }
 
                     default -> log.info("AuthTypeMaster is '{}', no special action triggered", authTypeName);
                 }
@@ -411,6 +432,51 @@ import java.util.stream.Collectors;
                 log.error("[UserServiceImpl] Error changing password: {}", e.getMessage(), e);
                 response.put("message", "Internal server error");
                 return ResponseEntity.internalServerError().body(response);
+            }
+        }
+
+        @Override
+        public UserCredential activateUser(Long id, String token) {
+            try {
+                UserCredential existing = repository.findByUserId(id)
+                        .orElseThrow(() -> new NoSuchElementException("User not found with id " + id));
+
+                String modifiedByUser = jwtService.extractUsername(token);
+                String role = jwtService.extractRole(token);
+
+                // ✅ Check if already activated
+                if (Boolean.TRUE.equals(existing.getActivationKey())) {
+                    log.info("User id={} is already activated.", id);
+                    return existing;
+                }
+
+                String generatedPassword = generateRandomPassword();
+                existing.setPasswordHash(passwordEncoder.encode(generatedPassword));
+                // ✅ Set activation key true
+                existing.setActivationKey(true);
+                existing.setActivated(true);
+                existing.setAuthStatus(true);
+                existing.setLastModifyDate(LocalDateTime.now());
+
+                UserCredential saved = repository.save(existing);
+                log.info("User id={} activated by {} (role={})", saved.getUserId(), modifiedByUser, role);
+
+                // ✅ Send credentials email
+                String loginUrl = "http://yourdomain.com/login"; // Replace with real domain
+                emailService.sendCredentialsEmail(
+                        saved.getEmail(),
+                        saved.getUsername(),
+                        generatedPassword,// ⚠️ You can replace with decrypted or original password if stored separately
+                        loginUrl
+                );
+
+                log.info("📧 Credentials email sent to '{}'", saved.getEmail());
+
+                return saved;
+
+            } catch (Exception e) {
+                log.error("Error activating user id={}: {}", id, e.getMessage(), e);
+                throw e;
             }
         }
     }

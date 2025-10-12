@@ -37,7 +37,7 @@ public class UserRegisterDto {
 
         private Boolean activated;
 
-        private String activationKey;
+        private Boolean activationKey;
 
         private Boolean authStatus;
 
@@ -114,11 +114,11 @@ public class UserRegisterDto {
                 this.activated = activated;
         }
 
-        public String getActivationKey() {
+        public Boolean getActivationKey() {
                 return activationKey;
         }
 
-        public void setActivationKey(String activationKey) {
+        public void setActivationKey(Boolean activationKey) {
                 this.activationKey = activationKey;
         }
 

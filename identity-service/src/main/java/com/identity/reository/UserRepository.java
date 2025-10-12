@@ -17,6 +17,10 @@ public interface UserRepository extends JpaRepository<UserCredential, Integer> {
     Optional<UserCredential> findByEmail(String email);
     Optional<UserCredential> findByUsername(String username);
 
+    // 🔹 Find SuperAdmin user by Authority name
+    @Query("SELECT u FROM UserCredential u JOIN u.authorities a WHERE LOWER(a.name) = LOWER(:roleName)")
+    Optional<UserCredential> findByAuthorityName(@Param("roleName") String roleName);
+
     Optional<UserCredential> findByEmailAndUsername(String email, String username);
 
     // Already have findById from JpaRepository

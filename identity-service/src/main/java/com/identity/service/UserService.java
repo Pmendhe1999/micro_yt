@@ -46,4 +46,6 @@ public interface UserService {
     UserCredential updateUser(Long id, UserRegisterDto dto, String token);
 
     UserCredential deleteUser(Long id, String token);
+
+    UserCredential activateUser(Long id, String token);
 }
