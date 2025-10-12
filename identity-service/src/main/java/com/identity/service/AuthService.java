@@ -154,6 +154,12 @@ public class AuthService {
             log.info("[AuthService] Type is SA — selfAuthentication set to false for user: {}", user.getUsername());
         }
 
+        if (dto.getType() != null && dto.getType().equalsIgnoreCase("otp")) {
+            user.setSelfAuthentication(false);
+            user.setOtpAuthentication(false);
+            log.info("[AuthService] Type is SA — selfAuthentication set to false for user: {}", user.getUsername());
+        }
+
 
         // ✅ Step 3: Encode and update the new password
         String hashedPassword = passwordEncoder.encode(dto.getNewPassword());

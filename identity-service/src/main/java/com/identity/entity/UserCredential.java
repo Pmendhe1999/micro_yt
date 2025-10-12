@@ -108,6 +108,18 @@ public class UserCredential {
     @Column(name = "self_authentication")
     private Boolean selfAuthentication = false;
 
+    // ✅ New field to indicate if user is self-authenticated
+    @Column(name = "otp_authentication")
+    private Boolean otpAuthentication = false;
+
+    public Boolean getOtpAuthentication() {
+        return otpAuthentication;
+    }
+
+    public void setOtpAuthentication(Boolean otpAuthentication) {
+        this.otpAuthentication = otpAuthentication;
+    }
+
     public Boolean getSelfAuthentication() {
         return selfAuthentication;
     }

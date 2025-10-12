@@ -42,6 +42,10 @@ public class CustomUserDetails implements UserDetails {
         return user.getSelfAuthentication();
     }
 
+    public Boolean getOtpSelfAuthentication() {
+        return user.getOtpAuthentication();
+    }
+
 
 
     @Override

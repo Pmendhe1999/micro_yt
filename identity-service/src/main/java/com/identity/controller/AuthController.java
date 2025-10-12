@@ -112,6 +112,7 @@ public class AuthController {
                 response.put("firstName", userDetails.getFirstName());
                 response.put("lastName", userDetails.getLastName());
                 response.put("selfAuthentication", userDetails.getSelfAuthentication());
+                response.put("otpAuthentication", userDetails.getOtpSelfAuthentication());
 
                 // ✅ Include Base Image URL if available
                 if (userDetails.getUser().getMediaDetails() != null
