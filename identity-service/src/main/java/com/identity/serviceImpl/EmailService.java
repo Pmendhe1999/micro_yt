@@ -50,7 +50,31 @@ public class EmailService {
             throw new RuntimeException("❌ Failed to send email: " + e.getMessage(), e);
         }
     }
+    // ✅ New Method for cancellation email
+    public void sendCancellationEmail(String toEmail, String username) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+            helper.setFrom("itariumtechmail@gmail.com", "Ethosh Company");
+            helper.setTo(toEmail);
+            helper.setSubject("Registration Cancelled");
+
+            String content = """
+                    <h2>Hello %s,</h2>
+                    <p>We regret to inform you that your registration request has been <b>cancelled</b>.</p>
+                    <p>If you believe this was a mistake, please contact our support team for assistance.</p>
+                    <br>
+                    <p>Thank you,<br>Aguapro Team</p>
+                    """.formatted(username);
+
+            helper.setText(content, true);
+            mailSender.send(message);
+
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException("❌ Failed to send cancellation email: " + e.getMessage(), e);
+        }
+    }
 
     public void sendOtpEmail(String toEmail, String otp) {
         try {

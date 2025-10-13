@@ -281,9 +281,11 @@ import java.util.stream.Collectors;
                 String lastName,
                 List<Long> applicationIds,
                 List<Long> authorityIds,
+                Boolean activationKey,
+                Boolean activated,
                 Pageable pageable) {
 
-            return repository.searchUsersAdvanced(username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds, pageable);
+            return repository.searchUsersAdvanced(username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds,activationKey, activated, pageable);
         }
 
         // READ BY ID
@@ -436,7 +438,7 @@ import java.util.stream.Collectors;
         }
 
         @Override
-        public UserCredential activateUser(Long id, String token) {
+        public UserCredential activateUser(Long id, Boolean activated, String token) {
             try {
                 UserCredential existing = repository.findByUserId(id)
                         .orElseThrow(() -> new NoSuchElementException("User not found with id " + id));
@@ -444,38 +446,54 @@ import java.util.stream.Collectors;
                 String modifiedByUser = jwtService.extractUsername(token);
                 String role = jwtService.extractRole(token);
 
-                // ✅ Check if already activated
-                if (Boolean.TRUE.equals(existing.getActivationKey())) {
-                    log.info("User id={} is already activated.", id);
-                    return existing;
+                if (activated) {
+                    // ✅ Activate user
+                    if (Boolean.TRUE.equals(existing.getActivationKey())) {
+                        log.info("User id={} already activated.", id);
+                        return existing;
+                    }
+
+                    String generatedPassword = generateRandomPassword();
+                    existing.setPasswordHash(passwordEncoder.encode(generatedPassword));
+                    existing.setActivationKey(true);
+                    existing.setActivated(true);
+                    existing.setAuthStatus(true);
+                    existing.setLastModifyDate(LocalDateTime.now());
+
+                    UserCredential saved = repository.save(existing);
+                    log.info("✅ User id={} activated by {} (role={})", saved.getUserId(), modifiedByUser, role);
+
+                    // Send activation email
+                    String loginUrl = "http://yourdomain.com/login";
+                    emailService.sendCredentialsEmail(
+                            saved.getEmail(),
+                            saved.getUsername(),
+                            generatedPassword,
+                            loginUrl
+                    );
+
+                    log.info("📧 Activation email sent to '{}'", saved.getEmail());
+                    return saved;
+
+                } else {
+                    // ❌ Deactivate / Cancel user
+                    existing.setActivationKey(true);
+                    existing.setActivated(false);
+                    existing.setAuthStatus(false);
+                    existing.setLastModifyDate(LocalDateTime.now());
+
+                    UserCredential saved = repository.save(existing);
+                    log.info("❌ User id={} registration cancelled by {} (role={})", saved.getUserId(), modifiedByUser, role);
+
+                    // Send cancellation email
+                    emailService.sendCancellationEmail(saved.getEmail(), saved.getUsername());
+
+                    log.info("📧 Cancellation email sent to '{}'", saved.getEmail());
+                    return saved;
                 }
 
-                String generatedPassword = generateRandomPassword();
-                existing.setPasswordHash(passwordEncoder.encode(generatedPassword));
-                // ✅ Set activation key true
-                existing.setActivationKey(true);
-                existing.setActivated(true);
-                existing.setAuthStatus(true);
-                existing.setLastModifyDate(LocalDateTime.now());
-
-                UserCredential saved = repository.save(existing);
-                log.info("User id={} activated by {} (role={})", saved.getUserId(), modifiedByUser, role);
-
-                // ✅ Send credentials email
-                String loginUrl = "http://yourdomain.com/login"; // Replace with real domain
-                emailService.sendCredentialsEmail(
-                        saved.getEmail(),
-                        saved.getUsername(),
-                        generatedPassword,// ⚠️ You can replace with decrypted or original password if stored separately
-                        loginUrl
-                );
-
-                log.info("📧 Credentials email sent to '{}'", saved.getEmail());
-
-                return saved;
-
             } catch (Exception e) {
-                log.error("Error activating user id={}: {}", id, e.getMessage(), e);
+                log.error("Error processing activation for user id={}: {}", id, e.getMessage(), e);
                 throw e;
             }
         }

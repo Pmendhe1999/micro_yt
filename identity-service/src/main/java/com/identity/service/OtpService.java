@@ -40,7 +40,9 @@ public class OtpService {
     private final Map<String, OtpData> otpStore = new ConcurrentHashMap<>();
 
     public String generateOtp(String email) {
-        String otp = String.valueOf(100000 + new Random().nextInt(900000)); // 6 digits
+          String otp = "123456"; // 6 digits
+//        String otp = String.valueOf(100000 + new Random().nextInt(900000)); // 6 digits
+
         otpStore.put(email, new OtpData(otp, LocalDateTime.now().plusMinutes(10))); // valid 10 min
         return otp;
     }

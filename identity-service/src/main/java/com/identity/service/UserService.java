@@ -37,6 +37,8 @@ public interface UserService {
             String lastName,
             List<Long> applicationIds,
             List<Long> authorityIds,
+            Boolean activationKey,
+            Boolean activated,
             Pageable pageable
     );
 
@@ -47,5 +49,5 @@ public interface UserService {
 
     UserCredential deleteUser(Long id, String token);
 
-    UserCredential activateUser(Long id, String token);
+    UserCredential activateUser(Long id, Boolean activated, String token);
 }

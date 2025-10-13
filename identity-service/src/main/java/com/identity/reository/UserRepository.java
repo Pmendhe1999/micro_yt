@@ -45,7 +45,9 @@ public interface UserRepository extends JpaRepository<UserCredential, Integer> {
             "AND (:firstName IS NULL OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :firstName, '%'))) " +
             "AND (:lastName IS NULL OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :lastName, '%'))) " +
             "AND (:applicationIds IS NULL OR a.applicationId IN :applicationIds) " +
-            "AND (:authorityIds IS NULL OR auth.authorityId IN :authorityIds)")
+            "AND (:authorityIds IS NULL OR auth.authorityId IN :authorityIds) " +
+            "AND (:activationKey IS NULL OR u.activationKey = :activationKey) " +  // ✅ Added filter
+            "AND (:activated IS NULL OR u.activated = :activated)")
     Page<UserCredential> searchUsersAdvanced(
             @Param("username") String username,
             @Param("email") String email,
@@ -55,5 +57,7 @@ public interface UserRepository extends JpaRepository<UserCredential, Integer> {
             @Param("lastName") String lastName,
             @Param("applicationIds") List<Long> applicationIds,
             @Param("authorityIds") List<Long> authorityIds,
+            @Param("activationKey") Boolean activationKey,
+            @Param("activated") Boolean activated,
             Pageable pageable);
 }

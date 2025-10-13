@@ -117,6 +117,7 @@ public class AuthService {
 
         // ✅ Generate OTP
         String otp = otpService.generateOtp(user.getEmail());
+//        String otp = "123456";
 
         // ✅ Send OTP to user's email
         emailService.sendOtpEmail(user.getEmail(), otp);

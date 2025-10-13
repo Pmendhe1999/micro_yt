@@ -86,17 +86,19 @@ public class UserController {
             @RequestParam(required = false) String lastName,
             @RequestParam(required = false) List<Long> applicationIds,
             @RequestParam(required = false) List<Long> authorityIds,
+            @RequestParam(required = false) Boolean activationKey, // ✅ Added this
+            @RequestParam(required = false) Boolean activated,
             @RequestParam(defaultValue = "userId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
         try {
-            log.info("Fetching Users with filters: username={}, email={}, mobile={}, country={}, firstName={}, lastName={}, applicationIds={}, authorityIds={}",
-                    username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds);
+            log.info("Fetching Users with filters: username={}, email={}, mobile={}, country={}, firstName={}, activationKey={},activated={},  lastName={}, applicationIds={}, authorityIds={}",
+                    username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds,activationKey,activated);
 
             Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
             Pageable pageable = PageRequest.of(page - 1, size, sort);
 
             Page<UserCredential> result = userService.getAllUsersWithFilters(
-                    username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds, pageable
+                    username, email, mobileNumber, country, firstName, lastName, applicationIds, authorityIds, activationKey, activated,pageable
             );
 
             ResponceData response = new ResponceData(
@@ -224,16 +226,29 @@ public class UserController {
     @PutMapping("/activate/{id}")
     public ResponseEntity<ResponceData> activateUser(
             @PathVariable Long id,
+            @RequestBody Map<String, Boolean> payload, // ✅ get "activated" flag from body
             @RequestHeader("Authorization") String authHeader) {
+
         try {
-            log.info("Activating user with ID {}", id);
+            log.info("Processing activation request for user id={}", id);
 
             String token = authHeader.replace("Bearer ", "");
-            UserCredential activatedUser = userService.activateUser(id, token);
+            Boolean activated = payload.get("activated");
+
+            if (activated == null) {
+                return ResponseEntity.badRequest().body(
+                        new ResponceData("fail", 400, "Missing field: 'activated'", Collections.emptyList(), 0)
+                );
+            }
+
+            UserCredential updatedUser = userService.activateUser(id, activated, token);
+
+            String message = activated
+                    ? "User activated successfully and credentials sent."
+                    : "User deactivated successfully and cancellation email sent.";
 
             ResponceData response = new ResponceData(
-                    "success", 200, "User activated successfully and credentials sent.",
-                    Collections.singletonList(activatedUser), 1
+                    "success", 200, message, Collections.singletonList(updatedUser), 1
             );
             return ResponseEntity.ok(response);
 
@@ -241,13 +256,13 @@ public class UserController {
             log.warn("User not found for activation, id={}", id);
             ResponceData response = new ResponceData("fail", 404, e.getMessage(), Collections.emptyList(), 0);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+
         } catch (Exception e) {
             log.error("Error activating user id={}: {}", id, e.getMessage(), e);
             ResponceData response = new ResponceData("fail", 500, "Unexpected error: " + e.getMessage(), Collections.emptyList(), 0);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
 
 }
