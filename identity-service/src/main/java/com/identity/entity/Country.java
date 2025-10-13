@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "countries")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class Country {

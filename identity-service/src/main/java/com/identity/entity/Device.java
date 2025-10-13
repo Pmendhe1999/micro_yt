@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "devices")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class Device {

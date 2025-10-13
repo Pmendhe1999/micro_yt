@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "auth_types")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthType {

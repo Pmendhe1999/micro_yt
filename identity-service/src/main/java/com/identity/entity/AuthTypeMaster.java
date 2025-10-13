@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "auth_type_master")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthTypeMaster {

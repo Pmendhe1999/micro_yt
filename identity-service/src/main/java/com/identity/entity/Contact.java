@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "contact")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class Contact {

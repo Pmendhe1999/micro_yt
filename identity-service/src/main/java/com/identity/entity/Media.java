@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "media")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class Media {

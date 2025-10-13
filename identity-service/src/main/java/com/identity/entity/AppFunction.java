@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "app_functions")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppFunction {

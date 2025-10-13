@@ -10,7 +10,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "authority")
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 public class Authority {
