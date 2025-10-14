@@ -15,4 +15,6 @@ public interface NotificationTechDetailsService {
     NotificationTechDetails updateReturnEntity(Long id, NotificationTechDetailsDTO dto, String token);
     NotificationTechDetails deleteReturnEntity(Long id, String token);
     List<NotificationTechDetails> getByServiceProviderMasterId(Long serviceProviderMasterId);
+    NotificationTechDetails patchNotificationTechDetails(Long id, String key, Object value);
+
 }

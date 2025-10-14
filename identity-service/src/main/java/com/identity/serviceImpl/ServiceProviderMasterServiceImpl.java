@@ -5,6 +5,9 @@ import com.identity.entity.ServiceProviderMaster;
 import com.identity.reository.ServiceProviderMasterRepository;
 import com.identity.service.JwtService;
 import com.identity.service.ServiceProviderMasterService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,9 @@ public class ServiceProviderMasterServiceImpl implements ServiceProviderMasterSe
 
     @Autowired
     private ServiceProviderMasterRepository repository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private JwtService jwtService;
@@ -118,5 +124,23 @@ public class ServiceProviderMasterServiceImpl implements ServiceProviderMasterSe
             log.error("Error while deleting ServiceProvider id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting ServiceProvider: " + e.getMessage(), e);
         }
+    }
+    @Override
+    @Transactional
+    public ServiceProviderMaster patchServiceProvider(Long id, String key, Object value) {
+        // ✅ Build dynamic native SQL query
+        String sql = "UPDATE service_provider_master SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("ServiceProviderMaster not found with id " + id);
+        }
+
+        // ✅ Return updated record
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("ServiceProviderMaster not found after update"));
     }
 }

@@ -4,6 +4,9 @@ import com.identity.dto.DeviceDTO;
 import com.identity.reository.DeviceRepository;
 import com.identity.service.DeviceService;
 import com.identity.service.JwtService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +28,9 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Autowired
     private  JwtService jwtService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Logger log = LoggerFactory.getLogger(DeviceServiceImpl.class);
 
@@ -146,5 +152,24 @@ public class DeviceServiceImpl implements DeviceService {
             log.error("Unexpected error while deleting Device id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting Device with id " + id + ": " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    @Transactional
+    public Device patchDevice(Long id, String key, Object value) {
+        // Dynamic native SQL
+        String sql = "UPDATE devices SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("Device not found with id " + id);
+        }
+
+        // Return updated entity
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Device not found after update"));
     }
 }

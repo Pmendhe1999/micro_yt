@@ -7,6 +7,9 @@ import com.identity.reository.*;
 import com.identity.service.JwtService;
 import com.identity.service.OtpService;
 import com.identity.service.UserService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +60,12 @@ import java.util.stream.Collectors;
         @Autowired
         private AuthTypeRepository authTypeRepository;
 
+        @Autowired
         private AuthTypeMasterRepository authTypeMasterRepository;
+
+        @Autowired
+        private EntityManager entityManager;
+
 
         // CREATE
         @Override
@@ -154,6 +162,13 @@ import java.util.stream.Collectors;
                     credential.setSelfAuthentication(false);
                 }
 
+                if (authTypeMaster != null &&
+                        authTypeMaster.getName().equalsIgnoreCase("default password")) {
+                    credential.setActivationKey(true);
+                } else {
+                    credential.setActivationKey(true);
+                }
+
                 // ✅ Save user
                 UserCredential saved = repository.save(credential);
                 log.info("User '{}' created successfully", saved.getUsername());
@@ -188,6 +203,7 @@ import java.util.stream.Collectors;
 //                        emailService.sendOtpEmail(saved.getEmail(), otp);
 //                        log.info("🔐 OTP authentication selected — OTP sent to {}", saved.getEmail());
                     }
+
                     case "admin authentication" -> {
                         // 🔹 Find SuperAdmin
                         Optional<UserCredential> superAdminOpt = repository.findByAuthorityName("superadmin");
@@ -210,8 +226,23 @@ import java.util.stream.Collectors;
                         }
                     }
 
+                    case "default password" -> {
+                        // 🔹 Send credentials directly to user
+                        String loginUrl = "http://yourdomain.com/login";
+                        emailService.sendCredentialsEmail(
+                                saved.getEmail(),
+                                saved.getUsername(),
+                                dto.getPassword(), // send plain password in email
+                                loginUrl
+                        );
+                        log.info("📧 Default Password email sent to '{}'", saved.getEmail());
+                    }
+
+
                     default -> log.info("AuthTypeMaster is '{}', no special action triggered", authTypeName);
                 }
+
+
 
                 return saved;
 
@@ -496,5 +527,25 @@ import java.util.stream.Collectors;
                 log.error("Error processing activation for user id={}: {}", id, e.getMessage(), e);
                 throw e;
             }
+        }
+
+
+        @Override
+        @Transactional
+        public UserCredential patchUser(Long id, String key, Object value, String token) {
+            // Build dynamic SQL query
+            String sql = "UPDATE users SET " + key + " = :value, last_modify_date = NOW() WHERE user_id = :id";
+            Query query = entityManager.createNativeQuery(sql);
+            query.setParameter("value", value);
+            query.setParameter("id", id);
+
+            int updated = query.executeUpdate();
+            if (updated == 0) {
+                throw new NoSuchElementException("User not found with id " + id);
+            }
+
+            // Return updated user
+            return repository.findByUserId(id)
+                    .orElseThrow(() -> new NoSuchElementException("User not found after update"));
         }
     }

@@ -5,6 +5,9 @@ import com.identity.entity.AuthTypeMaster;
 import com.identity.reository.AuthTypeMasterRepository;
 import com.identity.service.AuthTypeMasterService;
 import com.identity.service.JwtService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,8 @@ public class AuthTypeMasterServiceImpl implements AuthTypeMasterService {
 
     @Autowired
     private JwtService jwtService;
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Logger log = LoggerFactory.getLogger(AuthTypeMasterServiceImpl.class);
 
@@ -125,5 +130,24 @@ public class AuthTypeMasterServiceImpl implements AuthTypeMasterService {
             log.error("Error deleting AuthTypeMaster id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error deleting record: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    @Transactional
+    public AuthTypeMaster patchAuthTypeMaster(Long id, String key, Object value) {
+        // ✅ Construct dynamic native SQL
+        String sql = "UPDATE auth_type_master SET " + key + " = :value WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("AuthTypeMaster not found with id " + id);
+        }
+
+        // ✅ Return updated entity
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("AuthTypeMaster not found after update"));
     }
 }

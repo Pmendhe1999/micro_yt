@@ -124,4 +124,27 @@ public class NotificationTypesMasterController {
                     .body(new ResponceData("fail", 500, e.getMessage(), Collections.emptyList(), 0));
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchNotificationTypeMaster(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // Only one key-value expected
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        NotificationTypesMaster updated = service.patchNotificationTypeMaster(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "NotificationTypesMaster patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

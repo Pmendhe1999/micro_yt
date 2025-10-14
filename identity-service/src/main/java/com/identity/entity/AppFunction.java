@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "app_functions")
-
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppFunction {
@@ -33,7 +32,7 @@ public class AppFunction {
     private String name;
 
     @Column(name = "status", length = 255)
-    private String status;
+    private Boolean status;
 
     // FK → AppFunTypesMaster
     @ManyToOne(fetch = FetchType.EAGER)
@@ -85,11 +84,11 @@ public class AppFunction {
         this.name = name;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 

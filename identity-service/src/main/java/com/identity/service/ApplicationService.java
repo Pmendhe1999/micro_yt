@@ -13,4 +13,5 @@ public interface ApplicationService {
     Optional<Application> getApplicationById(Long applicationId);
     Application updateApplicationReturnEntity(Long applicationId, ApplicationDTO updatedApplicationDTO, String token);
     Application deleteApplicationReturnEntity(Long applicationId, String token);
+    Application patchApplication(Long id, String key, Object value);
 }

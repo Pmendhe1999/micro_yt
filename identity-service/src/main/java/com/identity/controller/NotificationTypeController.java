@@ -165,4 +165,27 @@ public class NotificationTypeController {
                     .body(new ResponceData("fail", 500, "Unexpected error: " + e.getMessage(), Collections.emptyList(), 0));
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchNotificationType(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // ✅ Expect only one key-value pair
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        NotificationType updated = service.patchNotificationType(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "NotificationType patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

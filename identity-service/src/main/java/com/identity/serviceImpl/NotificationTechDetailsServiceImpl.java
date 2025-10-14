@@ -7,6 +7,9 @@ import com.identity.reository.NotificationTechDetailsRepository;
 import com.identity.reository.ServiceProviderMasterRepository;
 import com.identity.service.JwtService;
 import com.identity.service.NotificationTechDetailsService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,9 @@ public class NotificationTechDetailsServiceImpl implements NotificationTechDetai
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Logger log = LoggerFactory.getLogger(NotificationTechDetailsServiceImpl.class);
 
@@ -132,5 +138,24 @@ public class NotificationTechDetailsServiceImpl implements NotificationTechDetai
     @Override
     public List<NotificationTechDetails> getByServiceProviderMasterId(Long serviceProviderMasterId) {
         return repository.findByServiceProviderMaster_Id(serviceProviderMasterId);
+    }
+
+    @Override
+    @Transactional
+    public NotificationTechDetails patchNotificationTechDetails(Long id, String key, Object value) {
+        // ✅ Build dynamic SQL query
+        String sql = "UPDATE notification_tech_details SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("NotificationTechDetails not found with id " + id);
+        }
+
+        // ✅ Return updated record
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("NotificationTechDetails not found after update"));
     }
 }

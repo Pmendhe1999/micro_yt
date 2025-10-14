@@ -17,7 +17,7 @@ public class AuthTypeMasterDTO {
 
     private String description;
 
-    private String status;
+    private Boolean status;
 
     public  String getName() {
         return name;
@@ -35,11 +35,11 @@ public class AuthTypeMasterDTO {
         this.description = description;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 }

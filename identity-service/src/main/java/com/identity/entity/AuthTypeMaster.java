@@ -26,7 +26,7 @@ public class AuthTypeMaster {
     private String description;
 
     @Column(name = "status", length = 255)
-    private String status;
+    private Boolean status;
 
     @Column(name = "created_date")
     private LocalDateTime createdDate;
@@ -58,11 +58,11 @@ public class AuthTypeMaster {
         this.description = description;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 

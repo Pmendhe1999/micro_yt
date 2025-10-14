@@ -13,4 +13,6 @@ public interface NotificationTypesMasterService {
     Optional<NotificationTypesMaster> getNotificationTypeById(Long id);
     NotificationTypesMaster updateNotificationTypeReturnEntity(Long id, NotificationTypesMasterDTO dto, String token);
     NotificationTypesMaster deleteNotificationTypeReturnEntity(Long id, String token);
+    NotificationTypesMaster patchNotificationTypeMaster(Long id, String key, Object value);
+
 }

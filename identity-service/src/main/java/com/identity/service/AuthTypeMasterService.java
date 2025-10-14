@@ -17,4 +17,7 @@ public interface AuthTypeMasterService {
     AuthTypeMaster update(Long id, AuthTypeMasterDTO dto, String token);
 
     AuthTypeMaster delete(Long id, String token);
+
+    AuthTypeMaster patchAuthTypeMaster(Long id, String key, Object value);
+
 }

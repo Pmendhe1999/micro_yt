@@ -13,4 +13,6 @@ public interface ServiceProviderMasterService {
     Optional<ServiceProviderMaster> getServiceProviderById(Long id);
     ServiceProviderMaster updateServiceProviderReturnEntity(Long id, ServiceProviderMasterDTO dto, String token);
     ServiceProviderMaster deleteServiceProviderReturnEntity(Long id, String token);
+    ServiceProviderMaster patchServiceProvider(Long id, String key, Object value);
+
 }

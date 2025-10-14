@@ -18,4 +18,7 @@ public interface NotificationTypeService {
     Optional<NotificationType> getNotificationTypeById(Long id);
     NotificationType updateNotificationType(Long id, NotificationTypeDTO dto, String token);
     NotificationType deleteNotificationType(Long id, String token);
+
+    NotificationType patchNotificationType(Long id, String key, Object value);
+
 }

@@ -205,4 +205,27 @@ public class AppFunTypesMasterController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchAppFunType(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // Only one key-value pair expected
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        AppFunTypesMaster updated = service.patchAppFunType(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "AppFunTypesMaster patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

@@ -9,6 +9,9 @@ import com.identity.reository.AppFunctionRepository;
 import com.identity.reository.ApplicationRepository;
 import com.identity.service.AppFunctionService;
 import com.identity.service.JwtService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +36,9 @@ public class AppFunctionServiceImpl implements AppFunctionService {
 
     @Autowired
     private ApplicationRepository applicationRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private JwtService jwtService;
@@ -173,5 +179,25 @@ public class AppFunctionServiceImpl implements AppFunctionService {
             log.error("Unexpected error while deleting AppFunction id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting AppFunction with id " + id + ": " + e.getMessage(), e);
         }
+    }
+
+
+    @Override
+    @Transactional
+    public AppFunction patchAppFunction(Long id, String key, Object value) {
+        // Build dynamic SQL query
+        String sql = "UPDATE app_functions SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("App Function not found with id " + id);
+        }
+
+        // Return updated AppFunction
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("App Function not found after update"));
     }
 }

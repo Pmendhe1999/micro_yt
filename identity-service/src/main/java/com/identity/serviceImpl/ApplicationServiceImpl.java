@@ -5,6 +5,9 @@ import com.identity.entity.Application;
 import com.identity.reository.ApplicationRepository;
 import com.identity.service.ApplicationService;
 import com.identity.service.JwtService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,10 @@ public class ApplicationServiceImpl  implements ApplicationService {
     private JwtService jwtService;
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationServiceImpl.class);
+
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Override
     public Application saveApplication(ApplicationDTO applicationDTO, String token) {
@@ -146,5 +153,24 @@ public class ApplicationServiceImpl  implements ApplicationService {
             log.error("Unexpected error while deleting Application applicationId={}: {}", applicationId, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting Application with id " + applicationId + ": " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    @Transactional
+    public Application patchApplication(Long id, String key, Object value) {
+        // Build dynamic SQL query
+        String sql = "UPDATE applications SET " + key + " = :value, last_modified_date = NOW() WHERE application_id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("Application not found with id " + id);
+        }
+
+        // Return updated application
+        return repository.findByApplicationId(id)
+                .orElseThrow(() -> new NoSuchElementException("Application not found after update"));
     }
 }

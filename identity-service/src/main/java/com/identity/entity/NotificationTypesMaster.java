@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notification_types_master")
-
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationTypesMaster {

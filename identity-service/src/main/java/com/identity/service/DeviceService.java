@@ -18,4 +18,6 @@ public interface DeviceService {
     Device updateDeviceReturnEntity(Long id, DeviceDTO dto, String token);
 
     Device deleteDeviceReturnEntity(Long id, String token);
+
+    Device patchDevice(Long id, String key, Object value);
 }

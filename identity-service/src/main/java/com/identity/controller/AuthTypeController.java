@@ -132,4 +132,27 @@ public class AuthTypeController {
                     .body(new ResponceData("error", 500, e.getMessage(), null, 0));
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchAuthType(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // Expect only one key-value pair
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        AuthType updated = service.patchAuthType(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "AuthType patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

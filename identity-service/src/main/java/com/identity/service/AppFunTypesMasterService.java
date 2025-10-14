@@ -18,4 +18,7 @@ public interface AppFunTypesMasterService {
     AppFunTypesMaster update(Long id, AppFunTypesMasterDTO dto, String token);
 
     AppFunTypesMaster delete(Long id, String token);
+
+    AppFunTypesMaster patchAppFunType(Long id, String key, Object value);
+
 }

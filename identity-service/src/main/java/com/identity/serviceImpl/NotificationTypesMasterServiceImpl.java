@@ -5,6 +5,9 @@ import com.identity.entity.NotificationTypesMaster;
 import com.identity.reository.NotificationTypesMasterRepository;
 import com.identity.service.JwtService;
 import com.identity.service.NotificationTypesMasterService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,9 @@ public class NotificationTypesMasterServiceImpl implements NotificationTypesMast
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Logger log = LoggerFactory.getLogger(NotificationTypesMasterServiceImpl.class);
 
@@ -118,5 +124,24 @@ public class NotificationTypesMasterServiceImpl implements NotificationTypesMast
             log.error("Error while deleting NotificationType id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting NotificationType: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    @Transactional
+    public NotificationTypesMaster patchNotificationTypeMaster(Long id, String key, Object value) {
+        // Dynamic native SQL
+        String sql = "UPDATE notification_types_master SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("NotificationTypesMaster not found with id " + id);
+        }
+
+        // Return updated entity
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("NotificationTypesMaster not found after update"));
     }
 }

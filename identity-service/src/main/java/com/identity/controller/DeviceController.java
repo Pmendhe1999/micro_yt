@@ -128,4 +128,27 @@ public class DeviceController {
                     new ResponceData("fail", 500, "Unexpected error: " + e.getMessage(), null, 0));
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchDevice(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // Only one key-value expected
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        Device updated = service.patchDevice(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "Device patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

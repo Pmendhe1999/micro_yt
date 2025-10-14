@@ -208,4 +208,27 @@ public class ApplicationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchApplication(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // Expect only one key-value pair
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        Application updatedApp = service.patchApplication(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "Application patched successfully",
+                Collections.singletonList(updatedApp), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

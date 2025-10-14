@@ -5,6 +5,9 @@ import com.identity.entity.AppFunTypesMaster;
 import com.identity.reository.AppFunTypesMasterRepository;
 import com.identity.service.AppFunTypesMasterService;
 import com.identity.service.JwtService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,9 @@ public class AppFunTypesMasterServiceImpl implements AppFunTypesMasterService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Logger log = LoggerFactory.getLogger(AppFunTypesMasterServiceImpl.class);
 
@@ -143,5 +149,24 @@ public class AppFunTypesMasterServiceImpl implements AppFunTypesMasterService {
             log.error("Unexpected error while deleting AppFunTypesMaster id={}: {}", id, e.getMessage(), e);
             throw new RuntimeException("Error occurred while deleting record with id " + id + ": " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    @Transactional
+    public AppFunTypesMaster patchAppFunType(Long id, String key, Object value) {
+        // Build dynamic SQL query
+        String sql = "UPDATE app_fun_types_master SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("AppFunTypesMaster not found with id " + id);
+        }
+
+        // Return updated record
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("AppFunTypesMaster not found after update"));
     }
 }

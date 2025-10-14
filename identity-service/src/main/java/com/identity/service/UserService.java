@@ -50,4 +50,7 @@ public interface UserService {
     UserCredential deleteUser(Long id, String token);
 
     UserCredential activateUser(Long id, Boolean activated, String token);
+
+    UserCredential patchUser(Long id, String key, Object value, String token);
+
 }

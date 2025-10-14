@@ -14,4 +14,7 @@ public interface AuthTypeService {
     Optional<AuthType> getAuthTypeById(Long id);
     AuthType updateAuthType(Long id, AuthTypeDTO dto, String token);
     AuthType deleteAuthType(Long id, String token);
+
+    AuthType patchAuthType(Long id, String key, Object value);
+
 }

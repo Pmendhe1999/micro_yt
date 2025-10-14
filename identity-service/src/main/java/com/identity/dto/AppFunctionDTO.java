@@ -10,7 +10,7 @@ public class AppFunctionDTO {
 
     private String description;
 
-    private String status;
+    private Boolean status;
 
     @NotNull(message = "App Function Type ID is required")
     private Long appFunTypesMasterId; // FK to app_fun_types_master
@@ -35,11 +35,11 @@ public class AppFunctionDTO {
         this.description = description;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 

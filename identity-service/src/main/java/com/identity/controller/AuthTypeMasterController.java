@@ -145,4 +145,27 @@ public class AuthTypeMasterController {
                             Collections.emptyList(), 0));
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchAuthTypeMaster(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // ✅ Expect only one key-value pair
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        AuthTypeMaster updated = service.patchAuthTypeMaster(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "AuthTypeMaster patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

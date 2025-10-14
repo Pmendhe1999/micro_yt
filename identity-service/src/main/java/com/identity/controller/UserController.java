@@ -150,7 +150,6 @@ public class UserController {
     }
 
     // UPDATE
-    // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<ResponceData> updateUser(
             @PathVariable Long id,
@@ -264,5 +263,27 @@ public class UserController {
         }
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchUser(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates,
+            @RequestHeader("Authorization") String authHeader) {
 
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        String token = authHeader.replace("Bearer ", "");
+        // As per your requirement, only one key-value expected
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        UserCredential updatedUser = userService.patchUser(id, key, value, token);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "User patched successfully",
+                Collections.singletonList(updatedUser), 1);
+        return ResponseEntity.ok(response);
+    }
 }

@@ -9,6 +9,9 @@ import com.identity.reository.AuthTypeMasterRepository;
 import com.identity.reository.AuthTypeRepository;
 import com.identity.service.AuthTypeService;
 import com.identity.service.JwtService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,9 @@ public class AuthTypeServiceImpl implements AuthTypeService {
     private  AuthTypeMasterRepository authTypeMasterRepository;
     @Autowired
     private  JwtService jwtService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Logger log = LoggerFactory.getLogger(AuthTypeServiceImpl.class);
 
@@ -155,6 +161,23 @@ public class AuthTypeServiceImpl implements AuthTypeService {
             throw new RuntimeException("Error occurred while deleting AuthType with id " + id, e);
         }
     }
+    @Override
+    @Transactional
+    public AuthType patchAuthType(Long id, String key, Object value) {
+        // ✅ Build dynamic SQL for single field update
+        String sql = "UPDATE auth_types SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
 
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("AuthType not found with id " + id);
+        }
+
+        // ✅ Return updated entity
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("AuthType not found after update"));
+    }
 
 }

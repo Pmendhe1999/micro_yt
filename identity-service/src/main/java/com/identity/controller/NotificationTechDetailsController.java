@@ -160,4 +160,28 @@ public class NotificationTechDetailsController {
                             Collections.emptyList(), 0));
         }
     }
+
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchNotificationTechDetails(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // ✅ Expect only one key-value pair
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        NotificationTechDetails updated = service.patchNotificationTechDetails(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "Notification Tech Details patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
 }

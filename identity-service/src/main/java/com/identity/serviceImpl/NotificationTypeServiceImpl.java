@@ -11,6 +11,9 @@ import com.identity.reository.NotificationTypeRepository;
 import com.identity.reository.NotificationTypesMasterRepository;
 import com.identity.service.JwtService;
 import com.identity.service.NotificationTypeService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,9 @@ public class NotificationTypeServiceImpl implements NotificationTypeService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private static final Logger log = LoggerFactory.getLogger(NotificationTypeServiceImpl.class);
 
@@ -192,4 +198,24 @@ public class NotificationTypeServiceImpl implements NotificationTypeService {
             throw new RuntimeException("Error occurred while deleting NotificationType with id " + id + ": " + e.getMessage(), e);
         }
     }
+
+    @Override
+    @Transactional
+    public NotificationType patchNotificationType(Long id, String key, Object value) {
+        // ✅ Build dynamic native SQL
+        String sql = "UPDATE notification_types SET " + key + " = :value, last_modified_date = NOW() WHERE id = :id";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("value", value);
+        query.setParameter("id", id);
+
+        int updated = query.executeUpdate();
+        if (updated == 0) {
+            throw new NoSuchElementException("NotificationType not found with id " + id);
+        }
+
+        // ✅ Return updated entity
+        return repository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("NotificationType not found after update"));
+    }
+
 }

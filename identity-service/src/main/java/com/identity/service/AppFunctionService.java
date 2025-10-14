@@ -15,4 +15,5 @@ public interface AppFunctionService {
     Optional<AppFunction> getAppFunctionById(Long id);
     AppFunction updateAppFunction(Long id, AppFunctionDTO dto, String token);
     AppFunction deleteAppFunction(Long id, String token);
+    AppFunction patchAppFunction(Long id, String key, Object value);
 }

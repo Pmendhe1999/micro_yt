@@ -124,4 +124,28 @@ public class ServiceProviderMasterController {
                     .body(new ResponceData("fail", 500, e.getMessage(), Collections.emptyList(), 0));
         }
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponceData> patchServiceProvider(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
+
+        if (updates == null || updates.isEmpty()) {
+            throw new IllegalArgumentException("No field to update");
+        }
+
+        // ✅ Expect only one key-value pair
+        Map.Entry<String, Object> entry = updates.entrySet().iterator().next();
+        String key = entry.getKey();
+        Object value = entry.getValue();
+
+        ServiceProviderMaster updated = service.patchServiceProvider(id, key, value);
+
+        ResponceData response = new ResponceData(
+                "success", 200, "Service Provider patched successfully",
+                Collections.singletonList(updated), 1);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
