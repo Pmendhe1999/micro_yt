@@ -10,8 +10,14 @@ import java.util.Optional;
 
 public interface NotificationTechDetailsService {
     NotificationTechDetails save(NotificationTechDetailsDTO dto, String token);
-    Page<NotificationTechDetails> getAll(String search, Pageable pageable);
-    Optional<NotificationTechDetails> getById(Long id);
+    Page<NotificationTechDetails> getAllNotificationTechDetailsWithFilters(
+            String name,
+            String description,
+            String notes,
+            Boolean status,
+            List<Long> serviceProviderIds,
+            Pageable pageable
+    );    Optional<NotificationTechDetails> getById(Long id);
     NotificationTechDetails updateReturnEntity(Long id, NotificationTechDetailsDTO dto, String token);
     NotificationTechDetails deleteReturnEntity(Long id, String token);
     List<NotificationTechDetails> getByServiceProviderMasterId(Long serviceProviderMasterId);

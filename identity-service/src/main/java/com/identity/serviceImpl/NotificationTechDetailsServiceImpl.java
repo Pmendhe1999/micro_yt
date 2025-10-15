@@ -73,11 +73,20 @@ public class NotificationTechDetailsServiceImpl implements NotificationTechDetai
     }
 
     @Override
-    public Page<NotificationTechDetails> getAll(String search, Pageable pageable) {
-        if (search != null && !search.isEmpty()) {
-            return repository.findByNameContainingIgnoreCase(search, pageable);
-        }
-        return repository.findAll(pageable);
+    public Page<NotificationTechDetails> getAllNotificationTechDetailsWithFilters(
+            String name,
+            String description,
+            String notes,
+            Boolean status,
+            List<Long> serviceProviderIds,
+            Pageable pageable) {
+
+        log.info("Fetching NotificationTechDetails with filters: name={}, description={}, notes={}, status={}, serviceProviderIds={}",
+                name, description, notes, status, serviceProviderIds);
+
+        return repository.searchNotificationTechDetails(
+                name, description, notes, status, serviceProviderIds, pageable
+        );
     }
 
     @Override

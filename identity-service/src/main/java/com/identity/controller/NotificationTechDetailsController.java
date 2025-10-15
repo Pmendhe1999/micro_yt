@@ -56,28 +56,51 @@ public class NotificationTechDetailsController {
 
     // READ ALL
     @GetMapping
-    public ResponseEntity<ResponceData> getAll(@RequestParam(defaultValue = "1") int page,
-                                               @RequestParam(defaultValue = "10") int size,
-                                               @RequestParam(required = false) String search,
-                                               @RequestParam(defaultValue = "id") String sortBy,
-                                               @RequestParam(defaultValue = "asc") String sortDir) {
+    public ResponseEntity<ResponceData> getAllNotificationTechDetails(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String notes,
+            @RequestParam(required = false) Boolean status,
+            @RequestParam(required = false) List<Long> serviceProviderIds,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
         try {
-            log.info("Fetching NotificationTechDetails page={}, size={}, search={}, sortBy={}, sortDir={}",
-                    page, size, search, sortBy, sortDir);
+            log.info("Fetching NotificationTechDetails with filters: name={}, description={}, notes={}, status={}, serviceProviderIds={}",
+                    name, description, notes, status, serviceProviderIds);
 
-            Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            Pageable pageable = PageRequest.of(page-1, size, sort);
+            Sort sort = sortDir.equalsIgnoreCase("desc")
+                    ? Sort.by(sortBy).descending()
+                    : Sort.by(sortBy).ascending();
 
-            Page<NotificationTechDetails> result = service.getAll(search, pageable);
+            Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-            log.info("Retrieved {} NotificationTechDetails", result.getTotalElements());
-            return ResponseEntity.ok(new ResponceData("success", 200, "Retrieved successfully",
-                    result.getContent(), (int) result.getTotalElements()));
+            Page<NotificationTechDetails> result = service.getAllNotificationTechDetailsWithFilters(
+                    name, description, notes, status, serviceProviderIds, pageable
+            );
+
+            ResponceData response = new ResponceData(
+                    "success",
+                    200,
+                    "Retrieved NotificationTechDetails",
+                    result.getContent(),
+                    (int) result.getTotalElements()
+            );
+
+            return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             log.error("Unexpected error while fetching NotificationTechDetails: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponceData("fail", 500, "Unexpected error: " + e.getMessage(),
-                            Collections.emptyList(), 0));
+            ResponceData response = new ResponceData(
+                    "fail",
+                    500,
+                    "Unexpected error: " + e.getMessage(),
+                    Collections.emptyList(),
+                    0
+            );
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
