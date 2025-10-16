@@ -18,11 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/countries")
@@ -164,5 +162,30 @@ public class CountryController {
         return ResponseEntity.ok(new ResponceData(
                 "success", 200, "Country patched successfully",
                 Collections.singletonList(updated), 1));
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<ResponceData> uploadCountries(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            String token = authHeader.replace("Bearer ", "");
+
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(new ResponceData("fail", 400, "File is empty", null, 0));
+            }
+
+            List<Country> savedCountries = service.uploadCountriesFromExcel(file, token);
+
+            return ResponseEntity.ok(new ResponceData(
+                    "success", 200, "Countries uploaded successfully", savedCountries, savedCountries.size()));
+
+        } catch (Exception e) {
+            log.error("Error uploading countries: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponceData("error", 500, "Unexpected error: " + e.getMessage(), null, 0));
+        }
     }
 }
