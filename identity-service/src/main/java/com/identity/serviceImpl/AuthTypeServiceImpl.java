@@ -82,14 +82,15 @@ public class AuthTypeServiceImpl implements AuthTypeService {
     }
 
     @Override
-    public Page<AuthType> getAllAuthTypes(String search, List<Long> appFuncIds, List<Long> authTypeMasterIds, Pageable pageable) {
+    public Page<AuthType> getAllAuthTypes(String name,String search, List<Long> appFuncIds, List<Long> authTypeMasterIds, Pageable pageable) {
         try {
             log.debug("Fetching AuthTypes with search={}, authFuncIds={}, authTypeMasterIds={}", search, appFuncIds, authTypeMasterIds);
 
             if ((search != null && !search.isEmpty()) ||
                     (appFuncIds != null && !appFuncIds.isEmpty()) ||
+                    (name != null && !name.isEmpty()) ||
                     (authTypeMasterIds != null && !authTypeMasterIds.isEmpty())) {
-                return repository.findByFilters(search, appFuncIds, authTypeMasterIds, pageable);
+                return repository.findByFilters(name,search, appFuncIds, authTypeMasterIds, pageable);
             }
 
             return repository.findAll(pageable);

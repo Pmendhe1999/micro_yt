@@ -61,6 +61,7 @@ public class AuthTypeController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) String name,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir,
             @RequestParam(required = false) List<Long> appFuncIds,
@@ -70,7 +71,7 @@ public class AuthTypeController {
                 Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<AuthType> result = service.getAllAuthTypes(search, appFuncIds, authTypeMasterIds, pageable);
+        Page<AuthType> result = service.getAllAuthTypes(name,search, appFuncIds, authTypeMasterIds, pageable);
         return ResponseEntity.ok(new ResponceData("success", 200, "Retrieved AuthTypes",
                 result.getContent(), (int) result.getTotalElements()));
     }

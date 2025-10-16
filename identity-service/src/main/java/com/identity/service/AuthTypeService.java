@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface AuthTypeService {
     AuthType saveAuthType(AuthTypeDTO dto, String token);
-    Page<AuthType> getAllAuthTypes(String search, List<Long> appFuncIds, List<Long> authTypeMasterIds, Pageable pageable);
+    Page<AuthType> getAllAuthTypes(String name,String search, List<Long> appFuncIds, List<Long> authTypeMasterIds, Pageable pageable);
     Optional<AuthType> getAuthTypeById(Long id);
     AuthType updateAuthType(Long id, AuthTypeDTO dto, String token);
     AuthType deleteAuthType(Long id, String token);

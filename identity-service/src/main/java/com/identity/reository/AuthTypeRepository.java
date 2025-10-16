@@ -16,8 +16,10 @@ public interface AuthTypeRepository extends JpaRepository<AuthType, Long> {
     @Query("SELECT at FROM AuthType at " +
             "WHERE (:search IS NULL OR LOWER(at.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
             "AND (:appFuncIds IS NULL OR at.appFunction.id IN :appFuncIds) " +
+            "AND (:name IS NULL OR LOWER(at.name) LIKE LOWER(CONCAT('%', :name, '%'))) "+
             "AND (:authTypeMasterIds IS NULL OR at.authTypeMaster.id IN :authTypeMasterIds)")
     Page<AuthType> findByFilters(@Param("search") String search,
+                                 @Param("name") String name,
                                  @Param("appFuncIds") java.util.List<Long> appFuncIds,
                                  @Param("authTypeMasterIds") java.util.List<Long> authTypeMasterIds,
                                  Pageable pageable);
