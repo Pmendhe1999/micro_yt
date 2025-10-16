@@ -5,9 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "countries")
-
 @AllArgsConstructor
 @NoArgsConstructor
 public class Country {
@@ -25,6 +26,15 @@ public class Country {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "status")
+    private Boolean status = true;
+
+    @Column(name = "created_date")
+    private LocalDateTime createdDate;
+
+    @Column(name = "last_modified_date")
+    private LocalDateTime lastModifiedDate;
 
     public Long getCountryId() {
         return countryId;
@@ -56,5 +66,29 @@ public class Country {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public LocalDateTime getLastModifiedDate() {
+        return lastModifiedDate;
+    }
+
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
     }
 }
