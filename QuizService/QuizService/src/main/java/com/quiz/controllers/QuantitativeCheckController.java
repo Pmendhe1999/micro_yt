@@ -1,0 +1,90 @@
+package com.quiz.controllers;
+
+import com.quiz.dto.QuantitativeCheckDTO;
+import com.quiz.dto.QuantitativeCheckDTOResponse;
+import com.quiz.dto.Response;
+import com.quiz.exception.IllegalArgumentsException;
+import com.quiz.services.QuantitativeCheckService;
+import com.quiz.services.ResponseService;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api")
+@Slf4j
+public class QuantitativeCheckController {
+
+    @Autowired
+    private QuantitativeCheckService quantitativeCheckService;
+
+    @Autowired
+    private ResponseService responseService;
+
+    @Operation(summary = "Create a List of Quantitative Checks")
+    @PostMapping("/quantitativeCheck/all")
+    public ResponseEntity<Response<Void>> createAll(@Validated @RequestBody List<QuantitativeCheckDTO> dtoList) {
+        log.info("Request to create QuantitativeCheck list");
+        if (dtoList == null || dtoList.isEmpty()) {
+            throw new IllegalArgumentsException("Quantitative Check list cannot be empty");
+        }
+        quantitativeCheckService.createAllQuantitativeCheck(dtoList);
+        return responseService.success(HttpStatus.CREATED.value(), "Quantitative Checks created successfully", null, 0);
+    }
+
+    @Operation(summary = "Create a Quantitative Check")
+    @PostMapping("/quantitativeCheck")
+    public ResponseEntity<Response<Void>> create(@Validated @RequestBody QuantitativeCheckDTO dto) {
+        log.info("Request to create QuantitativeCheck: {}", dto.getDescription());
+        quantitativeCheckService.createQuantitativeCheck(dto);
+        return responseService.success(HttpStatus.CREATED.value(), "Quantitative Check created successfully", null, 0);
+    }
+
+    @Operation(summary = "List all Quantitative Checks with pagination")
+    @GetMapping("/quantitativeCheck")
+    public ResponseEntity<Response<List<QuantitativeCheckDTOResponse>>> getAll(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        log.info("Fetching QuantitativeCheck list");
+        Page<QuantitativeCheckDTOResponse> result = quantitativeCheckService.getAllQuantitativeCheck(PageRequest.of(page - 1, size));
+        return responseService.success(HttpStatus.OK.value(), "Quantitative Checks fetched successfully", result.getContent(), result.getTotalElements());
+    }
+
+    @Operation(summary = "Get Quantitative Check by ID")
+    @GetMapping("/quantitativeCheck/{id}")
+    public ResponseEntity<Response<QuantitativeCheckDTOResponse>> getById(@PathVariable Long id) {
+        QuantitativeCheckDTOResponse response = quantitativeCheckService.getQuantitativeCheckById(id);
+        return responseService.success(HttpStatus.OK.value(), "Quantitative Check fetched successfully", response, 1);
+    }
+
+    @Operation(summary = "Update Quantitative Check by ID")
+    @PutMapping("/quantitativeCheck/{id}")
+    public ResponseEntity<Response<QuantitativeCheckDTOResponse>> update(@PathVariable Long id,
+                                                                         @Validated @RequestBody QuantitativeCheckDTO dto) {
+        QuantitativeCheckDTOResponse updated = quantitativeCheckService.updateQuantitativeCheck(id, dto);
+        return responseService.success(HttpStatus.OK.value(), "Quantitative Check updated successfully", updated, 1);
+    }
+
+    @Operation(summary = "Partially update Quantitative Check by ID")
+    @PatchMapping("/quantitativeCheck/{id}")
+    public ResponseEntity<Response<QuantitativeCheckDTOResponse>> patch(@PathVariable Long id,
+                                                                        @RequestBody QuantitativeCheckDTO dto) {
+        QuantitativeCheckDTOResponse updated = quantitativeCheckService.patchQuantitativeCheck(id, dto);
+        return responseService.success(HttpStatus.OK.value(), "Quantitative Check patched successfully", updated, 1);
+    }
+
+    @Operation(summary = "Delete Quantitative Check by ID")
+    @DeleteMapping("/quantitativeCheck/{id}")
+    public ResponseEntity<Response<Void>> delete(@PathVariable Long id) {
+        quantitativeCheckService.deleteQuantitativeCheck(id);
+        return responseService.success(HttpStatus.OK.value(), "Quantitative Check deleted successfully", null, 0);
+    }
+}
