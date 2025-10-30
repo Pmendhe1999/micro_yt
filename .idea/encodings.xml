@@ -3,6 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/ApiGateway/ApiGateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/QcService/QcService/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/QuestionService/QuestionService/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/QuizService/QuizService/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/ServiceRegistry/ServiceRegistry/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/identity-service/src/main/java" charset="UTF-8" />
