@@ -70,10 +70,10 @@ public class LabelScanMasterController {
     @Operation(summary = "List all Label Scan Masters with pagination")
     @GetMapping("/labelScanMaster")
     public ResponseEntity<Response<List<LabelScanMasterDTOResponse>>> getAllLabelScanMaster(
-            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size) {
         log.info("Request to fetch LabelScanMasters, page: {}, size: {}", page, size);
-        Page<LabelScanMasterDTOResponse> result = labelScanMasterService.getAllLabelScanMaster(PageRequest.of(page, size));
+        Page<LabelScanMasterDTOResponse> result = labelScanMasterService.getAllLabelScanMaster(PageRequest.of(page-1, size));
         return responseService.success(HttpStatus.OK.value(), "Label Scan Masters fetched successfully",
                 result.getContent(), result.getTotalElements());
     }
