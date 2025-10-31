@@ -1,10 +1,10 @@
 package com.quiz.controllers;
 
-import com.quiz.dto.DeliveryChallanMasterDTO;
-import com.quiz.dto.DeliveryChallanMasterDTOResponse;
+import com.quiz.dto.DeliveryChallanDTO;
+import com.quiz.dto.DeliveryChallanDTOResponse;
 import com.quiz.dto.Response;
 import com.quiz.exception.IllegalArgumentsException;
-import com.quiz.services.DeliveryChallanMasterService;
+import com.quiz.services.DeliveryChallanService;
 import com.quiz.services.ResponseService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -21,73 +21,74 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Slf4j
-public class DeliveryChallanMasterController {
-
+public class DeliveryChallanController {
     @Autowired
-    private DeliveryChallanMasterService service;
+    private DeliveryChallanService deliveryChallanService;
 
     @Autowired
     private ResponseService responseService;
 
     @Operation(summary = "Create a list of Delivery Challans")
-    @PostMapping("/deliveryChallanMaster/all")
-    public ResponseEntity<Response<Void>> createAllDeliveryChallan(@Valid @RequestBody List<DeliveryChallanMasterDTO> dtoList) {
+    @PostMapping("/deliveryChallan/all")
+    public ResponseEntity<Response<Void>> createAllDeliveryChallan(@Valid @RequestBody List<DeliveryChallanDTO> dtoList) {
         log.info("Request to create delivery challan list");
         if (dtoList == null || dtoList.isEmpty()) {
             throw new IllegalArgumentsException("Delivery Challan list cannot be empty");
         }
-        service.createAllDeliveryChallanMaster(dtoList);
+        deliveryChallanService.createAllDeliveryChallan(dtoList);
         return responseService.success(HttpStatus.CREATED.value(), "Delivery Challans created successfully", null, 0);
     }
 
     @Operation(summary = "Create a Delivery Challan")
-    @PostMapping("/deliveryChallanMaster")
-    public ResponseEntity<Response<Void>> createDeliveryChallan(@Valid @RequestBody DeliveryChallanMasterDTO dto) {
+    @PostMapping("/deliveryChallan")
+    public ResponseEntity<Response<DeliveryChallanDTOResponse>> createDeliveryChallan(@Valid @RequestBody DeliveryChallanDTO dto) {
         log.info("Request to create delivery challan: {}", dto.getName());
-        service.createDeliveryChallanMaster(dto);
+        deliveryChallanService.createDeliveryChallan(dto);
         return responseService.success(HttpStatus.CREATED.value(), "Delivery Challan created successfully", null, 0);
     }
 
     @Operation(summary = "Get all Delivery Challans")
-    @GetMapping("/deliveryChallanMaster")
-    public ResponseEntity<Response<List<DeliveryChallanMasterDTOResponse>>> getAllDeliveryChallan(
+    @GetMapping("/deliveryChallan")
+    public ResponseEntity<Response<List<DeliveryChallanDTOResponse>>> getAllDeliveryChallan(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
 
-        Page<DeliveryChallanMasterDTOResponse> resultPage = service.getAllDeliveryChallanMaster(PageRequest.of(page - 1, size));
+        Page<DeliveryChallanDTOResponse> resultPage = deliveryChallanService
+                .getAllDeliveryChallan(PageRequest.of(page - 1, size));
+
         return responseService.success(HttpStatus.OK.value(), "Delivery Challans fetched successfully",
                 resultPage.getContent(), resultPage.getTotalElements());
     }
 
     @Operation(summary = "Get Delivery Challan by ID")
-    @GetMapping("/deliveryChallanMaster/{id}")
-    public ResponseEntity<Response<DeliveryChallanMasterDTOResponse>> getDeliveryChallanById(@PathVariable Long id) {
-        DeliveryChallanMasterDTOResponse response = service.getDeliveryChallanMasterById(id);
+    @GetMapping("/deliveryChallan/{id}")
+    public ResponseEntity<Response<DeliveryChallanDTOResponse>> getDeliveryChallanById(@PathVariable Long id) {
+        DeliveryChallanDTOResponse response = deliveryChallanService.getDeliveryChallanById(id);
         return responseService.success(HttpStatus.OK.value(), "Delivery Challan fetched successfully", response, 1);
     }
 
     @Operation(summary = "Update Delivery Challan by ID")
-    @PutMapping("/deliveryChallanMaster/{id}")
-    public ResponseEntity<Response<DeliveryChallanMasterDTOResponse>> updateDeliveryChallan(
-            @PathVariable Long id, @Valid @RequestBody DeliveryChallanMasterDTO dto) {
+    @PutMapping("/deliveryChallan/{id}")
+    public ResponseEntity<Response<DeliveryChallanDTOResponse>> updateDeliveryChallan(
+            @PathVariable Long id, @Valid @RequestBody DeliveryChallanDTO dto) {
 
-        DeliveryChallanMasterDTOResponse updated = service.updateDeliveryChallanMaster(id, dto);
+        DeliveryChallanDTOResponse updated = deliveryChallanService.updateDeliveryChallan(id, dto);
         return responseService.success(HttpStatus.OK.value(), "Delivery Challan updated successfully", updated, 1);
     }
 
     @Operation(summary = "Patch Delivery Challan by ID")
-    @PatchMapping("/deliveryChallanMaster/{id}")
-    public ResponseEntity<Response<DeliveryChallanMasterDTOResponse>> patchDeliveryChallan(
-            @PathVariable Long id, @RequestBody DeliveryChallanMasterDTO dto) {
+    @PatchMapping("/deliveryChallan/{id}")
+    public ResponseEntity<Response<DeliveryChallanDTOResponse>> patchDeliveryChallan(
+            @PathVariable Long id, @RequestBody DeliveryChallanDTO dto) {
 
-        DeliveryChallanMasterDTOResponse updated = service.patchDeliveryChallanMaster(id, dto);
+        DeliveryChallanDTOResponse updated = deliveryChallanService.patchDeliveryChallan(id, dto);
         return responseService.success(HttpStatus.OK.value(), "Delivery Challan partially updated successfully", updated, 1);
     }
 
     @Operation(summary = "Delete Delivery Challan by ID")
-    @DeleteMapping("/deliveryChallanMaster/{id}")
+    @DeleteMapping("/deliveryChallan/{id}")
     public ResponseEntity<Response<Void>> deleteDeliveryChallan(@PathVariable Long id) {
-        service.deleteDeliveryChallanMaster(id);
+        deliveryChallanService.deleteDeliveryChallan(id);
         return responseService.success(HttpStatus.OK.value(), "Delivery Challan deleted successfully", null, 0);
     }
 }
