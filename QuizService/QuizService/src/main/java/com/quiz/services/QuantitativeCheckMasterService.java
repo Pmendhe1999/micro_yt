@@ -35,12 +35,22 @@ public class QuantitativeCheckMasterService {
         return quantitativeCheckMasterMapper.toResponse(saved);
     }
 
-    public Page<QuantitativeCheckMasterDTOResponse> getAll(Pageable pageable) {
-        Page<QuantitativeCheckMaster> page = quantitativeCheckMasterRepository.findAll(pageable);
-        List<QuantitativeCheckMasterDTOResponse> dtoList = quantitativeCheckMasterMapper.toResponseList(page.getContent());
+    public Page<QuantitativeCheckMasterDTOResponse> getAllWithFilters(
+            String name,
+            String description,
+            QuantitativeCheckMaster.CheckStatus checkStatus,
+            String status,
+            List<Long> scanMasterIds,
+            Pageable pageable) {
+
+        Page<QuantitativeCheckMaster> page = quantitativeCheckMasterRepository.searchQuantitativeCheckMasterAdvanced(
+                name, description, checkStatus, status, scanMasterIds, pageable);
+
+        List<QuantitativeCheckMasterDTOResponse> dtoList =
+                quantitativeCheckMasterMapper.toResponseList(page.getContent());
+
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
-
     public QuantitativeCheckMasterDTOResponse getById(Long id) {
         QuantitativeCheckMaster entity = quantitativeCheckMasterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Quantitative Check Master not found with id: " + id));

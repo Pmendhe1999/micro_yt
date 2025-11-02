@@ -39,16 +39,26 @@ public class QualitativeCheckService {
         return qualitativeCheckMapper.qualitativeCheckToQualitativeCheckDTOResponse(entity);
     }
 
-    public Page<QualitativeCheckDTOResponse> getAllQualitativeChecks(Pageable pageable) {
-        Page<QualitativeCheck> page = qualitativeCheckRepository.findAll(pageable);
+    public Page<QualitativeCheckDTOResponse> getAllQualitativeChecksWithFilters(
+            String description,
+            Boolean isScan,
+            String status,
+            String value,
+            List<Long> qualitativeCheckMasterIds,
+            Pageable pageable) {
+
+        Page<QualitativeCheck> page = qualitativeCheckRepository.searchQualitativeChecksAdvanced(
+                description, isScan, status, value, qualitativeCheckMasterIds, pageable);
+
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Qualitative Checks found");
         }
+
         List<QualitativeCheckDTOResponse> dtoList =
                 qualitativeCheckMapper.qualitativeCheckListToQualitativeCheckDTOResponseList(page.getContent());
+
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
-
     public QualitativeCheckDTOResponse getQualitativeCheckById(Long id) {
         QualitativeCheck entity = qualitativeCheckRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Qualitative Check not found with id: " + id));

@@ -3,6 +3,7 @@ package com.quiz.controllers;
 import com.quiz.dto.QuantitativeCheckMasterDTO;
 import com.quiz.dto.QuantitativeCheckMasterDTOResponse;
 import com.quiz.dto.Response;
+import com.quiz.entities.QuantitativeCheckMaster;
 import com.quiz.exception.IllegalArgumentsException;
 import com.quiz.services.QuantitativeCheckMasterService;
 import com.quiz.services.ResponseService;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -45,13 +48,33 @@ public class QuantitativeCheckMasterController {
         return responseService.success(HttpStatus.CREATED.value(), "Quantitative Check Master created successfully", response, 1);
     }
 
-    @Operation(summary = "Get all Quantitative Check Masters")
+    @Operation(summary = "Get all Quantitative Check Masters with filters")
     @GetMapping("/quantitativeCheckMaster")
     public ResponseEntity<Response<List<QuantitativeCheckMasterDTOResponse>>> getAll(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
-        Page<QuantitativeCheckMasterDTOResponse> result = quantitativeCheckMasterService.getAll(PageRequest.of(page - 1, size));
-        return responseService.success(HttpStatus.OK.value(), "Fetched successfully", result.getContent(), result.getTotalElements());
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) QuantitativeCheckMaster.CheckStatus checkStatus,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) List<Long> scanMasterIds, // ✅ foreign key filter
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<QuantitativeCheckMasterDTOResponse> result =
+                quantitativeCheckMasterService.getAllWithFilters(name, description, checkStatus, status, scanMasterIds, pageable);
+
+        return responseService.success(HttpStatus.OK.value(),
+                "Fetched successfully",
+                result.getContent(),
+                result.getTotalElements());
     }
 
     @Operation(summary = "Get Quantitative Check Master by ID")

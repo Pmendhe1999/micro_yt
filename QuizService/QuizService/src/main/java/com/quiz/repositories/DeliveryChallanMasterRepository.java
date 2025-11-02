@@ -11,6 +11,15 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface DeliveryChallanMasterRepository extends JpaRepository<DeliveryChallanMaster, Long> {
+    @Query("SELECT DISTINCT d FROM DeliveryChallanMaster d " +
+            "WHERE (:name IS NULL OR LOWER(d.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
+            "AND (:descriptions IS NULL OR LOWER(d.descriptions) LIKE LOWER(CONCAT('%', :descriptions, '%'))) " +
+            "AND (:status IS NULL OR d.status = :status) ")
+    Page<DeliveryChallanMaster> searchDeliveryChallans(
+            @Param("name") String name,
+            @Param("descriptions") String descriptions,
+            @Param("status") Boolean status,
+            Pageable pageable);
 
 
 }

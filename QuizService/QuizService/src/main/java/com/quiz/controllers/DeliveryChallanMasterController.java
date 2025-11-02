@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,14 +50,27 @@ public class DeliveryChallanMasterController {
         return responseService.success(HttpStatus.CREATED.value(), "Delivery Challan created successfully", null, 0);
     }
 
-    @Operation(summary = "Get all Delivery Challans")
+    @Operation(summary = "Get all Delivery Challans with filters")
     @GetMapping("/deliveryChallanMaster")
     public ResponseEntity<Response<List<DeliveryChallanMasterDTOResponse>>> getAllDeliveryChallan(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String descriptions,
+            @RequestParam(required = false) Boolean status,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
 
-        Page<DeliveryChallanMasterDTOResponse> resultPage = service.getAllDeliveryChallanMaster(PageRequest.of(page - 1, size));
-        return responseService.success(HttpStatus.OK.value(), "Delivery Challans fetched successfully",
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<DeliveryChallanMasterDTOResponse> resultPage =
+                service.getAllDeliveryChallanMaster(name, descriptions, status, pageable);
+
+        return responseService.success(HttpStatus.OK.value(),
+                "Delivery Challans fetched successfully",
                 resultPage.getContent(), resultPage.getTotalElements());
     }
 

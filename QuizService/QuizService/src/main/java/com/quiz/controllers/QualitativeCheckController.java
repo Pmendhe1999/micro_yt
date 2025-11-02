@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,14 +46,35 @@ public class QualitativeCheckController {
         return responseService.success(HttpStatus.CREATED.value(), "Qualitative Check created successfully", response, 1);
     }
 
-    @Operation(summary = "Get all Qualitative Checks")
+    @Operation(summary = "Get all Qualitative Checks with filters")
     @GetMapping("/qualitativeCheck")
     public ResponseEntity<Response<List<QualitativeCheckDTOResponse>>> getAllQualitativeChecks(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        log.info("Fetching all Qualitative Checks");
-        Page<QualitativeCheckDTOResponse> resultPage = qualitativeCheckService.getAllQualitativeChecks(PageRequest.of(page - 1, size));
-        return responseService.success(HttpStatus.OK.value(), "Qualitative Checks fetched successfully", resultPage.getContent(), resultPage.getTotalElements());
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Boolean isScan,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String value,
+            @RequestParam(required = false) List<Long> qualitativeCheckMasterIds, // ✅ foreign key filter
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        log.info("Fetching Qualitative Checks with filters: description={}, isScan={}, status={}, value={}, qualitativeCheckMasterIds={}",
+                description, isScan, status, value, qualitativeCheckMasterIds);
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<QualitativeCheckDTOResponse> resultPage =
+                qualitativeCheckService.getAllQualitativeChecksWithFilters(description, isScan, status, value, qualitativeCheckMasterIds, pageable);
+
+        return responseService.success(HttpStatus.OK.value(),
+                "Qualitative Checks fetched successfully",
+                resultPage.getContent(),
+                resultPage.getTotalElements());
     }
 
     @Operation(summary = "Get Qualitative Check by ID")

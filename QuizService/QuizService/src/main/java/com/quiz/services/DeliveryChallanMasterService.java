@@ -34,11 +34,19 @@ public class DeliveryChallanMasterService {
         repository.save(entity);
     }
 
-    public Page<DeliveryChallanMasterDTOResponse> getAllDeliveryChallanMaster(Pageable pageable) {
-        Page<DeliveryChallanMaster> page = repository.findAll(pageable);
+    public Page<DeliveryChallanMasterDTOResponse> getAllDeliveryChallanMaster(
+            String name,
+            String descriptions,
+            Boolean status,
+            Pageable pageable) {
+
+        Page<DeliveryChallanMaster> page =
+                repository.searchDeliveryChallans(name, descriptions, status, pageable);
+
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Delivery Challans found");
         }
+
         List<DeliveryChallanMasterDTOResponse> dtoList = mapper.toDtoList(page.getContent());
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
