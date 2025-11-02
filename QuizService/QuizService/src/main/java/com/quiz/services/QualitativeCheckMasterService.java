@@ -34,9 +34,24 @@ public class QualitativeCheckMasterService {
         repository.save(entity);
     }
 
-    public Page<QualitativeCheckMasterDTOResponse> getAllQualitativeCheckMasters(Pageable pageable) {
-        Page<QualitativeCheckMaster> page = repository.findAll(pageable);
-        List<QualitativeCheckMasterDTOResponse> dtoList = mapper.entityListToQualitativeCheckMasterDTOResponseList(page.getContent());
+    public Page<QualitativeCheckMasterDTOResponse> getAllQualitativeCheckMastersWithFilters(
+            String name,
+            String description,
+            String status,
+            QualitativeCheckMaster.CheckStatus checkStatus,
+            List<Long> scanMasterIds,
+            Pageable pageable) {
+
+        Page<QualitativeCheckMaster> page = repository.searchQualitativeCheckMastersAdvanced(
+                name, description, status, checkStatus, scanMasterIds, pageable);
+
+        if (page.isEmpty()) {
+            throw new ResourceNotFoundException("No Qualitative Check Masters found");
+        }
+
+        List<QualitativeCheckMasterDTOResponse> dtoList =
+                mapper.entityListToQualitativeCheckMasterDTOResponseList(page.getContent());
+
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 

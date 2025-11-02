@@ -34,10 +34,24 @@ public class QuantitativeCheckService {
         quantitativeCheckRepository.save(entity);
     }
 
-    public Page<QuantitativeCheckDTOResponse> getAllQuantitativeCheck(Pageable pageable) {
-        Page<QuantitativeCheck> page = quantitativeCheckRepository.findAll(pageable);
-        if (page.isEmpty()) throw new ResourceNotFoundException("No Quantitative Checks found");
-        List<QuantitativeCheckDTOResponse> dtoList = quantitativeCheckMapper.quantitativeCheckListToQuantitativeCheckDTOResponseList(page.getContent());
+    public Page<QuantitativeCheckDTOResponse> getAllQuantitativeChecksWithFilters(
+            String description,
+            Boolean isScan,
+            String status,
+            String value,
+            List<Long> quantitativeCheckMasterIds,
+            Pageable pageable) {
+
+        Page<QuantitativeCheck> page = quantitativeCheckRepository.searchQuantitativeChecksAdvanced(
+                description, isScan, status, value, quantitativeCheckMasterIds, pageable);
+
+        if (page.isEmpty()) {
+            throw new ResourceNotFoundException("No Quantitative Checks found");
+        }
+
+        List<QuantitativeCheckDTOResponse> dtoList =
+                quantitativeCheckMapper.quantitativeCheckListToQuantitativeCheckDTOResponseList(page.getContent());
+
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 

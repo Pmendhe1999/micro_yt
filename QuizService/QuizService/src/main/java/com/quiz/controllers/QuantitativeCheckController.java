@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -48,14 +50,35 @@ public class QuantitativeCheckController {
         return responseService.success(HttpStatus.CREATED.value(), "Quantitative Check created successfully", null, 0);
     }
 
-    @Operation(summary = "List all Quantitative Checks with pagination")
+    @Operation(summary = "List all Quantitative Checks with filters and pagination")
     @GetMapping("/quantitativeCheck")
-    public ResponseEntity<Response<List<QuantitativeCheckDTOResponse>>> getAll(
+    public ResponseEntity<Response<List<QuantitativeCheckDTOResponse>>> getAllQuantitativeChecks(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
-        log.info("Fetching QuantitativeCheck list");
-        Page<QuantitativeCheckDTOResponse> result = quantitativeCheckService.getAllQuantitativeCheck(PageRequest.of(page - 1, size));
-        return responseService.success(HttpStatus.OK.value(), "Quantitative Checks fetched successfully", result.getContent(), result.getTotalElements());
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) Boolean isScan,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String value,
+            @RequestParam(required = false) List<Long> quantitativeCheckMasterIds, // ✅ foreign key filter
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        log.info("Fetching QuantitativeChecks with filters: description={}, isScan={}, status={}, value={}, quantitativeCheckMasterIds={}",
+                description, isScan, status, value, quantitativeCheckMasterIds);
+
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<QuantitativeCheckDTOResponse> result =
+                quantitativeCheckService.getAllQuantitativeChecksWithFilters(description, isScan, status, value, quantitativeCheckMasterIds, pageable);
+
+        return responseService.success(HttpStatus.OK.value(),
+                "Quantitative Checks fetched successfully",
+                result.getContent(),
+                result.getTotalElements());
     }
 
     @Operation(summary = "Get Quantitative Check by ID")
