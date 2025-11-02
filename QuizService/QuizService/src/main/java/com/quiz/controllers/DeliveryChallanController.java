@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -47,17 +49,34 @@ public class DeliveryChallanController {
         return responseService.success(HttpStatus.CREATED.value(), "Delivery Challan created successfully", null, 0);
     }
 
-    @Operation(summary = "Get all Delivery Challans")
+    @Operation(summary = "Get all Delivery Challans with filters")
     @GetMapping("/deliveryChallan")
     public ResponseEntity<Response<List<DeliveryChallanDTOResponse>>> getAllDeliveryChallan(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String descriptions,
+            @RequestParam(required = false) Boolean status,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
 
-        Page<DeliveryChallanDTOResponse> resultPage = deliveryChallanService
-                .getAllDeliveryChallan(PageRequest.of(page - 1, size));
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        return responseService.success(HttpStatus.OK.value(), "Delivery Challans fetched successfully",
-                resultPage.getContent(), resultPage.getTotalElements());
+        Page<DeliveryChallanDTOResponse> resultPage =
+                deliveryChallanService.getAllDeliveryChallanWithFilters(
+                        name, descriptions, status, pageable
+                );
+
+        return responseService.success(
+                HttpStatus.OK.value(),
+                "Delivery Challans fetched successfully",
+                resultPage.getContent(),
+                resultPage.getTotalElements()
+        );
     }
 
     @Operation(summary = "Get Delivery Challan by ID")
