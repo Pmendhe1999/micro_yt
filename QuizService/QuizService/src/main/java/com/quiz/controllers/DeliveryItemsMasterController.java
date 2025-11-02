@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,17 +50,36 @@ public class DeliveryItemsMasterController {
         return responseService.success(HttpStatus.CREATED.value(), "Delivery Item created successfully", null, 0);
     }
 
-    @Operation(summary = "Get all Delivery Items")
+    @Operation(summary = "Get all Delivery Items with filters")
     @GetMapping("/deliveryItems")
-    public ResponseEntity<Response<List<DeliveryItemsMasterDTOResponse>>> getAll(
+    public ResponseEntity<Response<List<DeliveryItemsMasterDTOResponse>>> getAllDeliveryItems(
             @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String batchNo,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String productCode,
+            @RequestParam(required = false) String orderNo,
+            @RequestParam(required = false) String serialNo,
+            @RequestParam(required = false) String unit,
+            @RequestParam(required = false) String hsnCode,
+            @RequestParam(required = false) List<Long> challanIds,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
 
-        Page<DeliveryItemsMasterDTOResponse> resultPage =
-                deliveryItemsMasterService.getAllDeliveryItems(PageRequest.of(page - 1, size));
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        return responseService.success(HttpStatus.OK.value(), "Delivery Items fetched successfully",
-                resultPage.getContent(), resultPage.getTotalElements());
+        Page<DeliveryItemsMasterDTOResponse> resultPage = deliveryItemsMasterService.getAllDeliveryItemsWithFilters(
+                batchNo, name, productCode, orderNo, serialNo, unit, hsnCode, challanIds, pageable
+        );
+
+        return responseService.success(
+                HttpStatus.OK.value(),
+                "Delivery Items fetched successfully",
+                resultPage.getContent(),
+                resultPage.getTotalElements()
+        );
     }
 
     @Operation(summary = "Get Delivery Item by ID")

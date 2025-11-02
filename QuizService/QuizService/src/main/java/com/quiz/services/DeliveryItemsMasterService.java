@@ -47,11 +47,25 @@ public class DeliveryItemsMasterService {
         deliveryItemsMasterRepository.save(entity);
     }
 
-    public Page<DeliveryItemsMasterDTOResponse> getAllDeliveryItems(Pageable pageable) {
-        Page<DeliveryItemsMaster> page = deliveryItemsMasterRepository.findAll(pageable);
+    public Page<DeliveryItemsMasterDTOResponse> getAllDeliveryItemsWithFilters(
+            String batchNo,
+            String name,
+            String productCode,
+            String orderNo,
+            String serialNo,
+            String unit,
+            String hsnCode,
+            List<Long> challanIds,
+            Pageable pageable
+    ) {
+        Page<DeliveryItemsMaster> page = deliveryItemsMasterRepository.searchDeliveryItemsAdvanced(
+                batchNo, name, productCode, orderNo, serialNo, unit, hsnCode, challanIds, pageable
+        );
+
         if (page.isEmpty()) {
-            throw new ResourceNotFoundException("No Delivery Items found");
+            throw new ResourceNotFoundException("No Delivery Items found with given filters");
         }
+
         List<DeliveryItemsMasterDTOResponse> dtoList = mapper.toDtoList(page.getContent());
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }

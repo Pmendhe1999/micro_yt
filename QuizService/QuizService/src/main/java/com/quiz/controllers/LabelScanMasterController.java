@@ -3,6 +3,7 @@ package com.quiz.controllers;
 import com.quiz.dto.LabelScanMasterDTO;
 import com.quiz.dto.LabelScanMasterDTOResponse;
 import com.quiz.dto.Response;
+import com.quiz.entities.LabelScanMaster;
 import com.quiz.exception.IllegalArgumentsException;
 import com.quiz.services.LabelScanMasterService;
 import com.quiz.services.ResponseService;
@@ -11,6 +12,8 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -67,14 +70,30 @@ public class LabelScanMasterController {
         return responseService.success(HttpStatus.OK.value(), "Label Scan Master partially updated successfully", updated, 1);
     }
 
-    @Operation(summary = "List all Label Scan Masters with pagination")
+    @Operation(summary = "List all Label Scan Masters with pagination and filters")
     @GetMapping("/labelScanMaster")
     public ResponseEntity<Response<List<LabelScanMasterDTOResponse>>> getAllLabelScanMaster(
             @RequestParam(value = "page", defaultValue = "1") Integer page,
-            @RequestParam(value = "size", defaultValue = "10") Integer size) {
-        log.info("Request to fetch LabelScanMasters, page: {}, size: {}", page, size);
-        Page<LabelScanMasterDTOResponse> result = labelScanMasterService.getAllLabelScanMaster(PageRequest.of(page-1, size));
-        return responseService.success(HttpStatus.OK.value(), "Label Scan Masters fetched successfully",
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String scanType,
+            @RequestParam(required = false) LabelScanMaster.CheckStatus checkStatus,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        log.info("Fetching LabelScanMasters with filters: name={}, scanType={}, checkStatus={}, status={}",
+                name, scanType, checkStatus, status);
+
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<LabelScanMasterDTOResponse> result = labelScanMasterService.getAllLabelScanMasterWithFilters(
+                name, description, scanType, checkStatus, status, pageable);
+
+        return responseService.success(HttpStatus.OK.value(),
+                "Label Scan Masters fetched successfully",
                 result.getContent(), result.getTotalElements());
     }
 

@@ -18,6 +18,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -73,12 +75,34 @@ public class ProductService {
         productRepository.save(entity);
     }
 
-    public Page<ProductDTOResponse> getAllProducts(Pageable pageable) {
-        Page<Product> page = productRepository.findAll(pageable);
+    public Page<ProductDTOResponse> getAllProductsWithFilters(
+            String name,
+            String productCode,
+            String serialNo,
+            String orderNo,
+            String batchNo,
+            String hsnCode,
+            String unit,
+            BigDecimal price,
+            Long inStockQuantity,
+            LocalDate mfgDate,
+            LocalDate expDate,
+            Boolean isPublished,
+            Boolean status,
+            List<Long> qualitativeCheckIds,
+            List<Long> quantitativeCheckIds,
+            Pageable pageable) {
+
+        Page<Product> page = productRepository.searchProductsAdvanced(
+                name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price,
+                inStockQuantity, mfgDate, expDate, isPublished, status, qualitativeCheckIds, quantitativeCheckIds, pageable);
+
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Products found");
         }
+
         List<ProductDTOResponse> dtoList = productMapper.toDtoList(page.getContent());
+
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 

@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -42,15 +43,28 @@ public class ProductMasterService {
         productMasterRepository.save(result);
     }
 
-    public Page<ProductMasterDTOResponse> getAllProductMaster(Pageable pageable) {
-        Page<ProductMaster> page = productMasterRepository.findAll(pageable);
+    public Page<ProductMasterDTOResponse> getAllProductMastersWithFilters(
+            String name,
+            String productCode,
+            String serialNo,
+            String orderNo,
+            String hsnCode,
+            String unit,
+            BigDecimal price,
+            BigDecimal quantity,
+            Boolean isPublished,
+            Boolean status,
+            Pageable pageable) {
+
+        Page<ProductMaster> page = productMasterRepository.searchProductMastersAdvanced(
+                name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity, isPublished, status, pageable);
 
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Product Masters found");
         }
 
-        List<ProductMasterDTOResponse> dtoList = productMasterMapper
-                .productMasterListToProductMasterDTOListResponse(page.getContent());
+        List<ProductMasterDTOResponse> dtoList =
+                productMasterMapper.productMasterListToProductMasterDTOListResponse(page.getContent());
 
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }

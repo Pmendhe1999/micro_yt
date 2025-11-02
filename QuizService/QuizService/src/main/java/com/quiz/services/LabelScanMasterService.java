@@ -35,13 +35,24 @@ public class LabelScanMasterService {
         labelScanMasterRepository.save(entity);
     }
 
-    public Page<LabelScanMasterDTOResponse> getAllLabelScanMaster(Pageable pageable) {
-        Page<LabelScanMaster> page = labelScanMasterRepository.findAll(pageable);
+    public Page<LabelScanMasterDTOResponse> getAllLabelScanMasterWithFilters(
+            String name,
+            String description,
+            String scanType,
+            LabelScanMaster.CheckStatus checkStatus,
+            String status,
+            Pageable pageable) {
+
+        Page<LabelScanMaster> page = labelScanMasterRepository.searchLabelScanMasters(
+                name, description, scanType, checkStatus, status, pageable);
+
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Label Scan Masters found");
         }
-        List<LabelScanMasterDTOResponse> dtoList = labelScanMasterMapper
-                .labelScanMasterListToLabelScanMasterDTOResponseList(page.getContent());
+
+        List<LabelScanMasterDTOResponse> dtoList =
+                labelScanMasterMapper.labelScanMasterListToLabelScanMasterDTOResponseList(page.getContent());
+
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
 

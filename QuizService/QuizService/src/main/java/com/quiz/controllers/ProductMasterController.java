@@ -10,11 +10,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -76,19 +79,36 @@ public class ProductMasterController {
         return responseService.success(HttpStatus.OK.value(), "Product Master updated successfully", updatedProduct, 1);
     }
 
-    @Operation(summary = "List all Product Masters with optional pagination")
+    @Operation(summary = "List all Product Masters with optional filters, pagination, and sorting")
     @GetMapping("/productMaster")
-    public ResponseEntity<Response<List<ProductMasterDTOResponse>>> getAllProductMaster(
-            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
+    public ResponseEntity<Response<List<ProductMasterDTOResponse>>> getAllProductMasters(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String productCode,
+            @RequestParam(required = false) String serialNo,
+            @RequestParam(required = false) String orderNo,
+            @RequestParam(required = false) String hsnCode,
+            @RequestParam(required = false) String unit,
+            @RequestParam(required = false) BigDecimal price,
+            @RequestParam(required = false) BigDecimal quantity,
+            @RequestParam(required = false) Boolean isPublished,
+            @RequestParam(required = false) Boolean status,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
 
-        log.info("Request to fetch all product masters, page: {}, size: {}", page, size);
+        log.info("Fetching Product Masters with filters: name={}, productCode={}, serialNo={}, orderNo={}, hsnCode={}, unit={}, price={}, quantity={}, isPublished={}, status={}",
+                name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity, isPublished, status);
 
-        Page<ProductMasterDTOResponse> resultPage = productMasterService
-                .getAllProductMaster(PageRequest.of(page-1, size));
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        return responseService.success(HttpStatus.OK.value(), "Product Masters fetched successfully",
-                resultPage.getContent(), resultPage.getTotalElements());
+        Page<ProductMasterDTOResponse> result = productMasterService.getAllProductMastersWithFilters(
+                name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity, isPublished, status, pageable);
+
+        return responseService.success(HttpStatus.OK.value(),
+                "Product Masters fetched successfully", result.getContent(), result.getTotalElements());
     }
 
     @Operation(summary = "Get Product Master by ID")

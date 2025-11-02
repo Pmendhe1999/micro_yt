@@ -36,11 +36,20 @@ public class DeliveryChallanService {
     }
 
     // Get all
-    public Page<DeliveryChallanDTOResponse> getAllDeliveryChallan(Pageable pageable) {
-        Page<DeliveryChallan> page = deliveryChallanRepository.findAll(pageable);
+    public Page<DeliveryChallanDTOResponse> getAllDeliveryChallanWithFilters(
+            String name,
+            String descriptions,
+            Boolean status,
+            Pageable pageable
+    ) {
+        Page<DeliveryChallan> page = deliveryChallanRepository.searchDeliveryChallansAdvanced(
+                name, descriptions, status, pageable
+        );
+
         if (page.isEmpty()) {
-            throw new ResourceNotFoundException("No Delivery Challans found");
+            throw new ResourceNotFoundException("No Delivery Challans found with given filters");
         }
+
         List<DeliveryChallanDTOResponse> dtoList = deliveryChallanMapper.toDtoList(page.getContent());
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
