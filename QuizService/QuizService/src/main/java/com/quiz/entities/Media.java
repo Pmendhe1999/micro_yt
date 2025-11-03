@@ -3,7 +3,7 @@ package com.quiz.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "media_master")
+@Table(name = "media")
 public class Media  extends AbstractAuditingEntity {
 
     @Id
