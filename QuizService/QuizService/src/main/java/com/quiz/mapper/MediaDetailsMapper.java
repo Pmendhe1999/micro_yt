@@ -4,11 +4,12 @@ import com.quiz.dto.MediaDetailsDTO;
 import com.quiz.dto.MediaDetailsDTOResponse;
 import com.quiz.entities.Media;
 import com.quiz.entities.MediaDetails;
+import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.List;
-
+@Mapper(componentModel = "spring")
 public interface MediaDetailsMapper {
 
     @Mapping(target = "media", source = "mediaId", qualifiedByName = "mapToMedia")
