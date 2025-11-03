@@ -3,6 +3,7 @@ package com.quiz.controllers;
 import com.quiz.dto.MediaDTO;
 import com.quiz.dto.MediaDTOResponse;
 import com.quiz.dto.Response;
+import com.quiz.entities.MediaMaster;
 import com.quiz.exception.IllegalArgumentsException;
 import com.quiz.services.MediaService;
 import com.quiz.services.ResponseService;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -93,5 +95,15 @@ public class MediaController {
     public ResponseEntity<Response<Void>> deleteMedia(@PathVariable Long id) {
         mediaService.deleteMedia(id);
         return responseService.success(HttpStatus.OK.value(), "Media deleted successfully", null, 0);
+    }
+
+    @PostMapping("/upload/product")
+    public ResponseEntity<MediaMaster> uploadProductMedia(
+            @RequestParam Long productId,
+            @RequestParam MultipartFile file,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String mediaFor) {
+
+        return ResponseEntity.ok(mediaService.uploadProductMedia(productId, file, description, mediaFor));
     }
 }

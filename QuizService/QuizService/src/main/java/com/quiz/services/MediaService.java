@@ -1,23 +1,36 @@
 package com.quiz.services;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.quiz.config.IdentityClient;
 import com.quiz.dto.MediaDTO;
 import com.quiz.dto.MediaDTOResponse;
 import com.quiz.entities.Media;
+import com.quiz.entities.MediaDetails;
+import com.quiz.entities.MediaMaster;
 import com.quiz.exception.ResourceNotFoundException;
 import com.quiz.mapper.MediaMapper;
+import com.quiz.repositories.MediaDetailsRepository;
+import com.quiz.repositories.MediaMasterRepository;
 import com.quiz.repositories.MediaRepository;
+import com.quiz.repositories.ProductMasterRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -31,6 +44,10 @@ public class MediaService {
 
     @Autowired
     private IdentityClient identityClient;
+
+
+    @Autowired
+    private  AmazonS3 s3Client;
 
     public void createAllMedia(List<MediaDTO> dtoList, String token) {
         Map<String, Object> authData = identityClient.validateToken(token);
@@ -114,5 +131,124 @@ public class MediaService {
         Media existing = mediaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Media not found with id: " + id));
         mediaRepository.delete(existing);
+    }
+
+
+
+    @Value("${aws.s3.bucketName}")
+    private String bucketName;
+
+    @Autowired
+    private MediaDetailsRepository mediaDetailsRepository;
+
+    @Autowired
+    private MediaMasterRepository mediaMasterRepository;
+
+    @Autowired
+    private ProductMasterRepository productRepository;
+
+    @Transactional
+    public MediaMaster uploadProductMedia(Long productId, MultipartFile file, String description, String mediaFor) {
+        try {
+            // 1️⃣ Check existing media for product
+            Optional<MediaMaster> existingMediaOpt = mediaMasterRepository.findByProductId(productId);
+            MediaMaster mediaMaster;
+            Media media;
+            MediaDetails mediaDetails;
+
+            // 2️⃣ Prepare S3 upload details
+            String folderName = "platfrom_images/";
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String fileKey = folderName + fileName;
+
+            // Convert file to temp file
+            File convertedFile = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
+            try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
+                fos.write(file.getBytes());
+            }
+
+            // Upload file to S3
+            s3Client.putObject(new PutObjectRequest(bucketName, fileKey, convertedFile));
+            convertedFile.delete();
+
+            // 3️⃣ Handle Existing Product Media (update) OR New Upload (create)
+            if (existingMediaOpt.isPresent()) {
+                // Update existing
+                mediaMaster = existingMediaOpt.get();
+
+                // Delete old S3 file if exists
+                if (mediaMaster.getName() != null) {
+                    try {
+                        s3Client.deleteObject(bucketName, "platfrom_images/" + mediaMaster.getName());
+                    } catch (Exception e) {
+                        log.warn("Could not delete old product image: {}", e.getMessage());
+                    }
+                }
+
+                // Update MediaMaster
+                mediaMaster.setName(fileName);
+                mediaMaster.setBaseImageUrl(fileKey);
+                mediaMaster.setDescription(description);
+                mediaMaster.setType(file.getContentType());
+                mediaMaster.setStatus("ACTIVE");
+
+                mediaMasterRepository.save(mediaMaster);
+
+                // Update Media
+                media = new Media();
+                media.setName(fileName);
+                media.setBaseImageUrl(fileKey);
+                media.setDescription(description);
+                media.setType(file.getContentType());
+                media.setStatus("ACTIVE");
+
+                mediaRepository.save(media);
+
+                // Update MediaDetails
+                mediaDetails = new MediaDetails();
+                mediaDetails.setMedia(media);
+                mediaDetails.setDescription(description);
+                mediaDetails.setMediaFor(mediaFor);
+                mediaDetails.setType(file.getContentType());
+                mediaDetails.setName(fileName);
+                mediaDetailsRepository.save(mediaDetails);
+
+            } else {
+                // 4️⃣ New Upload (no previous media for this product)
+                media = new Media();
+                media.setName(fileName);
+                media.setBaseImageUrl(fileKey);
+                media.setDescription(description);
+                media.setType(file.getContentType());
+                media.setStatus("ACTIVE");
+                mediaRepository.save(media);
+
+                mediaDetails = new MediaDetails();
+                mediaDetails.setMedia(media);
+                mediaDetails.setDescription(description);
+                mediaDetails.setMediaFor(mediaFor);
+                mediaDetails.setType(file.getContentType());
+                mediaDetails.setName(fileName);
+
+                mediaDetailsRepository.save(mediaDetails);
+
+                mediaMaster = new MediaMaster();
+                mediaMaster.setName(fileName);
+                mediaMaster.setBaseImageUrl(fileKey);
+                mediaMaster.setDescription(description);
+                mediaMaster.setType(file.getContentType());
+                mediaMaster.setStatus("ACTIVE");
+
+                mediaMaster.setProduct(productRepository.findById(productId)
+                        .orElseThrow(() -> new RuntimeException("Product not found")));
+                mediaMasterRepository.save(mediaMaster);
+            }
+
+            return mediaMaster;
+
+        } catch (Exception e) {
+            log.error("Error uploading product media: {}", e.getMessage(), e);
+            throw new RuntimeException("Error uploading product media: " + e.getMessage(), e);
+        }
     }
 }
