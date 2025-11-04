@@ -18,6 +18,7 @@ import java.util.List;
 @Transactional
 public class QuantitativeCheckService {
 
+
     @Autowired
     private QuantitativeCheckRepository quantitativeCheckRepository;
 
@@ -40,10 +41,11 @@ public class QuantitativeCheckService {
             String status,
             String value,
             List<Long> quantitativeCheckMasterIds,
+            List<Long> productIds,
             Pageable pageable) {
 
         Page<QuantitativeCheck> page = quantitativeCheckRepository.searchQuantitativeChecksAdvanced(
-                description, isScan, status, value, quantitativeCheckMasterIds, pageable);
+                description, isScan, status, value, quantitativeCheckMasterIds, productIds, pageable);
 
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Quantitative Checks found");
@@ -69,8 +71,12 @@ public class QuantitativeCheckService {
         entity.setScan(dto.getScan());
         entity.setStatus(dto.getStatus());
         entity.setValue(dto.getValue());
+
         if (dto.getQuantitativeCheckMasterId() != null) {
             entity.getQuantitativeCheckMaster().setId(dto.getQuantitativeCheckMasterId());
+        }
+        if (dto.getProductId() != null) {
+            entity.getProduct().setId(dto.getProductId());
         }
 
         QuantitativeCheck saved = quantitativeCheckRepository.save(entity);
@@ -85,9 +91,10 @@ public class QuantitativeCheckService {
         if (dto.getScan() != null) entity.setScan(dto.getScan());
         if (dto.getStatus() != null) entity.setStatus(dto.getStatus());
         if (dto.getValue() != null) entity.setValue(dto.getValue());
-        if (dto.getQuantitativeCheckMasterId() != null) {
+        if (dto.getQuantitativeCheckMasterId() != null)
             entity.getQuantitativeCheckMaster().setId(dto.getQuantitativeCheckMasterId());
-        }
+        if (dto.getProductId() != null)
+            entity.getProduct().setId(dto.getProductId());
 
         QuantitativeCheck saved = quantitativeCheckRepository.save(entity);
         return quantitativeCheckMapper.quantitativeCheckToQuantitativeCheckDTOResponse(saved);

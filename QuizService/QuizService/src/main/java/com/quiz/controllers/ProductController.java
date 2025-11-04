@@ -67,21 +67,19 @@ public class ProductController {
             @RequestParam(required = false) LocalDate expDate,
             @RequestParam(required = false) Boolean isPublished,
             @RequestParam(required = false) Boolean status,
-            @RequestParam(required = false) List<Long> qualitativeCheckIds,
-            @RequestParam(required = false) List<Long> quantitativeCheckIds,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
         try {
             log.info("Fetching Products with filters: name={}, productCode={}, serialNo={}, orderNo={}, batchNo={}, hsnCode={}, unit={}, price={}, inStockQuantity={}, mfgDate={}, expDate={}, isPublished={}, status={}, qualitativeCheckIds={}, quantitativeCheckIds={}",
-                    name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price, inStockQuantity, mfgDate, expDate, isPublished, status, qualitativeCheckIds, quantitativeCheckIds);
+                    name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price, inStockQuantity, mfgDate, expDate, isPublished, status);
 
             Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
             Pageable pageable = PageRequest.of(page - 1, size, sort);
 
             Page<ProductDTOResponse> result = productService.getAllProductsWithFilters(
                     name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price,
-                    inStockQuantity, mfgDate, expDate, isPublished, status, qualitativeCheckIds, quantitativeCheckIds, pageable);
+                    inStockQuantity, mfgDate, expDate, isPublished, status, pageable);
 
             return responseService.success(HttpStatus.OK.value(),
                     "Products fetched successfully", result.getContent(), result.getTotalElements());

@@ -55,12 +55,10 @@ public class QualitativeCheckController {
             @RequestParam(required = false) Boolean isScan,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String value,
-            @RequestParam(required = false) List<Long> qualitativeCheckMasterIds, // ✅ foreign key filter
+            @RequestParam(required = false) List<Long> qualitativeCheckMasterIds,
+            @RequestParam(required = false) List<Long> productIds, // ✅ added product filter
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
-
-        log.info("Fetching Qualitative Checks with filters: description={}, isScan={}, status={}, value={}, qualitativeCheckMasterIds={}",
-                description, isScan, status, value, qualitativeCheckMasterIds);
 
         Sort sort = sortDir.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
@@ -69,7 +67,8 @@ public class QualitativeCheckController {
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<QualitativeCheckDTOResponse> resultPage =
-                qualitativeCheckService.getAllQualitativeChecksWithFilters(description, isScan, status, value, qualitativeCheckMasterIds, pageable);
+                qualitativeCheckService.getAllQualitativeChecksWithFilters(
+                        description, isScan, status, value, qualitativeCheckMasterIds, productIds, pageable);
 
         return responseService.success(HttpStatus.OK.value(),
                 "Qualitative Checks fetched successfully",
@@ -92,13 +91,13 @@ public class QualitativeCheckController {
         return responseService.success(HttpStatus.OK.value(), "Qualitative Check updated successfully", response, 1);
     }
 
-    @Operation(summary = "Patch Qualitative Check by ID")
-    @PatchMapping("/qualitativeCheck/{id}")
-    public ResponseEntity<Response<QualitativeCheckDTOResponse>> patchQualitativeCheck(
-            @PathVariable Long id, @RequestBody QualitativeCheckDTO dto) {
-        QualitativeCheckDTOResponse response = qualitativeCheckService.patchQualitativeCheck(id, dto);
-        return responseService.success(HttpStatus.OK.value(), "Qualitative Check patched successfully", response, 1);
-    }
+//    @Operation(summary = "Patch Qualitative Check by ID")
+//    @PatchMapping("/qualitativeCheck/{id}")
+//    public ResponseEntity<Response<QualitativeCheckDTOResponse>> patchQualitativeCheck(
+//            @PathVariable Long id, @RequestBody QualitativeCheckDTO dto) {
+//        QualitativeCheckDTOResponse response = qualitativeCheckService.patchQualitativeCheck(id, dto);
+//        return responseService.success(HttpStatus.OK.value(), "Qualitative Check patched successfully", response, 1);
+//    }
 
     @Operation(summary = "Delete Qualitative Check by ID")
     @DeleteMapping("/qualitativeCheck/{id}")

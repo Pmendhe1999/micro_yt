@@ -6,7 +6,7 @@ public class QuantitativeCheckDTO {
     private String status;
     private String value;
     private Long quantitativeCheckMasterId;
-
+    private Long productId;
     public String getDescription() {
         return description;
     }
@@ -45,5 +45,13 @@ public class QuantitativeCheckDTO {
 
     public void setQuantitativeCheckMasterId(Long quantitativeCheckMasterId) {
         this.quantitativeCheckMasterId = quantitativeCheckMasterId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 }

@@ -14,9 +14,8 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+
     @Query("SELECT DISTINCT p FROM Product p " +
-            "LEFT JOIN p.qualitativeCheck qc " +
-            "LEFT JOIN p.quantitativeCheck qtc " +
             "WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND (:productCode IS NULL OR LOWER(p.productCode) LIKE LOWER(CONCAT('%', :productCode, '%'))) " +
             "AND (:serialNo IS NULL OR LOWER(p.serialNo) LIKE LOWER(CONCAT('%', :serialNo, '%'))) " +
@@ -29,9 +28,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND (:mfgDate IS NULL OR p.mfgDate = :mfgDate) " +
             "AND (:expDate IS NULL OR p.expDate = :expDate) " +
             "AND (:isPublished IS NULL OR p.isPublished = :isPublished) " +
-            "AND (:status IS NULL OR p.status = :status) " +
-            "AND (:qualitativeCheckIds IS NULL OR qc.id IN :qualitativeCheckIds) " +
-            "AND (:quantitativeCheckIds IS NULL OR qtc.id IN :quantitativeCheckIds)")
+            "AND (:status IS NULL OR p.status = :status)")
     Page<Product> searchProductsAdvanced(
             @Param("name") String name,
             @Param("productCode") String productCode,
@@ -46,7 +43,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("expDate") LocalDate expDate,
             @Param("isPublished") Boolean isPublished,
             @Param("status") Boolean status,
-            @Param("qualitativeCheckIds") List<Long> qualitativeCheckIds,
-            @Param("quantitativeCheckIds") List<Long> quantitativeCheckIds,
             Pageable pageable);
 }

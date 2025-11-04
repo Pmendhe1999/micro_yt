@@ -59,12 +59,10 @@ public class QuantitativeCheckController {
             @RequestParam(required = false) Boolean isScan,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String value,
-            @RequestParam(required = false) List<Long> quantitativeCheckMasterIds, // ✅ foreign key filter
+            @RequestParam(required = false) List<Long> quantitativeCheckMasterIds,
+            @RequestParam(required = false) List<Long> productIds, // ✅ new filter
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
-
-        log.info("Fetching QuantitativeChecks with filters: description={}, isScan={}, status={}, value={}, quantitativeCheckMasterIds={}",
-                description, isScan, status, value, quantitativeCheckMasterIds);
 
         Sort sort = sortDir.equalsIgnoreCase("desc")
                 ? Sort.by(sortBy).descending()
@@ -73,13 +71,15 @@ public class QuantitativeCheckController {
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<QuantitativeCheckDTOResponse> result =
-                quantitativeCheckService.getAllQuantitativeChecksWithFilters(description, isScan, status, value, quantitativeCheckMasterIds, pageable);
+                quantitativeCheckService.getAllQuantitativeChecksWithFilters(
+                        description, isScan, status, value, quantitativeCheckMasterIds, productIds, pageable);
 
         return responseService.success(HttpStatus.OK.value(),
                 "Quantitative Checks fetched successfully",
                 result.getContent(),
                 result.getTotalElements());
     }
+
 
     @Operation(summary = "Get Quantitative Check by ID")
     @GetMapping("/quantitativeCheck/{id}")

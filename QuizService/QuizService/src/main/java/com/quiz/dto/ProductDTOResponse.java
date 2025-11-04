@@ -23,11 +23,6 @@ public class ProductDTOResponse {
     private Boolean status;
     private String unit;
 
-    private Long qualitativeCheckId;
-    private String qualitativeCheckName;
-    private Long quantitativeCheckId;
-    private String quantitativeCheckName;
-
     public Long getId() {
         return id;
     }
@@ -140,35 +135,5 @@ public class ProductDTOResponse {
         this.unit = unit;
     }
 
-    public Long getQualitativeCheckId() {
-        return qualitativeCheckId;
-    }
 
-    public void setQualitativeCheckId(Long qualitativeCheckId) {
-        this.qualitativeCheckId = qualitativeCheckId;
-    }
-
-    public String getQualitativeCheckName() {
-        return qualitativeCheckName;
-    }
-
-    public void setQualitativeCheckName(String qualitativeCheckName) {
-        this.qualitativeCheckName = qualitativeCheckName;
-    }
-
-    public Long getQuantitativeCheckId() {
-        return quantitativeCheckId;
-    }
-
-    public void setQuantitativeCheckId(Long quantitativeCheckId) {
-        this.quantitativeCheckId = quantitativeCheckId;
-    }
-
-    public String getQuantitativeCheckName() {
-        return quantitativeCheckName;
-    }
-
-    public void setQuantitativeCheckName(String quantitativeCheckName) {
-        this.quantitativeCheckName = quantitativeCheckName;
-    }
 }

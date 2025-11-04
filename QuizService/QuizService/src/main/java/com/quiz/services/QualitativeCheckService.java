@@ -2,9 +2,12 @@ package com.quiz.services;
 
 import com.quiz.dto.QualitativeCheckDTO;
 import com.quiz.dto.QualitativeCheckDTOResponse;
+import com.quiz.entities.Product;
 import com.quiz.entities.QualitativeCheck;
+import com.quiz.entities.QualitativeCheckMaster;
 import com.quiz.exception.ResourceNotFoundException;
 import com.quiz.mapper.QualitativeCheckMapper;
+import com.quiz.repositories.ProductRepository;
 import com.quiz.repositories.QualitativeCheckMasterRepository;
 import com.quiz.repositories.QualitativeCheckRepository;
 import jakarta.transaction.Transactional;
@@ -18,12 +21,14 @@ import java.util.List;
 @Service
 @Transactional
 public class QualitativeCheckService {
-
     @Autowired
     private QualitativeCheckRepository qualitativeCheckRepository;
 
     @Autowired
     private QualitativeCheckMasterRepository qualitativeCheckMasterRepository;
+
+    @Autowired
+    private ProductRepository productRepository; // ✅ added
 
     @Autowired
     private QualitativeCheckMapper qualitativeCheckMapper;
@@ -35,6 +40,17 @@ public class QualitativeCheckService {
 
     public QualitativeCheckDTOResponse createQualitativeCheck(QualitativeCheckDTO dto) {
         QualitativeCheck entity = qualitativeCheckMapper.qualitativeCheckDTOToQualitativeCheck(dto);
+
+        // ✅ Validate foreign keys
+        QualitativeCheckMaster master = qualitativeCheckMasterRepository.findById(dto.getQualitativeCheckMasterId())
+                .orElseThrow(() -> new ResourceNotFoundException("QualitativeCheckMaster not found"));
+
+        Product product = productRepository.findById(dto.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        entity.setQualitativeCheckMaster(master);
+        entity.setProduct(product);
+
         qualitativeCheckRepository.save(entity);
         return qualitativeCheckMapper.qualitativeCheckToQualitativeCheckDTOResponse(entity);
     }
@@ -45,10 +61,11 @@ public class QualitativeCheckService {
             String status,
             String value,
             List<Long> qualitativeCheckMasterIds,
+            List<Long> productIds, // ✅ added filter
             Pageable pageable) {
 
         Page<QualitativeCheck> page = qualitativeCheckRepository.searchQualitativeChecksAdvanced(
-                description, isScan, status, value, qualitativeCheckMasterIds, pageable);
+                description, isScan, status, value, qualitativeCheckMasterIds, productIds, pageable);
 
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Qualitative Checks found");
@@ -59,6 +76,7 @@ public class QualitativeCheckService {
 
         return new PageImpl<>(dtoList, pageable, page.getTotalElements());
     }
+
     public QualitativeCheckDTOResponse getQualitativeCheckById(Long id) {
         QualitativeCheck entity = qualitativeCheckRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Qualitative Check not found with id: " + id));
@@ -74,18 +92,11 @@ public class QualitativeCheckService {
         entity.setStatus(dto.getStatus());
         entity.setValue(dto.getValue());
 
-        QualitativeCheck saved = qualitativeCheckRepository.save(entity);
-        return qualitativeCheckMapper.qualitativeCheckToQualitativeCheckDTOResponse(saved);
-    }
-
-    public QualitativeCheckDTOResponse patchQualitativeCheck(Long id, QualitativeCheckDTO dto) {
-        QualitativeCheck entity = qualitativeCheckRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Qualitative Check not found with id: " + id));
-
-        if (dto.getDescription() != null) entity.setDescription(dto.getDescription());
-        if (dto.getScan() != null) entity.setScan(dto.getScan());
-        if (dto.getStatus() != null) entity.setStatus(dto.getStatus());
-        if (dto.getValue() != null) entity.setValue(dto.getValue());
+        if (dto.getProductId() != null) {
+            Product product = productRepository.findById(dto.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+            entity.setProduct(product);
+        }
 
         QualitativeCheck saved = qualitativeCheckRepository.save(entity);
         return qualitativeCheckMapper.qualitativeCheckToQualitativeCheckDTOResponse(saved);

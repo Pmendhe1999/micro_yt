@@ -6,7 +6,7 @@ public class QualitativeCheckDTO {
     private String status;
     private String value;
     private Long qualitativeCheckMasterId; // Foreign key reference
-
+    private Long productId; // ✅ added foreign key
     public String getDescription() {
         return description;
     }
@@ -45,5 +45,13 @@ public class QualitativeCheckDTO {
 
     public void setQualitativeCheckMasterId(Long qualitativeCheckMasterId) {
         this.qualitativeCheckMasterId = qualitativeCheckMasterId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 }

@@ -52,14 +52,6 @@ public class Product extends AbstractAuditingEntity{
     @Column(name = "unit", length = 255)
     private String unit;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "qualitative_check_id")
-    private QualitativeCheck qualitativeCheck;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "quantitative_check_id")
-    private QuantitativeCheck quantitativeCheck;
-
     public Long getId() {
         return id;
     }
@@ -170,21 +162,5 @@ public class Product extends AbstractAuditingEntity{
 
     public void setUnit(String unit) {
         this.unit = unit;
-    }
-
-    public QualitativeCheck getQualitativeCheck() {
-        return qualitativeCheck;
-    }
-
-    public void setQualitativeCheck(QualitativeCheck qualitativeCheck) {
-        this.qualitativeCheck = qualitativeCheck;
-    }
-
-    public QuantitativeCheck getQuantitativeCheck() {
-        return quantitativeCheck;
-    }
-
-    public void setQuantitativeCheck(QuantitativeCheck quantitativeCheck) {
-        this.quantitativeCheck = quantitativeCheck;
     }
 }

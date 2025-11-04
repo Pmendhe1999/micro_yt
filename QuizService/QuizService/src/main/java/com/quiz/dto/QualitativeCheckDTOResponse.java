@@ -13,7 +13,8 @@ public class QualitativeCheckDTOResponse {
     private String value;
     private Long qualitativeCheckMasterId;
     private String qualitativeCheckMasterName; // optional for readability
-
+    private Long productId;           // ✅ added product info
+    private String productName;
     public Long getId() {
         return id;
     }
@@ -68,5 +69,21 @@ public class QualitativeCheckDTOResponse {
 
     public void setQualitativeCheckMasterName(String qualitativeCheckMasterName) {
         this.qualitativeCheckMasterName = qualitativeCheckMasterName;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 }

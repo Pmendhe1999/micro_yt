@@ -26,6 +26,12 @@ public class QuantitativeCheck extends AbstractAuditingEntity {
     @JoinColumn(name = "quantitative_check_master_id", nullable = false)
     private QuantitativeCheckMaster quantitativeCheckMaster;
 
+    // ✅ Added Product foreign key
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+
     public Long getId() {
         return id;
     }
@@ -72,5 +78,13 @@ public class QuantitativeCheck extends AbstractAuditingEntity {
 
     public void setQuantitativeCheckMaster(QuantitativeCheckMaster quantitativeCheckMaster) {
         this.quantitativeCheckMaster = quantitativeCheckMaster;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }

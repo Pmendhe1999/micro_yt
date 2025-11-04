@@ -41,36 +41,14 @@ public class ProductService {
 
     public void createAllProduct(List<ProductDTO> dtoList) {
         List<Product> entities = productMapper.toEntityList(dtoList);
-        entities.forEach(entity -> {
-            if (entity.getQualitativeCheck() != null && entity.getQualitativeCheck().getId() != null) {
-                QualitativeCheck qc = qualitativeCheckRepository.findById(entity.getQualitativeCheck().getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("QualitativeCheck not found with ID: " + entity.getQualitativeCheck().getId()));
-                entity.setQualitativeCheck(qc);
-            }
 
-            if (entity.getQuantitativeCheck() != null && entity.getQuantitativeCheck().getId() != null) {
-                QuantitativeCheck qc = quantitativeCheckRepository.findById(entity.getQuantitativeCheck().getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("QuantitativeCheck not found with ID: " + entity.getQuantitativeCheck().getId()));
-                entity.setQuantitativeCheck(qc);
-            }
-        });
         productRepository.saveAll(entities);
     }
 
     public void createProduct(ProductDTO dto) {
         Product entity = productMapper.toEntity(dto);
 
-        if (dto.getQualitativeCheckId() != null) {
-            QualitativeCheck qc = qualitativeCheckRepository.findById(dto.getQualitativeCheckId())
-                    .orElseThrow(() -> new ResourceNotFoundException("QualitativeCheck not found with ID: " + dto.getQualitativeCheckId()));
-            entity.setQualitativeCheck(qc);
-        }
 
-        if (dto.getQuantitativeCheckId() != null) {
-            QuantitativeCheck qc = quantitativeCheckRepository.findById(dto.getQuantitativeCheckId())
-                    .orElseThrow(() -> new ResourceNotFoundException("QuantitativeCheck not found with ID: " + dto.getQuantitativeCheckId()));
-            entity.setQuantitativeCheck(qc);
-        }
 
         productRepository.save(entity);
     }
@@ -89,13 +67,11 @@ public class ProductService {
             LocalDate expDate,
             Boolean isPublished,
             Boolean status,
-            List<Long> qualitativeCheckIds,
-            List<Long> quantitativeCheckIds,
             Pageable pageable) {
 
         Page<Product> page = productRepository.searchProductsAdvanced(
                 name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price,
-                inStockQuantity, mfgDate, expDate, isPublished, status, qualitativeCheckIds, quantitativeCheckIds, pageable);
+                inStockQuantity, mfgDate, expDate, isPublished, status, pageable);
 
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Products found");
@@ -135,17 +111,6 @@ public class ProductService {
         if (dto.getHsnCode() != null) existing.setHsnCode(dto.getHsnCode());
         if (dto.getPublished() != null) existing.setPublished(dto.getPublished());
 
-        if (dto.getQualitativeCheckId() != null) {
-            QualitativeCheck qc = qualitativeCheckRepository.findById(dto.getQualitativeCheckId())
-                    .orElseThrow(() -> new ResourceNotFoundException("QualitativeCheck not found with ID: " + dto.getQualitativeCheckId()));
-            existing.setQualitativeCheck(qc);
-        }
-
-        if (dto.getQuantitativeCheckId() != null) {
-            QuantitativeCheck qc = quantitativeCheckRepository.findById(dto.getQuantitativeCheckId())
-                    .orElseThrow(() -> new ResourceNotFoundException("QuantitativeCheck not found with ID: " + dto.getQuantitativeCheckId()));
-            existing.setQuantitativeCheck(qc);
-        }
 
         Product saved = productRepository.save(existing);
         return productMapper.toDto(saved);
@@ -155,4 +120,5 @@ public class ProductService {
         Product existing = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         productRepository.delete(existing);
-    }}
+    }
+}

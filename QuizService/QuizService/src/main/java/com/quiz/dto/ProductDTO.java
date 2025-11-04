@@ -23,8 +23,6 @@ public class ProductDTO {
     private Boolean status;
     private String unit;
 
-    private Long qualitativeCheckId;
-    private Long quantitativeCheckId;
 
     public String getBatchNo() {
         return batchNo;
@@ -130,19 +128,5 @@ public class ProductDTO {
         this.unit = unit;
     }
 
-    public Long getQualitativeCheckId() {
-        return qualitativeCheckId;
-    }
 
-    public void setQualitativeCheckId(Long qualitativeCheckId) {
-        this.qualitativeCheckId = qualitativeCheckId;
-    }
-
-    public Long getQuantitativeCheckId() {
-        return quantitativeCheckId;
-    }
-
-    public void setQuantitativeCheckId(Long quantitativeCheckId) {
-        this.quantitativeCheckId = quantitativeCheckId;
-    }
 }
