@@ -149,14 +149,20 @@ import java.util.stream.Collectors;
                 if (authTypeMaster != null &&
                         authTypeMaster.getName().equalsIgnoreCase("self-authentication")) {
                     credential.setSelfAuthentication(true);
+                    credential.setActivationKey(true);
+                    credential.setActivated(true);
+
                 } else {
                     credential.setSelfAuthentication(false);
+
                 }
 
                 if (authTypeMaster != null &&
                         authTypeMaster.getName().equalsIgnoreCase("otp-authentication")) {
                     credential.setOtpAuthentication(true);
                     credential.setSelfAuthentication(true);
+                    credential.setActivationKey(true);
+                    credential.setActivated(true);
                 } else {
                     credential.setOtpAuthentication(false);
                     credential.setSelfAuthentication(false);
@@ -164,8 +170,6 @@ import java.util.stream.Collectors;
 
                 if (authTypeMaster != null &&
                         authTypeMaster.getName().equalsIgnoreCase("default password")) {
-                    credential.setActivationKey(true);
-                } else {
                     credential.setActivationKey(true);
                 }
                 if (authTypeMaster != null &&

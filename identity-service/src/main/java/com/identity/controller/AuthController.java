@@ -7,6 +7,7 @@ import com.identity.dto.ChangePasswordRequest;
 import com.identity.dto.OtpRequestDTO;
 import com.identity.dto.PasswordResetRequest;
 import com.identity.entity.UserCredential;
+import com.identity.reository.UserCredentialRepository;
 import com.identity.service.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -27,6 +28,7 @@ import java.security.SignatureException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 //@CrossOrigin(origins = "*")
 @RestController
@@ -88,9 +90,33 @@ public class AuthController {
         return "you hit the api";
     }
 
+    @Autowired
+    private UserCredentialRepository repository;
+
     @PostMapping("/token")
-    public ResponseEntity<?>getToken(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> getToken(@RequestBody AuthRequest authRequest) {
         try {
+            // 🔹 Step 1: Load user first (so we can check activationKey)
+            Optional<UserCredential> optionalUser = repository.findByUsername(authRequest.getUsername());
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("User not found with name: " + authRequest.getUsername());
+            }
+
+            UserCredential user = optionalUser.get();
+            // 🔹 Step 2: Check activationKey before authentication
+            if (Boolean.FALSE.equals(user.getActivated())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Your account is disable please contact admin");
+            }
+
+            // 🔹 Step 2: Check activationKey before authentication
+            if (Boolean.FALSE.equals(user.getActivationKey())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Your account is pending for admin verification.");
+            }
+
+            // 🔹 Step 3: Authenticate username & password
             Authentication authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             authRequest.getUsername(),
@@ -99,13 +125,11 @@ public class AuthController {
             );
 
             if (authenticate.isAuthenticated()) {
+                CustomUserDetails userDetails = (CustomUserDetails) userDetailsService
+                        .loadUserByUsername(authRequest.getUsername());
 
-                // ✅ Load user details
-                CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(authRequest.getUsername());
-// ✅ Generate JWT token with full UserDetails
                 String token = jwtService.generateToken(userDetails);
 
-                // ✅ Prepare response
                 Map<String, Object> response = new HashMap<>();
                 response.put("token", token);
                 response.put("userId", userDetails.getUserId());
@@ -114,7 +138,6 @@ public class AuthController {
                 response.put("selfAuthentication", userDetails.getSelfAuthentication());
                 response.put("otpAuthentication", userDetails.getOtpSelfAuthentication());
 
-                // ✅ Include Base Image URL if available
                 if (userDetails.getUser().getMediaDetails() != null
                         && userDetails.getUser().getMediaDetails().getMedia() != null) {
                     response.put("baseImageUrl", userDetails.getUser()
@@ -124,6 +147,7 @@ public class AuthController {
                 } else {
                     response.put("baseImageUrl", null);
                 }
+
                 response.put("roles", userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
                         .toList());
@@ -136,8 +160,6 @@ public class AuthController {
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An unexpected error occurred while generating token");
@@ -175,20 +197,57 @@ public class AuthController {
     @PostMapping("/send-otp")
     public ResponseEntity<?> sendOtp(@RequestBody Map<String, String> request) {
         String username = request.get("userName");
+        String key = request.get("key");
 
         if (username == null || username.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "Username is required"));
         }
 
+        if("F".equals(key)) {
+            Optional<UserCredential> optionalUser = repository.findByUsername(username);
+
+            if (optionalUser.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "User not found with name: " + username));
+            }
+
+            UserCredential user = optionalUser.get();
+
+            // 🔹 Step 1: Check activationKey before proceeding
+            if (Boolean.FALSE.equals(user.getActivated())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Your account is disable please contact admin"));
+            }
+
+
+
+            if (Boolean.TRUE.equals(user.getSelfAuthentication()) && Boolean.TRUE.equals(user.getOtpAuthentication()) ) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Your otp authintication is pending"));
+            }else
+                   if (Boolean.TRUE.equals(user.getSelfAuthentication())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "Your self authintication is pending"));
+            }else   if (Boolean.FALSE.equals(user.getActivationKey())) {
+                       return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                               .body(Map.of("message", "Your account is pending for admin verification."));
+                   }
+
+        }
+
         try {
+            // 🔹 Step 2: Proceed with OTP sending
             String message = service.sendOtpForReset(username);
             return ResponseEntity.ok(Map.of("message", message));
+
         } catch (IllegalArgumentException e) {
-            // ✅ Custom application error (bad request)
+            // ✅ Custom application error (e.g. invalid state)
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+
         } catch (Exception e) {
-            // ✅ Unexpected error
-            return ResponseEntity.internalServerError().body(Map.of("message", "Internal server error"));
+            // ✅ Unexpected server error
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("message", "Internal server error"));
         }
     }
 

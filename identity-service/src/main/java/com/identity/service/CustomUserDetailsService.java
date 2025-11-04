@@ -24,6 +24,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserCredential> credential = repository.findByUsername(username);
-        return credential.map(CustomUserDetails::new).orElseThrow(() -> new UsernameNotFoundException("user not found with name :" + username));
+
+        UserCredential user = credential.orElseThrow(
+                () -> new UsernameNotFoundException("User not found with name: " + username)
+        );
+
+        // ✅ Check if activation key is false
+        if (Boolean.FALSE.equals(user.getActivationKey())) {
+            throw new UsernameNotFoundException("Your account is pending verification.");
+        }
+
+        return new CustomUserDetails(user);
     }
 }

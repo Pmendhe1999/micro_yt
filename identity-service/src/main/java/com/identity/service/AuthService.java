@@ -158,6 +158,8 @@ public class AuthService {
         if (dto.getType() != null && dto.getType().equalsIgnoreCase("otp")) {
             user.setSelfAuthentication(false);
             user.setOtpAuthentication(false);
+            user.setActivationKey(true);
+            user.setActivated(true);
             log.info("[AuthService] Type is SA — selfAuthentication set to false for user: {}", user.getUsername());
         }
 
