@@ -153,12 +153,11 @@ public class EmailService {
                 <ul>
                     <li><b>Username:</b> %s</li>
                     <li><b>Email:</b> %s</li>
-                    <li><b>Password:</b> %s</li>
                     <li><b>Login URL:</b> <a href="%s">%s</a></li>
                 </ul>
                 <p>Please review and activate if needed.</p>
                 <p>Best regards,<br>System Notification Service</p>
-                """.formatted(newUsername, newUserEmail, password, loginUrl, loginUrl);
+                """.formatted(newUsername, newUserEmail, loginUrl, loginUrl);
 
             helper.setText(content, true);
             mailSender.send(message);

@@ -168,6 +168,11 @@ import java.util.stream.Collectors;
                 } else {
                     credential.setActivationKey(true);
                 }
+                if (authTypeMaster != null &&
+                        authTypeMaster.getName().equalsIgnoreCase("Admin Authentication")) {
+                    credential.setActivationKey(false);
+                    credential.setActivated(false);
+                }
 
                 // ✅ Save user
                 UserCredential saved = repository.save(credential);

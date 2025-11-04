@@ -62,7 +62,7 @@ public class CountryController {
     @GetMapping
     public ResponseEntity<ResponceData> getAll(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "100") int size,
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "countryId") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
