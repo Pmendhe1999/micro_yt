@@ -14,7 +14,7 @@ public interface DeviceService {
     Page<Device> getAllDevices(String search, Pageable pageable);
 
     Optional<Device> getDeviceById(Long id);
-
+    Optional<Device> getDeviceByDeviceId(String deviceId);
     Device updateDeviceReturnEntity(Long id, DeviceDTO dto, String token);
 
     Device deleteDeviceReturnEntity(Long id, String token);

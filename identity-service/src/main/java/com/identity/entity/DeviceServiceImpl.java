@@ -96,6 +96,17 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
+    public Optional<Device> getDeviceByDeviceId(String deviceId) {
+        try {
+            log.debug("Fetching Device by deviceId={}", deviceId);
+            return repository.findByDeviceId(deviceId);
+        } catch (Exception e) {
+            log.error("Error occurred while fetching Device with deviceId={}: {}", deviceId, e.getMessage(), e);
+            throw new RuntimeException("Error occurred while fetching Device with deviceId " + deviceId + ": " + e.getMessage(), e);
+        }
+    }
+
+    @Override
     public Device updateDeviceReturnEntity(Long id, DeviceDTO dto, String token) {
         try {
             Device existing = repository.findById(id)

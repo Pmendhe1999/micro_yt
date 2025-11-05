@@ -87,6 +87,15 @@ public class DeviceController {
                         .body(new ResponceData("fail", 404, "Device not found with id " + id, null, 0)));
     }
 
+    @GetMapping("/device/{deviceId}")
+    public ResponseEntity<ResponceData> getDeviceByDeviceId(@PathVariable String deviceId) {
+        Optional<Device> device = service.getDeviceByDeviceId(deviceId);
+        return device.map(value ->
+                        ResponseEntity.ok(new ResponceData("success", 200, "Device retrieved successfully", value, 1)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new ResponceData("fail", 404, "Device not found with deviceId " + deviceId, null, 0)));
+    }
+
     // UPDATE
     @PutMapping("/{id}")
     public ResponseEntity<ResponceData> updateDevice(
