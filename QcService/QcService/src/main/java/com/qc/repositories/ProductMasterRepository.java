@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public interface ProductMasterRepository extends JpaRepository<ProductMaster, Long> {
 
@@ -21,7 +22,9 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
             "AND (:price IS NULL OR p.price = :price) " +
             "AND (:quantity IS NULL OR p.quantity = :quantity) " +
             "AND (:isPublished IS NULL OR p.isPublished = :isPublished) " +
-            "AND (:status IS NULL OR p.status = :status)")
+            "AND (:status IS NULL OR p.status = :status) " +
+            "AND (:mfgDate IS NULL OR p.mfgDate = :mfgDate) " +
+            "AND (:expDate IS NULL OR p.expDate = :expDate)")
     Page<ProductMaster> searchProductMastersAdvanced(
             @Param("name") String name,
             @Param("productCode") String productCode,
@@ -33,5 +36,7 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
             @Param("quantity") BigDecimal quantity,
             @Param("isPublished") Boolean isPublished,
             @Param("status") Boolean status,
+            @Param("mfgDate") LocalDate mfgDate,
+            @Param("expDate") LocalDate expDate,
             Pageable pageable);
 }

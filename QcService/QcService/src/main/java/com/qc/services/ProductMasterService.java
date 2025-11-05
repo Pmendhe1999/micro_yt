@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -54,10 +55,13 @@ public class ProductMasterService {
             BigDecimal quantity,
             Boolean isPublished,
             Boolean status,
+            LocalDate mfgDate,
+            LocalDate expDate,
             Pageable pageable) {
 
         Page<ProductMaster> page = productMasterRepository.searchProductMastersAdvanced(
-                name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity, isPublished, status, pageable);
+                name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity,
+                isPublished, status, mfgDate, expDate, pageable);
 
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Product Masters found");
