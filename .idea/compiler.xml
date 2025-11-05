@@ -9,7 +9,6 @@
         <outputRelativeToContentRoot value="true" />
         <module name="QuizService" />
         <module name="ServiceRegistry" />
-        <module name="QcService" />
         <module name="ApiGateway" />
       </profile>
       <profile name="Annotation profile for identity-service" enabled="true">
@@ -23,6 +22,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="QcService" target="17" />
       <module name="QuestionService" target="17" />
     </bytecodeTargetLevel>
   </component>
