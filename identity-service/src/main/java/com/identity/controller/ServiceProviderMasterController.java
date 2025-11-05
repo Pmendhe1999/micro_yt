@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/service-providers")
+@RequestMapping("/identity/service-providers")
 public class ServiceProviderMasterController {
     private static final Logger log = LoggerFactory.getLogger(ServiceProviderMasterController.class);
 

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/notification-types")
+@RequestMapping("/identity/notification-types")
 @RequiredArgsConstructor
 public class NotificationTypeController {
     @Autowired

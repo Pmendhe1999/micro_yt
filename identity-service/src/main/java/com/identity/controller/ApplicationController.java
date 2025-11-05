@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/applications")
+@RequestMapping("/identity/applications")
 public class ApplicationController {
 
 

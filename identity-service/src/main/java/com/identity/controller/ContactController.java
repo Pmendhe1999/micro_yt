@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/contacts")
+@RequestMapping("/identity/contacts")
 public class ContactController {
     @Autowired
     private ContactService service;

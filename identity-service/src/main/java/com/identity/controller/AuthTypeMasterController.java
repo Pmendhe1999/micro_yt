@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 @RestController
-@RequestMapping("/auth-types-master")
+@RequestMapping("/identity/auth-types-master")
 public class AuthTypeMasterController {
     @Autowired
     private AuthTypeMasterService service;

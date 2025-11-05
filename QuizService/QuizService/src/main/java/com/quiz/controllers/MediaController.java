@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/qc")
 @Slf4j
 public class MediaController {
     @Autowired

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/app-functions")
+@RequestMapping("/identity/app-functions")
 public class AppFunctionController {
 
 

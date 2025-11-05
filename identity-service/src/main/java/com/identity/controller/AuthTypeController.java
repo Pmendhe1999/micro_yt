@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/auth-types")
+@RequestMapping("/identity/auth-types")
 @RequiredArgsConstructor
 public class AuthTypeController {
 

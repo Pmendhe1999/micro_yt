@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/app-fun-types")
+@RequestMapping("/identity/app-fun-types")
 public class AppFunTypesMasterController {
 
     @Autowired

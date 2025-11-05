@@ -22,7 +22,7 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/media-details")
+@RequestMapping("/identity/media-details")
 public class MediaDetailsController {
     @Autowired
     private MediaDetailsService service;

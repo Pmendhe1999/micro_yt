@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/notification-tech-details")
+@RequestMapping("/identity/notification-tech-details")
 public class NotificationTechDetailsController {
     @Autowired
     private NotificationTechDetailsService service;

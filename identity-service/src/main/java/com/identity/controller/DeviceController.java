@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/devices")
+@RequestMapping("/identity/devices")
 public class DeviceController {
 
     @Autowired

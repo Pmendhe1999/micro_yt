@@ -23,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 
 @RestController
-@RequestMapping("/countries")
+@RequestMapping("/identity/countries")
 @RequiredArgsConstructor
 public class CountryController {
 
