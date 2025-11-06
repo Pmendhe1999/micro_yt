@@ -87,13 +87,38 @@ public class DeviceController {
                         .body(new ResponceData("fail", 404, "Device not found with id " + id, null, 0)));
     }
 
+
     @GetMapping("/device/{deviceId}")
-    public ResponseEntity<ResponceData> getDeviceByDeviceId(@PathVariable String deviceId) {
-        Optional<Device> device = service.getDeviceByDeviceId(deviceId);
-        return device.map(value ->
-                        ResponseEntity.ok(new ResponceData("success", 200, "Device retrieved successfully", value, 1)))
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new ResponceData("fail", 404, "Device not found with deviceId " + deviceId, null, 0)));
+    public ResponseEntity<ResponceData> getDeviceByDeviceIdAndApplication(
+            @PathVariable String deviceId,
+            @RequestParam(required = false) Long applicationId) {
+
+        Optional<Device> deviceOpt = service.getDeviceByDeviceId(deviceId);
+
+        if (deviceOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponceData("fail", 404, "Device not found with deviceId " + deviceId, null, 0));
+        }
+
+        Device device = deviceOpt.get();
+
+        // ✅ If applicationId is provided, check for match
+        if (applicationId != null) {
+            boolean matched = device.getApplications().stream()
+                    .anyMatch(app -> app.getApplicationId().equals(applicationId));
+
+            if (!matched) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new ResponceData("fail", 403,
+                                "Device ID and Application ID do not match", null, 0));
+            }
+        }
+
+        // ✅ If matched or no applicationId provided, return success
+        return ResponseEntity.ok(
+                new ResponceData("success", 200,
+                        "Device retrieved successfully", device, 1)
+        );
     }
 
     // UPDATE
