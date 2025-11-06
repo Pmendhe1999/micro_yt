@@ -24,6 +24,25 @@ public class ProductDTO {
     private String unit;
 
 
+    private Long deliveryChallanId;     // Foreign key
+    private Long deliveryItemId;        // Foreign key
+
+    public Long getDeliveryChallanId() {
+        return deliveryChallanId;
+    }
+
+    public void setDeliveryChallanId(Long deliveryChallanId) {
+        this.deliveryChallanId = deliveryChallanId;
+    }
+
+    public Long getDeliveryItemId() {
+        return deliveryItemId;
+    }
+
+    public void setDeliveryItemId(Long deliveryItemId) {
+        this.deliveryItemId = deliveryItemId;
+    }
+
     public String getBatchNo() {
         return batchNo;
     }

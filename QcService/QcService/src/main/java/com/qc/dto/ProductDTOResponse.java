@@ -23,6 +23,43 @@ public class ProductDTOResponse {
     private Boolean status;
     private String unit;
 
+    private Long deliveryChallanId;
+    private String deliveryChallanName;   // Optional for readability
+    private Long deliveryItemId;
+    private String deliveryItemName;
+
+    public Long getDeliveryChallanId() {
+        return deliveryChallanId;
+    }
+
+    public void setDeliveryChallanId(Long deliveryChallanId) {
+        this.deliveryChallanId = deliveryChallanId;
+    }
+
+    public String getDeliveryChallanName() {
+        return deliveryChallanName;
+    }
+
+    public void setDeliveryChallanName(String deliveryChallanName) {
+        this.deliveryChallanName = deliveryChallanName;
+    }
+
+    public Long getDeliveryItemId() {
+        return deliveryItemId;
+    }
+
+    public void setDeliveryItemId(Long deliveryItemId) {
+        this.deliveryItemId = deliveryItemId;
+    }
+
+    public String getDeliveryItemName() {
+        return deliveryItemName;
+    }
+
+    public void setDeliveryItemName(String deliveryItemName) {
+        this.deliveryItemName = deliveryItemName;
+    }
+
     public Long getId() {
         return id;
     }

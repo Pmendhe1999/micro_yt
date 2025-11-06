@@ -212,6 +212,21 @@ import java.util.stream.Collectors;
 //                        emailService.sendOtpEmail(saved.getEmail(), otp);
 //                        log.info("🔐 OTP authentication selected — OTP sent to {}", saved.getEmail());
                     }
+                    case "self-authentication" -> {
+                        // 🔹 Generate OTP and send to email
+                        String loginUrl = "http://yourdomain.com/login";
+                        emailService.sendCredentialsEmail(
+                                saved.getEmail(),
+                                saved.getUsername(),
+                                dto.getPassword(), // send plain password in email
+                                loginUrl
+                        );
+                        log.info("📧 Credentials email sent to '{}'", saved.getEmail());
+
+//                        String otp = otpService.generateOtp(saved.getEmail());
+//                        emailService.sendOtpEmail(saved.getEmail(), otp);
+//                        log.info("🔐 OTP authentication selected — OTP sent to {}", saved.getEmail());
+                    }
 
                     case "admin authentication" -> {
                         // 🔹 Find SuperAdmin

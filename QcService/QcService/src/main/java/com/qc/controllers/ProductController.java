@@ -27,29 +27,18 @@ import java.util.List;
 @Slf4j
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    @Autowired private ProductService productService;
+    @Autowired private ResponseService responseService;
 
-    @Autowired
-    private ResponseService responseService;
-
-    @Operation(summary = "Create a list of Products")
-    @PostMapping("/product/all")
-    public ResponseEntity<Response<Void>> createAllProduct(@Valid @RequestBody List<ProductDTO> dtoList) {
-        log.info("Request to create product list");
-        productService.createAllProduct(dtoList);
-        return responseService.success(HttpStatus.CREATED.value(), "Products created successfully", null, 0);
-    }
-
-    @Operation(summary = "Create a Product")
+    @Operation(summary = "Create Product")
     @PostMapping("/product")
     public ResponseEntity<Response<ProductDTOResponse>> createProduct(@Valid @RequestBody ProductDTO dto) {
-        log.info("Request to create product: {}", dto.getName());
-        productService.createProduct(dto);
-        return responseService.success(HttpStatus.CREATED.value(), "Product created successfully", null, 0);
+        log.info("Creating Product: {}", dto.getName());
+        ProductDTOResponse created = productService.createProduct(dto);
+        return responseService.success(HttpStatus.CREATED.value(), "Product created successfully", created, 1);
     }
 
-    @Operation(summary = "Get all Products with optional filters, pagination, and sorting")
+    @Operation(summary = "Get All Products with Filters")
     @GetMapping("/product")
     public ResponseEntity<Response<List<ProductDTOResponse>>> getAllProducts(
             @RequestParam(defaultValue = "1") Integer page,
@@ -67,29 +56,21 @@ public class ProductController {
             @RequestParam(required = false) LocalDate expDate,
             @RequestParam(required = false) Boolean isPublished,
             @RequestParam(required = false) Boolean status,
+            @RequestParam(required = false) Long deliveryChallanId,
+            @RequestParam(required = false) Long deliveryItemId,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir
-    ) {
-        try {
-            log.info("Fetching Products with filters: name={}, productCode={}, serialNo={}, orderNo={}, batchNo={}, hsnCode={}, unit={}, price={}, inStockQuantity={}, mfgDate={}, expDate={}, isPublished={}, status={}, qualitativeCheckIds={}, quantitativeCheckIds={}",
-                    name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price, inStockQuantity, mfgDate, expDate, isPublished, status);
+            @RequestParam(defaultValue = "asc") String sortDir) {
 
-            Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-            Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-            Page<ProductDTOResponse> result = productService.getAllProductsWithFilters(
-                    name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price,
-                    inStockQuantity, mfgDate, expDate, isPublished, status, pageable);
+        Page<ProductDTOResponse> result = productService.getAllProductsWithFilters(
+                name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price,
+                inStockQuantity, mfgDate, expDate, isPublished, status,
+                deliveryChallanId, deliveryItemId, pageable);
 
-            return responseService.success(HttpStatus.OK.value(),
-                    "Products fetched successfully", result.getContent(), result.getTotalElements());
-
-        } catch (Exception e) {
-            log.error("Unexpected error while fetching Products: {}", e.getMessage(), e);
-            Response<List<ProductDTOResponse>> response = new Response<>(
-                    "fail", 500, "Unexpected error: " + e.getMessage(), Collections.emptyList(), 0L);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
+        return responseService.success(HttpStatus.OK.value(),
+                "Products fetched successfully", result.getContent(), result.getTotalElements());
     }
 
     @Operation(summary = "Get Product by ID")
@@ -105,14 +86,6 @@ public class ProductController {
             @PathVariable Long id, @Valid @RequestBody ProductDTO dto) {
         ProductDTOResponse updated = productService.updateProduct(id, dto);
         return responseService.success(HttpStatus.OK.value(), "Product updated successfully", updated, 1);
-    }
-
-    @Operation(summary = "Patch Product by ID")
-    @PatchMapping("/product/{id}")
-    public ResponseEntity<Response<ProductDTOResponse>> patchProduct(
-            @PathVariable Long id, @RequestBody ProductDTO dto) {
-        ProductDTOResponse updated = productService.patchProduct(id, dto);
-        return responseService.success(HttpStatus.OK.value(), "Product partially updated successfully", updated, 1);
     }
 
     @Operation(summary = "Delete Product by ID")

@@ -10,11 +10,14 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    @Query("SELECT DISTINCT p FROM Product p " +
+    @Query("SELECT p FROM Product p " +
+            "LEFT JOIN p.deliveryChallan dc " +
+            "LEFT JOIN p.deliveryItem di " +
             "WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
             "AND (:productCode IS NULL OR LOWER(p.productCode) LIKE LOWER(CONCAT('%', :productCode, '%'))) " +
             "AND (:serialNo IS NULL OR LOWER(p.serialNo) LIKE LOWER(CONCAT('%', :serialNo, '%'))) " +
@@ -27,7 +30,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND (:mfgDate IS NULL OR p.mfgDate = :mfgDate) " +
             "AND (:expDate IS NULL OR p.expDate = :expDate) " +
             "AND (:isPublished IS NULL OR p.isPublished = :isPublished) " +
-            "AND (:status IS NULL OR p.status = :status)")
+            "AND (:status IS NULL OR p.status = :status) " +
+            "AND (:deliveryChallanId IS NULL OR dc.id = :deliveryChallanId) " +
+            "AND (:deliveryItemId IS NULL OR di.id = :deliveryItemId)")
     Page<Product> searchProductsAdvanced(
             @Param("name") String name,
             @Param("productCode") String productCode,
@@ -42,5 +47,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("expDate") LocalDate expDate,
             @Param("isPublished") Boolean isPublished,
             @Param("status") Boolean status,
+            @Param("deliveryChallanId") Long deliveryChallanId,
+            @Param("deliveryItemId") Long deliveryItemId,
             Pageable pageable);
 }
