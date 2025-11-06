@@ -1,6 +1,7 @@
 package com.identity.entity;
 
 import com.identity.dto.DeviceDTO;
+import com.identity.reository.ApplicationRepository;
 import com.identity.reository.DeviceRepository;
 import com.identity.service.DeviceService;
 import com.identity.service.JwtService;
@@ -16,8 +17,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +31,9 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Autowired
     private  JwtService jwtService;
+
+    @Autowired
+    private ApplicationRepository applicationRepository;
 
     @Autowired
     private EntityManager entityManager;
@@ -54,6 +60,11 @@ public class DeviceServiceImpl implements DeviceService {
             device.setAuthorizedAt(LocalDateTime.now());
             device.setCreatedDate(LocalDateTime.now());
             device.setLastModifiedDate(LocalDateTime.now());
+            // Attach applications if provided
+            if (dto.getApplicationIds() != null && !dto.getApplicationIds().isEmpty()) {
+                Set<Application> apps = new HashSet<>(applicationRepository.findAllById(dto.getApplicationIds()));
+                device.setApplications(apps);
+            }
 
             Device saved = repository.save(device);
 
@@ -124,6 +135,12 @@ public class DeviceServiceImpl implements DeviceService {
             existing.setIpAddress(dto.getIpAddress());
             existing.setStatus(dto.getStatus());
             existing.setLastModifiedDate(LocalDateTime.now());
+
+            // Update applications if provided
+            if (dto.getApplicationIds() != null) {
+                Set<Application> apps = new HashSet<>(applicationRepository.findAllById(dto.getApplicationIds()));
+                existing.setApplications(apps);
+            }
 
             repository.save(existing);
 

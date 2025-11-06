@@ -6,7 +6,10 @@ import com.identity.dto.AuthRequest;
 import com.identity.dto.ChangePasswordRequest;
 import com.identity.dto.OtpRequestDTO;
 import com.identity.dto.PasswordResetRequest;
+import com.identity.entity.Application;
+import com.identity.entity.Device;
 import com.identity.entity.UserCredential;
+import com.identity.reository.DeviceRepository;
 import com.identity.reository.UserCredentialRepository;
 import com.identity.service.*;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -25,10 +28,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.SignatureException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 //@CrossOrigin(origins = "*")
 @RestController
@@ -93,10 +93,13 @@ public class AuthController {
     @Autowired
     private UserCredentialRepository repository;
 
+    @Autowired
+    private DeviceRepository deviceRepository;
+
     @PostMapping("/token")
     public ResponseEntity<?> getToken(@RequestBody AuthRequest authRequest) {
         try {
-            // 🔹 Step 1: Load user first (so we can check activationKey)
+            // 🔹 Step 1: Load user first
             Optional<UserCredential> optionalUser = repository.findByUsername(authRequest.getUsername());
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -104,19 +107,59 @@ public class AuthController {
             }
 
             UserCredential user = optionalUser.get();
-            // 🔹 Step 2: Check activationKey before authentication
+
+            // 🔹 Step 2: Check if user is active and verified
             if (Boolean.FALSE.equals(user.getActivated())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("Your account is disable please contact admin");
+                        .body("Your account is disabled. Please contact admin.");
             }
 
-            // 🔹 Step 2: Check activationKey before authentication
             if (Boolean.FALSE.equals(user.getActivationKey())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Your account is pending for admin verification.");
             }
 
-            // 🔹 Step 3: Authenticate username & password
+            // ✅ Step 3: If deviceId provided, perform device checks
+            if (authRequest.getDeviceId() != null && !authRequest.getDeviceId().isEmpty()) {
+
+                // Check if device exists
+                Optional<Device> optionalDevice = deviceRepository.findByDeviceId(authRequest.getDeviceId());
+                if (optionalDevice.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body("Device not available in the system.");
+                }
+
+                Device device = optionalDevice.get();
+
+                // Retrieve all applications assigned to this device
+                Set<Application> deviceApplications = device.getApplications();
+
+                if (deviceApplications == null || deviceApplications.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("No applications are linked to this device.");
+                }
+
+                // 🔹 Retrieve the user's assigned applications
+                Set<Application> userApplications = user.getApplications();
+
+                if (userApplications == null || userApplications.isEmpty()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("User is not linked to any application.");
+                }
+
+// 🔹 Check if any of the user's applications match the device's applications
+                boolean matched = userApplications.stream().anyMatch(
+                        userApp -> deviceApplications.stream()
+                                .anyMatch(deviceApp -> deviceApp.getApplicationId().equals(userApp.getApplicationId()))
+                );
+
+                if (!matched) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Application and device mismatch.");
+                }
+            }
+
+            // ✅ Step 4: Authenticate username & password
             Authentication authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             authRequest.getUsername(),
@@ -161,6 +204,7 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An unexpected error occurred while generating token");
         }

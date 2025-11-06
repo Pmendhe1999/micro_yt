@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "devices")
-
 @AllArgsConstructor
 @NoArgsConstructor
 public class Device {
@@ -42,6 +43,22 @@ public class Device {
 
     @Column(name = "last_modified_date")
     private LocalDateTime lastModifiedDate;
+    // 🔹 Many-to-Many with Application
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "device_application",
+            joinColumns = @JoinColumn(name = "device_id"),
+            inverseJoinColumns = @JoinColumn(name = "application_id")
+    )
+    private Set<Application> applications = new HashSet<>();
+
+    public Set<Application> getApplications() {
+        return applications;
+    }
+
+    public void setApplications(Set<Application> applications) {
+        this.applications = applications;
+    }
 
     public Long getId() {
         return id;

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,6 +24,16 @@ public class DeviceDTO {
     private String ipAddress;
 
     private Boolean status;   // e.g., ACTIVE / INACTIVE
+
+    private Set<Long> applicationIds;
+
+    public Set<Long> getApplicationIds() {
+        return applicationIds;
+    }
+
+    public void setApplicationIds(Set<Long> applicationIds) {
+        this.applicationIds = applicationIds;
+    }
 
     public @NotBlank(message = "Device ID is required") String getDeviceId() {
         return deviceId;
