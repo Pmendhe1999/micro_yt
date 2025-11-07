@@ -1,10 +1,10 @@
 package com.qc.controllers;
 
-import com.qc.dto.DeliveryItemsMasterDTO;
-import com.qc.dto.DeliveryItemsMasterDTOResponse;
+import com.qc.dto.DeliveryItemsDTO;
+import com.qc.dto.DeliveryItemsDTOResponse;
 import com.qc.dto.Response;
 import com.qc.exception.IllegalArgumentsException;
-import com.qc.services.DeliveryItemsMasterService;
+import com.qc.services.DeliveryItemsService;
 import com.qc.services.ResponseService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -23,36 +23,33 @@ import java.util.List;
 @RestController
 @RequestMapping("/qc")
 @Slf4j
-public class DeliveryItemsMasterController {
-
+public class DeliveryItemsController {
     @Autowired
-    private DeliveryItemsMasterService deliveryItemsMasterService;
+    private DeliveryItemsService deliveryItemsService;
 
     @Autowired
     private ResponseService responseService;
 
     @Operation(summary = "Create multiple Delivery Items")
-    @PostMapping("/deliveryItemsMaster/all")
-    public ResponseEntity<Response<Void>> createAll(@Valid @RequestBody List<DeliveryItemsMasterDTO> dtoList) {
-        log.info("Request to create delivery items list");
+    @PostMapping("/deliveryItems/all")
+    public ResponseEntity<Response<Void>> createAll(@Valid @RequestBody List<DeliveryItemsDTO> dtoList) {
         if (dtoList == null || dtoList.isEmpty()) {
             throw new IllegalArgumentsException("Delivery Items list cannot be empty");
         }
-        deliveryItemsMasterService.createAllDeliveryItems(dtoList);
+        deliveryItemsService.createAll(dtoList);
         return responseService.success(HttpStatus.CREATED.value(), "Delivery Items created successfully", null, 0);
     }
 
     @Operation(summary = "Create a Delivery Item")
-    @PostMapping("/deliveryItemsMaster")
-    public ResponseEntity<Response<DeliveryItemsMasterDTOResponse>> create(@Valid @RequestBody DeliveryItemsMasterDTO dto) {
-        log.info("Request to create delivery item for challan ID: {}", dto.getChallanId());
-        deliveryItemsMasterService.createDeliveryItem(dto);
-        return responseService.success(HttpStatus.CREATED.value(), "Delivery Item created successfully", null, 0);
+    @PostMapping("/deliveryItems")
+    public ResponseEntity<Response<DeliveryItemsDTOResponse>> create(@Valid @RequestBody DeliveryItemsDTO dto) {
+        DeliveryItemsDTOResponse response = deliveryItemsService.create(dto);
+        return responseService.success(HttpStatus.CREATED.value(), "Delivery Item created successfully", response, 1);
     }
 
     @Operation(summary = "Get all Delivery Items with filters")
-    @GetMapping("/deliveryItemsMaster")
-    public ResponseEntity<Response<List<DeliveryItemsMasterDTOResponse>>> getAllDeliveryItems(
+    @GetMapping("/deliveryItems")
+    public ResponseEntity<Response<List<DeliveryItemsDTOResponse>>> getAll(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String batchNo,
@@ -66,11 +63,10 @@ public class DeliveryItemsMasterController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
-
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<DeliveryItemsMasterDTOResponse> resultPage = deliveryItemsMasterService.getAllDeliveryItemsWithFilters(
+        Page<DeliveryItemsDTOResponse> resultPage = deliveryItemsService.getAll(
                 batchNo, name, productCode, orderNo, serialNo, unit, hsnCode, challanIds, pageable
         );
 
@@ -83,34 +79,32 @@ public class DeliveryItemsMasterController {
     }
 
     @Operation(summary = "Get Delivery Item by ID")
-    @GetMapping("/deliveryItemsMaster/{id}")
-    public ResponseEntity<Response<DeliveryItemsMasterDTOResponse>> getById(@PathVariable Long id) {
-        DeliveryItemsMasterDTOResponse response = deliveryItemsMasterService.getDeliveryItemById(id);
+    @GetMapping("/deliveryItems/{id}")
+    public ResponseEntity<Response<DeliveryItemsDTOResponse>> getById(@PathVariable Long id) {
+        DeliveryItemsDTOResponse response = deliveryItemsService.getById(id);
         return responseService.success(HttpStatus.OK.value(), "Delivery Item fetched successfully", response, 1);
     }
 
     @Operation(summary = "Update Delivery Item by ID")
-    @PutMapping("/deliveryItemsMaster/{id}")
-    public ResponseEntity<Response<DeliveryItemsMasterDTOResponse>> update(
-            @PathVariable Long id, @Valid @RequestBody DeliveryItemsMasterDTO dto) {
-
-        DeliveryItemsMasterDTOResponse updated = deliveryItemsMasterService.updateDeliveryItem(id, dto);
+    @PutMapping("/deliveryItems/{id}")
+    public ResponseEntity<Response<DeliveryItemsDTOResponse>> update(
+            @PathVariable Long id, @Valid @RequestBody DeliveryItemsDTO dto) {
+        DeliveryItemsDTOResponse updated = deliveryItemsService.update(id, dto);
         return responseService.success(HttpStatus.OK.value(), "Delivery Item updated successfully", updated, 1);
     }
 
     @Operation(summary = "Patch Delivery Item by ID")
-    @PatchMapping("/deliveryItemsMaster/{id}")
-    public ResponseEntity<Response<DeliveryItemsMasterDTOResponse>> patch(
-            @PathVariable Long id, @RequestBody DeliveryItemsMasterDTO dto) {
-
-        DeliveryItemsMasterDTOResponse updated = deliveryItemsMasterService.patchDeliveryItem(id, dto);
+    @PatchMapping("/deliveryItems/{id}")
+    public ResponseEntity<Response<DeliveryItemsDTOResponse>> patch(
+            @PathVariable Long id, @RequestBody DeliveryItemsDTO dto) {
+        DeliveryItemsDTOResponse updated = deliveryItemsService.patch(id, dto);
         return responseService.success(HttpStatus.OK.value(), "Delivery Item partially updated successfully", updated, 1);
     }
 
     @Operation(summary = "Delete Delivery Item by ID")
-    @DeleteMapping("/deliveryItemsMaster/{id}")
+    @DeleteMapping("/deliveryItems/{id}")
     public ResponseEntity<Response<Void>> delete(@PathVariable Long id) {
-        deliveryItemsMasterService.deleteDeliveryItem(id);
+        deliveryItemsService.delete(id);
         return responseService.success(HttpStatus.OK.value(), "Delivery Item deleted successfully", null, 0);
     }
 }
