@@ -156,7 +156,7 @@ public class MediaService {
             MediaDetails mediaDetails;
 
             // 2️⃣ Prepare S3 upload details
-            String folderName = "platfrom_images/";
+            String folderName = "frontend/platfrom_images/";
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String fileKey = folderName + fileName;
 

@@ -194,7 +194,7 @@ public class MediaServiceImpl implements MediaService {
             }
 
             // 2️⃣ Upload new file to S3 (inside folder platfrom_images/)
-            String folderName = "platfrom_images/";
+            String folderName = "frontend/platfrom_images/";
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String fileKey = folderName + fileName; // 👈 include folder name
 
