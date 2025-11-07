@@ -219,13 +219,14 @@ public class MediaServiceImpl implements MediaService {
                 if (media == null) media = new Media();
 
                 // Delete old S3 file
-                if (media.getName() != null) {
-                    try {
-                        s3Client.deleteObject(bucketName, media.getName());
-                    } catch (Exception e) {
-                        log.warn("Could not delete old file from S3: {}", e.getMessage());
-                    }
-                }
+//                if (media.getName() != null) {
+//                    try {
+//                        s3Client.deleteObject(bucketName, media.getName());
+//                    } catch (Exception e) {
+//                        System.out.println(e);
+//                        log.warn("Could not delete old file from S3: {}", e.getMessage());
+//                    }
+//                }
 
                 media.setName(fileName);
                 media.setBaseImageUrl(fileName);

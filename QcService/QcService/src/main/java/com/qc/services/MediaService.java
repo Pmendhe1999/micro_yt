@@ -175,14 +175,14 @@ public class MediaService {
                 // Update existing
                 mediaMaster = existingMediaOpt.get();
 
-                // Delete old S3 file if exists
-                if (mediaMaster.getName() != null) {
-                    try {
-                        s3Client.deleteObject(bucketName, "platfrom_images/" + mediaMaster.getName());
-                    } catch (Exception e) {
-                        log.warn("Could not delete old product image: {}", e.getMessage());
-                    }
-                }
+//                // Delete old S3 file if exists
+//                if (mediaMaster.getName() != null) {
+//                    try {
+//                        s3Client.deleteObject(bucketName, "platfrom_images/" + mediaMaster.getName());
+//                    } catch (Exception e) {
+//                        log.warn("Could not delete old product image: {}", e.getMessage());
+//                    }
+//                }
 
                 // Update MediaMaster
                 mediaMaster.setName(fileName);
