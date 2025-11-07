@@ -122,6 +122,8 @@ public class AuthController {
             // ✅ Step 3: If deviceId provided, perform device checks
             if (authRequest.getDeviceId() != null && !authRequest.getDeviceId().isEmpty()) {
 
+
+
                 // Check if device exists
                 Optional<Device> optionalDevice = deviceRepository.findByDeviceId(authRequest.getDeviceId());
                 if (optionalDevice.isEmpty()) {
@@ -156,6 +158,18 @@ public class AuthController {
                 if (!matched) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                             .body("Application and device mismatch.");
+                }
+
+                // 🔹 If application & device matched, now validate QC Project + QC User rule
+                boolean hasQcProject = userApplications.stream()
+                        .anyMatch(app -> "QC Project".equalsIgnoreCase(app.getName()));
+
+                boolean hasQcUserRole = user.getAuthorities().stream()
+                        .anyMatch(auth -> "QC User".equalsIgnoreCase(auth.getName()));
+
+                if (!(hasQcProject && hasQcUserRole)) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body("Device-based login allowed only for QC User with QC Project application.");
                 }
             }
 
