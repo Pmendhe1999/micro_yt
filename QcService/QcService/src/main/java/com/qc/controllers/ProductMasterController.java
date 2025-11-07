@@ -2,7 +2,9 @@ package com.qc.controllers;
 
 import com.qc.dto.ProductMasterDTO;
 import com.qc.dto.ProductMasterDTOResponse;
+import com.qc.dto.ResponceData;
 import com.qc.dto.Response;
+import com.qc.entities.ProductMaster;
 import com.qc.exception.IllegalArgumentsException;
 import com.qc.services.ProductMasterService;
 import com.qc.services.ResponseService;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -134,5 +137,30 @@ public class ProductMasterController {
         productMasterService.deleteProductMaster(id);
 
         return responseService.success(HttpStatus.OK.value(), "Product Master deleted successfully", null, 0);
+    }
+
+    @PostMapping("/productMasterupload")
+    public ResponseEntity<ResponceData> uploadProducts(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            String token = authHeader.replace("Bearer ", "");
+
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(new ResponceData("fail", 400, "File is empty", null, 0));
+            }
+
+            List<ProductMaster> savedProducts = productMasterService.uploadProductsFromExcel(file, token);
+
+            return ResponseEntity.ok(new ResponceData(
+                    "success", 200, "Products uploaded successfully", savedProducts, savedProducts.size()));
+
+        } catch (Exception e) {
+            log.error("Error uploading products: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponceData("error", 500, "Unexpected error: " + e.getMessage(), null, 0));
+        }
     }
 }

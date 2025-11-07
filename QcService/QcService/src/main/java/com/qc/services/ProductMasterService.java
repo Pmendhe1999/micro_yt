@@ -7,14 +7,19 @@ import com.qc.exception.ResourceNotFoundException;
 import com.qc.mapper.ProductMasterMapper;
 import com.qc.repositories.ProductMasterRepository;
 import jakarta.transaction.Transactional;
+import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -143,6 +148,112 @@ public class ProductMasterService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product Master not found with id: " + id));
 
         productMasterRepository.delete(existing);
+    }
+
+
+    public List<ProductMaster> uploadProductsFromExcel(MultipartFile file, String token) {
+        List<ProductMaster> products = new ArrayList<>();
+
+        try (InputStream is = file.getInputStream(); Workbook workbook = WorkbookFactory.create(is)) {
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // Skip header row
+            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null) continue;
+
+                String name = getCellValue(row.getCell(0));
+                String descriptionsJson = getCellValue(row.getCell(1)); // Comma-separated list
+                String productCode = getCellValue(row.getCell(2));
+                String serialNo = getCellValue(row.getCell(3));
+                String orderNo = getCellValue(row.getCell(4));
+                String hsnCode = getCellValue(row.getCell(5));
+                String unit = getCellValue(row.getCell(6));
+                String priceStr = getCellValue(row.getCell(7));
+                String quantityStr = getCellValue(row.getCell(8));
+                String inStockQuantityStr = getCellValue(row.getCell(9));
+                String mfgDateStr = getCellValue(row.getCell(10));
+                String expDateStr = getCellValue(row.getCell(11));
+                String isPublishedStr = getCellValue(row.getCell(12));
+                String statusStr = getCellValue(row.getCell(13));
+
+                if (name == null || name.trim().isEmpty()) continue;
+
+                ProductMaster product = new ProductMaster();
+                product.setName(name);
+                product.setDescriptions(
+                        descriptionsJson != null ? Arrays.asList(descriptionsJson.split(",")) : null);
+                product.setProductCode(productCode);
+                product.setSerialNo(serialNo);
+                product.setOrderNo(orderNo);
+                product.setHsnCode(hsnCode);
+                product.setUnit(unit);
+                product.setPrice(parseBigDecimalValue(priceStr));
+                product.setQuantity(parseBigDecimalValue(quantityStr));
+                product.setInStockQuantity(parseLongValue(inStockQuantityStr));
+                product.setMfgDate(parseDate(mfgDateStr));
+                product.setExpDate(parseDate(expDateStr));
+                product.setPublished(Boolean.parseBoolean(isPublishedStr));
+                product.setStatus(Boolean.parseBoolean(statusStr));
+
+                products.add(product);
+            }
+
+            productMasterRepository.saveAll(products);
+            return products;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error processing Excel file: " + e.getMessage(), e);
+        }
+    }
+
+    // ✅ Helper methods
+    private String getCellValue(Cell cell) {
+        if (cell == null) return null;
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue().trim();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getLocalDateTimeCellValue().toLocalDate().toString();
+                }
+                double numericValue = cell.getNumericCellValue();
+                if (numericValue == Math.floor(numericValue)) {
+                    return String.valueOf((long) numericValue); // avoid .0
+                }
+                return String.valueOf(numericValue);
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            default:
+                return null;
+        }
+    }
+
+    private BigDecimal parseBigDecimalValue(String value) {
+        if (value == null || value.trim().isEmpty()) return null;
+        try {
+            return new BigDecimal(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Long parseLongValue(String value) {
+        if (value == null || value.trim().isEmpty()) return null;
+        try {
+            return (long) Double.parseDouble(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private LocalDate parseDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) return null;
+        try {
+            return LocalDate.parse(dateStr);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }
