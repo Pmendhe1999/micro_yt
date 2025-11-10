@@ -42,8 +42,18 @@ public class DeliveryChallanMasterController {
         return responseService.success(HttpStatus.CREATED.value(), "Delivery Challans created successfully", null, 0);
     }
 
-    @Operation(summary = "Create a Delivery Challan")
+    @Operation(summary = "Create Delivery Challan along with Delivery Items")
     @PostMapping("/deliveryChallanMaster")
+    public ResponseEntity<Response<Void>> createDeliveryChallanWithItems(
+            @Valid @RequestBody DeliveryChallanMasterDTO dto) {
+        log.info("Request to create delivery challan with items: {}", dto.getName());
+        service.createDeliveryChallanWithItems(dto);
+        return responseService.success(HttpStatus.CREATED.value(),
+                "Delivery Challan and its items created successfully", null, 0);
+    }
+
+    @Operation(summary = "Create a Delivery Challan")
+    @PostMapping("/deliveryChallanMasters")
     public ResponseEntity<Response<Void>> createDeliveryChallan(@Valid @RequestBody DeliveryChallanMasterDTO dto) {
         log.info("Request to create delivery challan: {}", dto.getName());
         service.createDeliveryChallanMaster(dto);

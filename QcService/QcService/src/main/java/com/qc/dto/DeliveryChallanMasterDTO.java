@@ -2,20 +2,22 @@ package com.qc.dto;
 
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
 public class DeliveryChallanMasterDTO {
 
 
-    @NotNull(message = "Name is required")
     private String name;
-
     private String descriptions;
     private Boolean status;
 
-    public @NotNull(message = "Name is required") String getName() {
+    private List<DeliveryItemsMasterDTO> items;
+
+    public String getName() {
         return name;
     }
 
-    public void setName(@NotNull(message = "Name is required") String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
@@ -33,5 +35,13 @@ public class DeliveryChallanMasterDTO {
 
     public void setStatus(Boolean status) {
         this.status = status;
+    }
+
+    public List<DeliveryItemsMasterDTO> getItems() {
+        return items;
+    }
+
+    public void setItems(List<DeliveryItemsMasterDTO> items) {
+        this.items = items;
     }
 }

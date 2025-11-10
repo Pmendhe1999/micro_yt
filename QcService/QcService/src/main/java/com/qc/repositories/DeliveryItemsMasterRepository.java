@@ -33,4 +33,6 @@ public interface DeliveryItemsMasterRepository extends JpaRepository<DeliveryIte
             @Param("challanIds") List<Long> challanIds,
             Pageable pageable
     );
+
+    List<DeliveryItemsMaster> findAllByChallanId(Long challanId);
 }

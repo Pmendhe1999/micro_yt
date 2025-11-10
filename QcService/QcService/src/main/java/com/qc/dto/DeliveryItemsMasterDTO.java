@@ -17,7 +17,7 @@ public class DeliveryItemsMasterDTO {
     private BigDecimal quantity;
     private String serialNo;
     private String unit;
-    @NotNull(message = "Challan ID is required")
+
     private Long challanId;
 
     public String getBatchNo() {
