@@ -15,6 +15,16 @@ public class MediaDetailsDTOResponse {
     private String mediaName;
     private String uploadedBy;
 
+    private MediaDTOResponse media; // ✅ Nested Media
+
+    public MediaDTOResponse getMedia() {
+        return media;
+    }
+
+    public void setMedia(MediaDTOResponse media) {
+        this.media = media;
+    }
+
     public Long getId() {
         return id;
     }

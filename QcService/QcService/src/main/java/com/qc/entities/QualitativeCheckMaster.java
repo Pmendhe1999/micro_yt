@@ -28,8 +28,8 @@ public class QualitativeCheckMaster {
     private LabelScanMaster scanMaster;
 
     public enum CheckStatus {
-        QUALITATIVE,
-        QUANTITATIVE
+        GOODTOHAVE,
+        MUSTHAVE
     }
 
     public Long getId() {

@@ -180,6 +180,8 @@ public class MediaService {
             mediaDetails.setMediaFor(mediaFor);
             mediaDetails.setType(file.getContentType());
             mediaDetails.setName(fileName);
+            mediaDetails.setProductMaster(productMasterRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Product not found")));
             mediaDetailsRepository.save(mediaDetails);
 
             // 4️⃣ Always create a new MediaMaster entry (even if existing exists)

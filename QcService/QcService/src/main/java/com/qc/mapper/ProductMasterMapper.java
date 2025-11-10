@@ -1,23 +1,32 @@
 package com.qc.mapper;
 
+import com.qc.dto.MediaDTOResponse;
+import com.qc.dto.MediaDetailsDTOResponse;
 import com.qc.dto.ProductMasterDTO;
 import com.qc.dto.ProductMasterDTOResponse;
+import com.qc.entities.Media;
+import com.qc.entities.MediaDetails;
 import com.qc.entities.ProductMaster;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProductMasterMapper {
 
+    // ---------- ENTITY → DTO ----------
+    @Mapping(target = "mediaDetailsList", source = "mediaDetailsList")
     ProductMasterDTOResponse productMasterToProductMasterDTOResponse(ProductMaster productMaster);
 
     List<ProductMasterDTOResponse> productMasterListToProductMasterDTOListResponse(List<ProductMaster> productMasterList);
 
-    //ProductMaster productMasterResponseToProductMaster(ProductMasterDTOResponse productMasterResponse);
+    @Mapping(target = "media", source = "media")
+    MediaDetailsDTOResponse mediaDetailsToMediaDetailsDTOResponse(MediaDetails mediaDetails);
 
-    //List<ProductMasterDTOResponse> taskListToTaskResponseList(List<ProductMaster> productMasterList);
+    MediaDTOResponse mediaToMediaDTOResponse(Media media);
 
-    ProductMaster productMasterDTOToProductMaster(ProductMasterDTO productMasterDTO);
+    // ---------- DTO → ENTITY ----------
+    ProductMaster productMasterDTOToProductMaster(ProductMasterDTO dto);
 
-    List<ProductMaster> productMasterDTOListToProductMasterList(List<ProductMasterDTO> productMasterDTOList);
+    List<ProductMaster> productMasterDTOListToProductMasterList(List<ProductMasterDTO> dtoList);
 }

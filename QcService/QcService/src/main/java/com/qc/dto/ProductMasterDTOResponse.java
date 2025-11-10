@@ -32,6 +32,16 @@ public class ProductMasterDTOResponse {
     private Boolean isPublished;
     private Boolean status;
 
+    private List<MediaDetailsDTOResponse> mediaDetailsList;
+
+    public List<MediaDetailsDTOResponse> getMediaDetailsList() {
+        return mediaDetailsList;
+    }
+
+    public void setMediaDetailsList(List<MediaDetailsDTOResponse> mediaDetailsList) {
+        this.mediaDetailsList = mediaDetailsList;
+    }
+
     public Long getId() {
         return id;
     }

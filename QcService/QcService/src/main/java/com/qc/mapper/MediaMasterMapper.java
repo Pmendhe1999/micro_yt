@@ -13,11 +13,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface MediaMasterMapper {
 
-    @Mapping(target = "product", source = "productId", qualifiedByName = "mapToProductMaster")
+    @Mapping(target = "productMaster", source = "productId", qualifiedByName = "mapToProductMaster")
     MediaMaster toEntity(MediaMasterDTO dto);
 
-    @Mapping(target = "productId", source = "product.id")
-    @Mapping(target = "productName", source = "product.name")
+    @Mapping(target = "productId", source = "productMaster.id")
+    @Mapping(target = "productName", source = "productMaster.name")
     MediaMasterDTOResponse toDto(MediaMaster entity);
 
     List<MediaMaster> toEntityList(List<MediaMasterDTO> dtoList);

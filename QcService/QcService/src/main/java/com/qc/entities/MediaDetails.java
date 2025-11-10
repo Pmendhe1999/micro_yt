@@ -1,5 +1,6 @@
 package com.qc.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -27,6 +28,20 @@ public class MediaDetails extends AbstractAuditingEntity {
 
     @Column(name = "uploaded_by", length = 255)
     private String uploadedBy;
+
+    // 🔹 Many MediaDetails belong to one ProductMaster
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_master_id")
+    @JsonBackReference
+    private ProductMaster productMaster;
+
+    public ProductMaster getProductMaster() {
+        return productMaster;
+    }
+
+    public void setProductMaster(ProductMaster productMaster) {
+        this.productMaster = productMaster;
+    }
 
     public Long getId() {
         return id;

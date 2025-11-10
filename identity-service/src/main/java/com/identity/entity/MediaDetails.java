@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "media_details")
-
 @AllArgsConstructor
 @NoArgsConstructor
 public class MediaDetails {

@@ -1,11 +1,13 @@
 package com.qc.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -57,6 +59,19 @@ public class ProductMaster extends AbstractAuditingEntity {
 
     @Column(name = "status")
     private Boolean status;
+
+    // 🔹 One Product can have multiple MediaDetails
+    @OneToMany(mappedBy = "productMaster", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<MediaDetails> mediaDetailsList = new ArrayList<>();
+
+    public List<MediaDetails> getMediaDetailsList() {
+        return mediaDetailsList;
+    }
+
+    public void setMediaDetailsList(List<MediaDetails> mediaDetailsList) {
+        this.mediaDetailsList = mediaDetailsList;
+    }
 
     public Long getId() {
         return id;
