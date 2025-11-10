@@ -97,7 +97,7 @@ public class MediaController {
         return responseService.success(HttpStatus.OK.value(), "Media deleted successfully", null, 0);
     }
 
-    @PostMapping("/upload/product")
+    @PostMapping("/upload/productMaster")
     public ResponseEntity<MediaMaster> uploadProductMedia(
             @RequestParam Long productId,
             @RequestParam MultipartFile file,
@@ -105,5 +105,12 @@ public class MediaController {
             @RequestParam(required = false) String mediaFor) {
 
         return ResponseEntity.ok(mediaService.uploadProductMedia(productId, file, description, mediaFor));
+    }
+
+    // ✅ New endpoint: Get all media by productMasterId
+    @GetMapping("/productMasterImages/{productId}")
+    public ResponseEntity<List<MediaMaster>> getMediaByProductMasterId(@PathVariable Long productId) {
+        List<MediaMaster> mediaList = mediaService.getAllMediaByProductMasterId(productId);
+        return ResponseEntity.ok(mediaList);
     }
 }

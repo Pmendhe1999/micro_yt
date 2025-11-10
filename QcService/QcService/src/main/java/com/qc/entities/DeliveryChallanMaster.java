@@ -19,6 +19,8 @@ public class DeliveryChallanMaster extends AbstractAuditingEntity{
     @Column(name = "status")
     private Boolean status;
 
+    //one to many with deliveryItemMaster
+
     public Long getId() {
         return id;
     }

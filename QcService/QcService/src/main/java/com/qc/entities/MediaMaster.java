@@ -29,7 +29,7 @@ public class MediaMaster extends AbstractAuditingEntity {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_master_id")
-    private ProductMaster product;
+    private ProductMaster productMaster;
 
     public Long getId() {
         return id;
@@ -87,11 +87,11 @@ public class MediaMaster extends AbstractAuditingEntity {
         this.uploadedBy = uploadedBy;
     }
 
-    public ProductMaster getProduct() {
-        return product;
+    public ProductMaster getProductMaster() {
+        return productMaster;
     }
 
-    public void setProduct(ProductMaster product) {
-        this.product = product;
+    public void setProductMaster(ProductMaster productMaster) {
+        this.productMaster = productMaster;
     }
 }

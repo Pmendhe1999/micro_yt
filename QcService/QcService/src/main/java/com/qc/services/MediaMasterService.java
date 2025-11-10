@@ -45,7 +45,7 @@ public class MediaMasterService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + dto.getProductId()));
 
         MediaMaster entity = mediaMasterMapper.toEntity(dto);
-        entity.setProduct(product);
+        entity.setProductMaster(product);
         entity.setUploadedBy(uploadedBy);
 
         mediaMasterRepository.save(entity);
@@ -59,9 +59,9 @@ public class MediaMasterService {
 
         List<MediaMaster> entities = mediaMasterMapper.toEntityList(dtoList);
         entities.forEach(entity -> {
-            ProductMaster product = productMasterRepository.findById(entity.getProduct().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + entity.getProduct().getId()));
-            entity.setProduct(product);
+            ProductMaster product = productMasterRepository.findById(entity.getProductMaster().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + entity.getProductMaster().getId()));
+            entity.setProductMaster(product);
             entity.setUploadedBy(uploadedBy);
         });
 
@@ -91,7 +91,7 @@ public class MediaMasterService {
         ProductMaster product = productMasterRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + dto.getProductId()));
 
-        existing.setProduct(product);
+        existing.setProductMaster(product);
         existing.setBaseImageUrl(dto.getBaseImageUrl());
         existing.setDescription(dto.getDescription());
         existing.setName(dto.getName());
@@ -113,7 +113,7 @@ public class MediaMasterService {
         if (dto.getProductId() != null) {
             ProductMaster product = productMasterRepository.findById(dto.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found with ID: " + dto.getProductId()));
-            existing.setProduct(product);
+            existing.setProductMaster(product);
         }
         if (dto.getBaseImageUrl() != null) existing.setBaseImageUrl(dto.getBaseImageUrl());
         if (dto.getDescription() != null) existing.setDescription(dto.getDescription());

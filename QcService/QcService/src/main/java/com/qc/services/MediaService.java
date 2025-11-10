@@ -144,18 +144,12 @@ public class MediaService {
     private MediaMasterRepository mediaMasterRepository;
 
     @Autowired
-    private ProductMasterRepository productRepository;
+    private ProductMasterRepository productMasterRepository;
 
     @Transactional
     public MediaMaster uploadProductMedia(Long productId, MultipartFile file, String description, String mediaFor) {
         try {
-            // 1️⃣ Check existing media for product
-            Optional<MediaMaster> existingMediaOpt = mediaMasterRepository.findByProductId(productId);
-            MediaMaster mediaMaster;
-            Media media;
-            MediaDetails mediaDetails;
-
-            // 2️⃣ Prepare S3 upload details
+            // 1️⃣ Prepare S3 upload details
             String folderName = "frontend/platfrom_images/";
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String fileKey = folderName + fileName;
@@ -170,78 +164,36 @@ public class MediaService {
             s3Client.putObject(new PutObjectRequest(bucketName, fileKey, convertedFile));
             convertedFile.delete();
 
-            // 3️⃣ Handle Existing Product Media (update) OR New Upload (create)
-            if (existingMediaOpt.isPresent()) {
-                // Update existing
-                mediaMaster = existingMediaOpt.get();
+            // 2️⃣ Create new Media entry
+            Media media = new Media();
+            media.setName(fileName);
+            media.setBaseImageUrl(fileKey);
+            media.setDescription(description);
+            media.setType(file.getContentType());
+            media.setStatus("ACTIVE");
+            mediaRepository.save(media);
 
-//                // Delete old S3 file if exists
-//                if (mediaMaster.getName() != null) {
-//                    try {
-//                        s3Client.deleteObject(bucketName, "platfrom_images/" + mediaMaster.getName());
-//                    } catch (Exception e) {
-//                        log.warn("Could not delete old product image: {}", e.getMessage());
-//                    }
-//                }
+            // 3️⃣ Create new MediaDetails entry
+            MediaDetails mediaDetails = new MediaDetails();
+            mediaDetails.setMedia(media);
+            mediaDetails.setDescription(description);
+            mediaDetails.setMediaFor(mediaFor);
+            mediaDetails.setType(file.getContentType());
+            mediaDetails.setName(fileName);
+            mediaDetailsRepository.save(mediaDetails);
 
-                // Update MediaMaster
-                mediaMaster.setName(fileName);
-                mediaMaster.setBaseImageUrl(fileKey);
-                mediaMaster.setDescription(description);
-                mediaMaster.setType(file.getContentType());
-                mediaMaster.setStatus("ACTIVE");
+            // 4️⃣ Always create a new MediaMaster entry (even if existing exists)
+            MediaMaster mediaMaster = new MediaMaster();
+            mediaMaster.setName(fileName);
+            mediaMaster.setBaseImageUrl(fileKey);
+            mediaMaster.setDescription(description);
+            mediaMaster.setType(file.getContentType());
+            mediaMaster.setStatus("ACTIVE");
 
-                mediaMasterRepository.save(mediaMaster);
+            mediaMaster.setProductMaster(productMasterRepository.findById(productId)
+                    .orElseThrow(() -> new RuntimeException("Product not found")));
 
-                // Update Media
-                media = new Media();
-                media.setName(fileName);
-                media.setBaseImageUrl(fileKey);
-                media.setDescription(description);
-                media.setType(file.getContentType());
-                media.setStatus("ACTIVE");
-
-                mediaRepository.save(media);
-
-                // Update MediaDetails
-                mediaDetails = new MediaDetails();
-                mediaDetails.setMedia(media);
-                mediaDetails.setDescription(description);
-                mediaDetails.setMediaFor(mediaFor);
-                mediaDetails.setType(file.getContentType());
-                mediaDetails.setName(fileName);
-                mediaDetailsRepository.save(mediaDetails);
-
-            } else {
-                // 4️⃣ New Upload (no previous media for this product)
-                media = new Media();
-                media.setName(fileName);
-                media.setBaseImageUrl(fileKey);
-                media.setDescription(description);
-                media.setType(file.getContentType());
-                media.setStatus("ACTIVE");
-                mediaRepository.save(media);
-
-                mediaDetails = new MediaDetails();
-                mediaDetails.setMedia(media);
-                mediaDetails.setDescription(description);
-                mediaDetails.setMediaFor(mediaFor);
-                mediaDetails.setType(file.getContentType());
-                mediaDetails.setName(fileName);
-
-                mediaDetailsRepository.save(mediaDetails);
-
-                mediaMaster = new MediaMaster();
-                mediaMaster.setName(fileName);
-                mediaMaster.setBaseImageUrl(fileKey);
-                mediaMaster.setDescription(description);
-                mediaMaster.setType(file.getContentType());
-                mediaMaster.setStatus("ACTIVE");
-
-                mediaMaster.setProduct(productRepository.findById(productId)
-                        .orElseThrow(() -> new RuntimeException("Product not found")));
-                mediaMasterRepository.save(mediaMaster);
-            }
+            mediaMasterRepository.save(mediaMaster);
 
             return mediaMaster;
 
@@ -249,5 +201,13 @@ public class MediaService {
             log.error("Error uploading product media: {}", e.getMessage(), e);
             throw new RuntimeException("Error uploading product media: " + e.getMessage(), e);
         }
+    }
+    // ✅ Get all media by productMasterId
+    public List<MediaMaster> getAllMediaByProductMasterId(Long productId) {
+        List<MediaMaster> mediaList = mediaMasterRepository.findAllByProductMasterId(productId);
+        if (mediaList.isEmpty()) {
+            throw new RuntimeException("No media found for ProductMaster ID: " + productId);
+        }
+        return mediaList;
     }
 }
