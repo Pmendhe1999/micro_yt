@@ -22,7 +22,7 @@ public class IdentityClient {
 
     public Map<String, Object> validateToken(String token) {
         ResponseEntity<Map> response = restTemplate.getForEntity(
-                IDENTITY_BASE_URL + "/auth/validate?token=" + token, Map.class);
+                IDENTITY_BASE_URL + "/identity/auth/validate?token=" + token, Map.class);
         return response.getBody();
     }
 }

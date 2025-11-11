@@ -147,7 +147,7 @@ public class MediaService {
     private ProductMasterRepository productMasterRepository;
 
     @Transactional
-    public MediaMaster uploadProductMedia(Long productId, MultipartFile file, String description, String mediaFor) {
+    public MediaMaster uploadProductMedia(Long productId, MultipartFile file, String description, String mediaFor,String token) {
         try {
             // 1️⃣ Prepare S3 upload details
             String folderName = "frontend/platfrom_images/";
@@ -164,6 +164,9 @@ public class MediaService {
             s3Client.putObject(new PutObjectRequest(bucketName, fileKey, convertedFile));
             convertedFile.delete();
 
+            Map<String, Object> authData = identityClient.validateToken(token);
+            String uploadedBy = (String) authData.get("username");
+
             // 2️⃣ Create new Media entry
             Media media = new Media();
             media.setName(fileName);
@@ -171,6 +174,7 @@ public class MediaService {
             media.setDescription(description);
             media.setType(file.getContentType());
             media.setStatus("ACTIVE");
+            media.setUploadedBy(uploadedBy);
             mediaRepository.save(media);
 
             // 3️⃣ Create new MediaDetails entry
@@ -180,6 +184,7 @@ public class MediaService {
             mediaDetails.setMediaFor(mediaFor);
             mediaDetails.setType(file.getContentType());
             mediaDetails.setName(fileName);
+            mediaDetails.setUploadedBy(uploadedBy);
             mediaDetails.setProductMaster(productMasterRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product not found")));
             mediaDetailsRepository.save(mediaDetails);

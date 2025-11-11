@@ -102,9 +102,10 @@ public class MediaController {
             @RequestParam Long productId,
             @RequestParam MultipartFile file,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) String mediaFor) {
-
-        return ResponseEntity.ok(mediaService.uploadProductMedia(productId, file, description, mediaFor));
+            @RequestParam(required = false) String mediaFor,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(mediaService.uploadProductMedia(productId, file, description, mediaFor,token));
     }
 
     // ✅ New endpoint: Get all media by productMasterId
