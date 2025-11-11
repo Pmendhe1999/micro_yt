@@ -40,7 +40,7 @@ public class LabelScanMasterService {
             String description,
             String scanType,
             LabelScanMaster.CheckStatus checkStatus,
-            String status,
+            Boolean status,
             Pageable pageable) {
 
         Page<LabelScanMaster> page = labelScanMasterRepository.searchLabelScanMasters(

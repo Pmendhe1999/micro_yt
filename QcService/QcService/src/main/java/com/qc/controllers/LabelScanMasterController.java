@@ -79,7 +79,7 @@ public class LabelScanMasterController {
             @RequestParam(required = false) String description,
             @RequestParam(required = false) String scanType,
             @RequestParam(required = false) LabelScanMaster.CheckStatus checkStatus,
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean status,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
 

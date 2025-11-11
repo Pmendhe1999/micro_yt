@@ -14,12 +14,12 @@ public interface LabelScanMasterRepository extends JpaRepository<LabelScanMaster
             "AND (:description IS NULL OR LOWER(l.description) LIKE LOWER(CONCAT('%', :description, '%'))) " +
             "AND (:scanType IS NULL OR LOWER(l.scanType) LIKE LOWER(CONCAT('%', :scanType, '%'))) " +
             "AND (:checkStatus IS NULL OR l.checkStatus = :checkStatus) " +
-            "AND (:status IS NULL OR LOWER(l.status) LIKE LOWER(CONCAT('%', :status, '%')))")
+            "AND (:status IS NULL OR l.status = :status)")
     Page<LabelScanMaster> searchLabelScanMasters(
             @Param("name") String name,
             @Param("description") String description,
             @Param("scanType") String scanType,
             @Param("checkStatus") LabelScanMaster.CheckStatus checkStatus,
-            @Param("status") String status,
+            @Param("status") Boolean status,
             Pageable pageable);
 }

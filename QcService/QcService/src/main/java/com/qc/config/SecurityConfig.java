@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/quiz/public/**").permitAll() // public endpoints
+                        .requestMatchers("/qc/**").permitAll() // public endpoints
                         .anyRequest().authenticated() // all others need JWT
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

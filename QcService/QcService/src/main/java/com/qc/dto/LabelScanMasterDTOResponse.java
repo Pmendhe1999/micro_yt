@@ -13,7 +13,7 @@ public class LabelScanMasterDTOResponse {
     private String scanType;
     private Long seqNumber;
     private LabelScanMaster.CheckStatus checkStatus;
-    private String status;
+    private Boolean status;
 
     public Long getId() {
         return id;
@@ -63,11 +63,11 @@ public class LabelScanMasterDTOResponse {
         this.checkStatus = checkStatus;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 }
