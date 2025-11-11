@@ -7,6 +7,7 @@ import com.qc.entities.MediaMaster;
 import com.qc.exception.IllegalArgumentsException;
 import com.qc.services.MediaService;
 import com.qc.services.ResponseService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,11 +92,22 @@ public class MediaController {
         return responseService.success(HttpStatus.OK.value(), "Media partially updated successfully", updated, 1);
     }
 
-    @DeleteMapping("/media/{id}")
-    public ResponseEntity<Response<Void>> deleteMedia(@PathVariable Long id) {
-        mediaService.deleteMedia(id);
-        return responseService.success(HttpStatus.OK.value(), "Media deleted successfully", null, 0);
+    @Operation(summary = "Delete Media and its Media Details by Media ID")
+    @DeleteMapping("/media/{mediaId}")
+    public ResponseEntity<Response<Void>> deleteMedia(@PathVariable Long mediaId) {
+        mediaService.deleteMediaWithDetails(mediaId);
+
+        Response<Void> response = new Response<>(
+                "SUCCESS",                   // status
+                HttpStatus.OK.value(),       // statusCode
+                "Media and its details deleted successfully", // message
+                null,                        // data
+                0                            // count
+        );
+
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/upload/productMaster")
     public ResponseEntity<MediaMaster> uploadProductMedia(

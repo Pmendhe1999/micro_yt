@@ -126,10 +126,17 @@ public class MediaService {
         return mediaMapper.toDto(saved);
     }
 
-    public void deleteMedia(Long id) {
-        Media existing = mediaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Media not found with id: " + id));
-        mediaRepository.delete(existing);
+
+    public void deleteMediaWithDetails(Long mediaId) {
+        // ✅ Check if media exists
+        Media media = mediaRepository.findById(mediaId)
+                .orElseThrow(() -> new RuntimeException("Media not found with ID: " + mediaId));
+
+        // ✅ Delete all MediaDetails linked to this media
+        mediaDetailsRepository.deleteByMediaId(mediaId);
+
+        // ✅ Delete Media itself
+        mediaRepository.delete(media);
     }
 
 
