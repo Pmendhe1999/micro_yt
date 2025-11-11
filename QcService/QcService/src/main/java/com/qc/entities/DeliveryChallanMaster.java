@@ -2,6 +2,9 @@ package com.qc.entities;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "delivery_challan_master")
 public class DeliveryChallanMaster extends AbstractAuditingEntity{
@@ -18,8 +21,28 @@ public class DeliveryChallanMaster extends AbstractAuditingEntity{
 
     @Column(name = "status")
     private Boolean status;
+    // 🧩 Add this relationship
+    @OneToMany(mappedBy = "challan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<DeliveryItemsMaster> items = new ArrayList<>();
 
-    //one to many with deliveryItemMaster
+    // ✅ Convenience method (optional but recommended)
+    public void addItem(DeliveryItemsMaster item) {
+        items.add(item);
+        item.setChallan(this);
+    }
+
+    public void removeItem(DeliveryItemsMaster item) {
+        items.remove(item);
+        item.setChallan(null);
+    }
+
+    public List<DeliveryItemsMaster> getItems() {
+        return items;
+    }
+
+    public void setItems(List<DeliveryItemsMaster> items) {
+        this.items = items;
+    }
 
     public Long getId() {
         return id;

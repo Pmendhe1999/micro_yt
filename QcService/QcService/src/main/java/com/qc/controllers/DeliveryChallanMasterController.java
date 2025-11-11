@@ -2,7 +2,9 @@ package com.qc.controllers;
 
 import com.qc.dto.DeliveryChallanMasterDTO;
 import com.qc.dto.DeliveryChallanMasterDTOResponse;
+import com.qc.dto.ResponceData;
 import com.qc.dto.Response;
+import com.qc.entities.DeliveryChallanMaster;
 import com.qc.exception.IllegalArgumentsException;
 import com.qc.services.DeliveryChallanMasterService;
 import com.qc.services.ResponseService;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -114,5 +117,27 @@ public class DeliveryChallanMasterController {
     public ResponseEntity<Response<Void>> deleteDeliveryChallan(@PathVariable Long id) {
         service.deleteDeliveryChallanMaster(id);
         return responseService.success(HttpStatus.OK.value(), "Delivery Challan deleted successfully", null, 0);
+    }
+
+    @PostMapping("/deliveryChallanUpload")
+    public ResponseEntity<ResponceData> uploadDeliveryChallans(
+            @RequestParam("file") MultipartFile file) {
+
+        try {
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(new ResponceData("fail", 400, "File is empty", null, 0));
+            }
+
+            List<DeliveryChallanMaster> savedChallans = service.uploadDeliveryChallansFromExcel(file);
+
+            return ResponseEntity.ok(new ResponceData(
+                    "success", 200, "Delivery Challans uploaded successfully", savedChallans, savedChallans.size()));
+
+        } catch (Exception e) {
+            log.error("Error uploading delivery challans: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponceData("error", 500, "Unexpected error: " + e.getMessage(), null, 0));
+        }
     }
 }
