@@ -2,7 +2,9 @@ package com.qc.controllers;
 
 import com.qc.dto.ProductionOrderDTO;
 import com.qc.dto.ProductionOrderDTOResponse;
+import com.qc.dto.ResponceData;
 import com.qc.dto.Response;
+import com.qc.entities.ProductionOrder;
 import com.qc.services.ProductionOrderService;
 import com.qc.services.ResponseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -108,5 +111,31 @@ public class ProductionOrderController {
         log.info("Deleting Production Order with ID: {}", id);
         productionOrderService.deleteProductionOrder(id);
         return responseService.success(HttpStatus.OK.value(), "Production Order deleted successfully", null, 0);
+    }
+
+    @Operation(summary = "Upload Production Orders via Excel")
+    @PostMapping("/productionOrderUpload")
+    public ResponseEntity<ResponceData> uploadProductionOrders(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            String token = authHeader.replace("Bearer ", "");
+
+            if (file.isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(new ResponceData("fail", 400, "File is empty", null, 0));
+            }
+
+            List<ProductionOrder> savedOrders = productionOrderService.uploadProductionOrdersFromExcel(file, token);
+
+            return ResponseEntity.ok(new ResponceData(
+                    "success", 200, "Production Orders uploaded successfully", savedOrders, savedOrders.size()));
+
+        } catch (Exception e) {
+            log.error("Error uploading Production Orders: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponceData("error", 500, "Unexpected error: " + e.getMessage(), null, 0));
+        }
     }
 }
