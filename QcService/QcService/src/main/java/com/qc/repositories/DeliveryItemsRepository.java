@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DeliveryItemsRepository extends JpaRepository<DeliveryItems, Long> {
@@ -35,4 +36,7 @@ public interface DeliveryItemsRepository extends JpaRepository<DeliveryItems, Lo
     );
 
     List<DeliveryItems> findByChallanId(Long challanId);
+
+    Optional<DeliveryItems> findByNameAndProductCode(String name, String productCode);
+
 }

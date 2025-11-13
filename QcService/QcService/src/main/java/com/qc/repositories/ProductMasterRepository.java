@@ -44,4 +44,6 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
             Pageable pageable);
 
     Optional<ProductMaster> findByName(String name);
+    Optional<ProductMaster> findByNameAndProductCode(String name, String productCode);
+
 }

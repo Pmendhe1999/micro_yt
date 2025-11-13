@@ -2,7 +2,7 @@ package com.qc.dto;
 
 public class QualitativeCheckRequestDTO {
     private Long qualitativeCheckMasterId;
-    private String productName;
+    private String name;
     private String description;
     private Boolean isScan;
     private String status;
@@ -16,12 +16,12 @@ public class QualitativeCheckRequestDTO {
         this.qualitativeCheckMasterId = qualitativeCheckMasterId;
     }
 
-    public String getProductName() {
-        return productName;
+    public String getName() {
+        return name;
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {

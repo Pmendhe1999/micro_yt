@@ -60,7 +60,7 @@ public class Product extends AbstractAuditingEntity{
 
     // Foreign key to DeliveryItemsMaster
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "delivery_item_id", nullable = false)
+    @JoinColumn(name = "delivery_item_id", nullable = true)
     private DeliveryItemsMaster deliveryItem;
 
     // Foreign key to DeliveryItemsMaster
