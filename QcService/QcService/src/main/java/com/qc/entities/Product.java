@@ -63,6 +63,32 @@ public class Product extends AbstractAuditingEntity{
     @JoinColumn(name = "delivery_item_id", nullable = false)
     private DeliveryItemsMaster deliveryItem;
 
+    // Foreign key to DeliveryItemsMaster
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "delivery_items_id", nullable = false)
+    private DeliveryItems deliveryItems;
+
+    // 🔹 Foreign key to ProductMaster
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_master_id", nullable = false)
+    private ProductMaster productMaster;
+
+    public DeliveryItems getDeliveryItems() {
+        return deliveryItems;
+    }
+
+    public void setDeliveryItems(DeliveryItems deliveryItems) {
+        this.deliveryItems = deliveryItems;
+    }
+
+    public ProductMaster getProductMaster() {
+        return productMaster;
+    }
+
+    public void setProductMaster(ProductMaster productMaster) {
+        this.productMaster = productMaster;
+    }
+
     public DeliveryItemsMaster getDeliveryItem() {
         return deliveryItem;
     }

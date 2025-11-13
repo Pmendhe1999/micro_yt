@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface LabelScanMasterRepository extends JpaRepository<LabelScanMaster, Long> {
 
     @Query("SELECT l FROM LabelScanMaster l " +
@@ -22,4 +24,6 @@ public interface LabelScanMasterRepository extends JpaRepository<LabelScanMaster
             @Param("checkStatus") LabelScanMaster.CheckStatus checkStatus,
             @Param("status") Boolean status,
             Pageable pageable);
+
+    List<LabelScanMaster> findByStatusTrue();
 }

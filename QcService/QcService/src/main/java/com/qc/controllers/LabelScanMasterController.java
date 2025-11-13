@@ -2,6 +2,7 @@ package com.qc.controllers;
 
 import com.qc.dto.LabelScanMasterDTO;
 import com.qc.dto.LabelScanMasterDTOResponse;
+import com.qc.dto.LabelScanMasterFullResponse;
 import com.qc.dto.Response;
 import com.qc.entities.LabelScanMaster;
 import com.qc.exception.IllegalArgumentsException;
@@ -112,4 +113,30 @@ public class LabelScanMasterController {
         labelScanMasterService.deleteLabelScanMaster(id);
         return responseService.success(HttpStatus.OK.value(), "Label Scan Master deleted successfully", null, 0);
     }
+
+    @Operation(summary = "Get Label Scan Master with Qualitative and Quantitative Checks")
+    @GetMapping("/labelScanMaster/full/{id}")
+    public ResponseEntity<Response<LabelScanMasterFullResponse>> getFullLabelScanMasterDetails(@PathVariable Long id) {
+        log.info("Request to fetch Label Scan Master with related checks, ID: {}", id);
+        LabelScanMasterFullResponse result = labelScanMasterService.getFullScanMasterDetails(id);
+        return responseService.success(HttpStatus.OK.value(),
+                "Label Scan Master with related checks fetched successfully",
+                result,
+                1);
+    }
+
+    @Operation(summary = "Get all Label Scan Masters with Qualitative and Quantitative Checks")
+    @GetMapping("/labelScanMaster/full")
+    public ResponseEntity<Response<List<LabelScanMasterFullResponse>>> getAllFullLabelScanMasters() {
+        log.info("Request to fetch all Label Scan Masters with related checks");
+        List<LabelScanMasterFullResponse> result = labelScanMasterService.getAllFullScanMasterDetails();
+
+        return responseService.success(
+                HttpStatus.OK.value(),
+                "All Label Scan Masters with related checks fetched successfully",
+                result,
+                result.size()
+        );
+    }
+
 }

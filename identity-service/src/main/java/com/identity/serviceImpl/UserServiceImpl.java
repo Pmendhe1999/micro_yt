@@ -256,7 +256,7 @@ import java.util.stream.Collectors;
                         emailService.sendCredentialsEmail(
                                 saved.getEmail(),
                                 saved.getUsername(),
-                                dto.getPassword(), // send plain password in email
+                                "Asdf@1234", // send plain password in email
                                 loginUrl
                         );
                         log.info("📧 Default Password email sent to '{}'", saved.getEmail());

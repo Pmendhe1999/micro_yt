@@ -1,11 +1,16 @@
 package com.qc.services;
 
-import com.qc.dto.LabelScanMasterDTO;
-import com.qc.dto.LabelScanMasterDTOResponse;
+import com.qc.dto.*;
 import com.qc.entities.LabelScanMaster;
+import com.qc.entities.QualitativeCheckMaster;
+import com.qc.entities.QuantitativeCheckMaster;
 import com.qc.exception.ResourceNotFoundException;
 import com.qc.mapper.LabelScanMasterMapper;
+import com.qc.mapper.QualitativeCheckMasterMapper;
+import com.qc.mapper.QuantitativeCheckMasterMapper;
 import com.qc.repositories.LabelScanMasterRepository;
+import com.qc.repositories.QualitativeCheckMasterRepository;
+import com.qc.repositories.QuantitativeCheckMasterRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -23,6 +29,18 @@ public class LabelScanMasterService {
 
     @Autowired
     private LabelScanMasterMapper labelScanMasterMapper;
+
+    @Autowired
+    private QualitativeCheckMasterRepository qualitativeRepo;
+
+    @Autowired
+    private QuantitativeCheckMasterRepository quantitativeRepo;
+
+    @Autowired
+    private QualitativeCheckMasterMapper qualitativeMapper;
+
+    @Autowired
+    private QuantitativeCheckMasterMapper quantitativeMapper;
 
     public void createAllLabelScanMaster(List<LabelScanMasterDTO> labelScanMasterDTOList) {
         List<LabelScanMaster> entities = labelScanMasterMapper
@@ -96,5 +114,67 @@ public class LabelScanMasterService {
         LabelScanMaster existing = labelScanMasterRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Label Scan Master not found with id: " + id));
         labelScanMasterRepository.delete(existing);
+    }
+
+    public LabelScanMasterFullResponse getFullScanMasterDetails(Long id) {
+        LabelScanMaster labelScanMaster = labelScanMasterRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Label Scan Master not found with id: " + id));
+
+        // Fetch qualitative and quantitative checks
+        List<QualitativeCheckMaster> qualitativeEntities = qualitativeRepo.findByScanMasterId(id);
+        List<QuantitativeCheckMaster> quantitativeEntities = quantitativeRepo.findByScanMasterId(id);
+
+        List<QualitativeCheckMasterDTOResponse> qualitativeDTOs =
+                qualitativeMapper.entityListToQualitativeCheckMasterDTOResponseList(qualitativeEntities);
+        List<QuantitativeCheckMasterDTOResponse> quantitativeDTOs =
+                quantitativeMapper.toResponseList(quantitativeEntities);
+        // Build response
+        return new LabelScanMasterFullResponse(
+                labelScanMaster.getId(),
+                labelScanMaster.getName(),
+                labelScanMaster.getDescription(),
+                labelScanMaster.getScanType(),
+                labelScanMaster.getSeqNumber(),
+                labelScanMaster.getCheckStatus(),
+                labelScanMaster.getStatus(),
+                qualitativeDTOs,
+                quantitativeDTOs
+        );
+    }
+
+    public List<LabelScanMasterFullResponse> getAllFullScanMasterDetails() {
+
+        // Step 1️⃣: Fetch only active LabelScanMasters (status = true)
+        List<LabelScanMaster> labelScanMasters = labelScanMasterRepository.findByStatusTrue();
+
+        // Step 2️⃣: Map each LabelScanMaster with its related checks
+        return labelScanMasters.stream().map(scanMaster -> {
+
+            List<QualitativeCheckMaster> qualitativeEntities =
+                    qualitativeRepo.findByScanMasterId(scanMaster.getId());
+
+            List<QuantitativeCheckMaster> quantitativeEntities =
+                    quantitativeRepo.findByScanMasterId(scanMaster.getId());
+
+            List<QualitativeCheckMasterDTOResponse> qualitativeDTOs =
+                    qualitativeMapper.entityListToQualitativeCheckMasterDTOResponseList(qualitativeEntities);
+
+            List<QuantitativeCheckMasterDTOResponse> quantitativeDTOs =
+                    quantitativeMapper.toResponseList(quantitativeEntities);
+
+            // Build and return the full response for this scan master
+            return new LabelScanMasterFullResponse(
+                    scanMaster.getId(),
+                    scanMaster.getName(),
+                    scanMaster.getDescription(),
+                    scanMaster.getScanType(),
+                    scanMaster.getSeqNumber(),
+                    scanMaster.getCheckStatus(),
+                    scanMaster.getStatus(),
+                    qualitativeDTOs,
+                    quantitativeDTOs
+            );
+
+        }).collect(Collectors.toList());
     }
 }

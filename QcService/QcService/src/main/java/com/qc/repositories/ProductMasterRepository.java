@@ -42,4 +42,6 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
             @Param("mfgDate") LocalDate mfgDate,
             @Param("expDate") LocalDate expDate,
             Pageable pageable);
+
+    Optional<ProductMaster> findByName(String name);
 }

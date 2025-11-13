@@ -99,4 +99,16 @@ public class QualitativeCheckMasterController {
         service.deleteQualitativeCheckMaster(id);
         return responseService.success(HttpStatus.OK.value(), "Qualitative Check Master deleted successfully", null, 0);
     }
+
+    @Operation(summary = "Get Qualitative Check Masters by Scan Master ID")
+    @GetMapping("/qualitativeCheckMaster/byScanMaster/{scanMasterId}")
+    public ResponseEntity<Response<List<QualitativeCheckMasterDTOResponse>>> getByScanMasterId(
+            @PathVariable Long scanMasterId) {
+
+        List<QualitativeCheckMasterDTOResponse> result = service.getByScanMasterId(scanMasterId);
+        return responseService.success(HttpStatus.OK.value(),
+                "Qualitative Check Masters fetched successfully by Scan Master ID",
+                result,
+                result.size());
+    }
 }

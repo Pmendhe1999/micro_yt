@@ -27,4 +27,7 @@ public interface QualitativeCheckMasterRepository extends JpaRepository<Qualitat
             @Param("checkStatus") QualitativeCheckMaster.CheckStatus checkStatus,
             @Param("scanMasterIds") List<Long> scanMasterIds,
             Pageable pageable);
+
+    @Query("SELECT q FROM QualitativeCheckMaster q WHERE q.scanMaster.id = :scanMasterId")
+    List<QualitativeCheckMaster> findByScanMasterId(@Param("scanMasterId") Long scanMasterId);
 }

@@ -82,4 +82,14 @@ public class QualitativeCheckMasterService {
                 .orElseThrow(() -> new ResourceNotFoundException("Qualitative Check Master not found with id: " + id));
         repository.delete(entity);
     }
+
+    public List<QualitativeCheckMasterDTOResponse> getByScanMasterId(Long scanMasterId) {
+        List<QualitativeCheckMaster> entities = repository.findByScanMasterId(scanMasterId);
+
+        if (entities.isEmpty()) {
+            throw new ResourceNotFoundException("No Qualitative Check Masters found for Scan Master ID: " + scanMasterId);
+        }
+
+        return mapper.entityListToQualitativeCheckMasterDTOResponseList(entities);
+    }
 }

@@ -33,4 +33,6 @@ public interface DeliveryItemsRepository extends JpaRepository<DeliveryItems, Lo
             @Param("challanIds") List<Long> challanIds,
             Pageable pageable
     );
+
+    List<DeliveryItems> findByChallanId(Long challanId);
 }
