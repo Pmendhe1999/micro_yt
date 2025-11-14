@@ -84,6 +84,29 @@ public class Product extends AbstractAuditingEntity{
     @JoinColumn(name = "product_master_id", nullable = false)
     private ProductMaster productMaster;
 
+    // ✅ Newly Added Fields
+    @Column(name = "bar_code_no", length = 255)
+    private String barCodeNo;
+
+    @Column(name = "iin_no", length = 255)
+    private String iinNo;
+
+    public String getBarCodeNo() {
+        return barCodeNo;
+    }
+
+    public void setBarCodeNo(String barCodeNo) {
+        this.barCodeNo = barCodeNo;
+    }
+
+    public String getIinNo() {
+        return iinNo;
+    }
+
+    public void setIinNo(String iinNo) {
+        this.iinNo = iinNo;
+    }
+
     public String getMfgLifNo() {
         return mfgLifNo;
     }

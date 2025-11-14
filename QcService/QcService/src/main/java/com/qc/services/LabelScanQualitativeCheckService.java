@@ -375,5 +375,105 @@ public class LabelScanQualitativeCheckService {
         );
     }
 
+    public LabelScanBarIinCheckResponseDTO createBarIinChecks(
+            LabelScanBarIinCheckRequestDTO request) {
+
+        // Step 1: Validate LabelScanMaster
+        LabelScanMaster labelScanMaster = labelScanMasterRepository.findById(request.getLabelScanMasterId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "LabelScanMaster not found with ID: " + request.getLabelScanMasterId()));
+
+        // Step 2: Validate DeliveryChallan
+        DeliveryChallan deliveryChallan = deliveryChallanRepository.findById(request.getDeliveryChallanId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "DeliveryChallan not found with ID: " + request.getDeliveryChallanId()));
+
+        // Step 3: Validate Product
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Product not found with ID: " + request.getProductId()));
+
+        ProductMaster productMaster = product.getProductMaster();
+
+        // Step 4: Extract barCodeNo, iinNo, batchNo from payload
+        String barCodeNo = null;
+        String iinNo = null;
+        String batchNo = null;
+
+        for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
+
+            switch (dto.getName().toLowerCase()) {
+                case "barcodeno": barCodeNo = dto.getValue(); break;
+                case "iinno": iinNo = dto.getValue(); break;
+                case "batchno": batchNo = dto.getValue(); break;
+            }
+        }
+
+        // Step 5A: Validate barCodeNo in ProductMaster
+        if (!Objects.equals(productMaster.getBarCodeNo(), barCodeNo)) {
+            throw new ResourceNotFoundException("barCodeNo does not match ProductMaster");
+        }
+
+        // Step 5B: Validate iinNo in ProductMaster
+        if (!Objects.equals(productMaster.getIinNo(), iinNo)) {
+            throw new ResourceNotFoundException("iinNo does not match ProductMaster");
+        }
+
+
+        String finalBatchNo = batchNo;
+        // Step 5C: Validate batchNo in DeliveryItems (NOT ProductMaster)
+        DeliveryItems deliveryItem = deliveryItemsRepository
+                .findByBatchNo(batchNo)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "DeliveryItem not found for batchNo: " + finalBatchNo));
+
+        // Step 6: Save Quantitative Checks
+        List<QuantitativeCheck> savedChecks = new ArrayList<>();
+
+        for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
+
+            QuantitativeCheckMaster master = quantitativeCheckMasterRepository
+                    .findById(dto.getQuantitativeCheckMasterId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "QuantitativeCheckMaster not found with ID: " + dto.getQuantitativeCheckMasterId()));
+
+            QuantitativeCheck check = new QuantitativeCheck();
+            check.setDescription(dto.getDescription());
+            check.setScan(dto.getIsScan());
+            check.setStatus(dto.getStatus());
+            check.setValue(dto.getValue());
+            check.setQuantitativeCheckMaster(master);
+            check.setProduct(product);
+
+            savedChecks.add(check);
+        }
+
+        quantitativeCheckRepository.saveAll(savedChecks);
+
+        // Step 7: Prepare Response DTO
+        List<QuantitativeCheckDTOResponse> responseList = savedChecks.stream()
+                .map(c -> new QuantitativeCheckDTOResponse(
+                        c.getId(),
+                        c.getDescription(),
+                        c.getScan(),
+                        c.getStatus(),
+                        c.getValue(),
+                        c.getQuantitativeCheckMaster().getId(),
+                        c.getQuantitativeCheckMaster().getName(),
+                        product.getId(),
+                        product.getName(),
+                        product.getProductCode(),
+                        product.getSize(),
+                        product.getOrientation()
+                ))
+                .collect(Collectors.toList());
+
+        return new LabelScanBarIinCheckResponseDTO(
+                labelScanMaster.getId(),
+                deliveryChallan.getId(),
+                product.getId(),
+                responseList
+        );
+    }
 
 }

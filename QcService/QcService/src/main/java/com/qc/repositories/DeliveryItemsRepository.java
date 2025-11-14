@@ -38,5 +38,5 @@ public interface DeliveryItemsRepository extends JpaRepository<DeliveryItems, Lo
     List<DeliveryItems> findByChallanId(Long challanId);
 
     Optional<DeliveryItems> findByNameAndProductCode(String name, String productCode);
-
+    Optional<DeliveryItems> findByBatchNo(String batchNo);
 }

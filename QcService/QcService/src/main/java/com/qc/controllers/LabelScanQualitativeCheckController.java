@@ -67,4 +67,19 @@ public class LabelScanQualitativeCheckController {
         );
     }
 
+    @PostMapping("/labelScanMaster/quantitativeCheck/bar-inn")
+    public ResponseEntity<Response<LabelScanBarIinCheckResponseDTO>> createBarIinChecks(
+            @Valid @RequestBody LabelScanBarIinCheckRequestDTO request) {
+
+        LabelScanBarIinCheckResponseDTO dto =
+                labelScanQualitativeCheckService.createBarIinChecks(request);
+
+        return responseService.success(
+                HttpStatus.CREATED.value(),
+                "BarCode / IIN / BatchNo Checks saved successfully",
+                dto,
+                dto.getQuantitativeChecks().size()
+        );
+    }
+
 }

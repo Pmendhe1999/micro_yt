@@ -1,0 +1,43 @@
+package com.qc.dto;
+
+import java.util.List;
+
+public class LabelScanBarIinCheckRequestDTO {
+    private Long labelScanMasterId;
+    private Long deliveryChallanId;
+    private Long productId;
+
+    private List<QuantitativeCheckRequestDTO> quantitativeChecks;
+
+    public Long getLabelScanMasterId() {
+        return labelScanMasterId;
+    }
+
+    public void setLabelScanMasterId(Long labelScanMasterId) {
+        this.labelScanMasterId = labelScanMasterId;
+    }
+
+    public Long getDeliveryChallanId() {
+        return deliveryChallanId;
+    }
+
+    public void setDeliveryChallanId(Long deliveryChallanId) {
+        this.deliveryChallanId = deliveryChallanId;
+    }
+
+    public Long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(Long productId) {
+        this.productId = productId;
+    }
+
+    public List<QuantitativeCheckRequestDTO> getQuantitativeChecks() {
+        return quantitativeChecks;
+    }
+
+    public void setQuantitativeChecks(List<QuantitativeCheckRequestDTO> quantitativeChecks) {
+        this.quantitativeChecks = quantitativeChecks;
+    }
+}
