@@ -17,6 +17,32 @@ public class QuantitativeCheckDTOResponse {
     private Long productId;
     private String productName;
 
+    public QuantitativeCheckDTOResponse(
+            Long id,
+            String description,
+            Boolean scan,
+            String status,
+            String value,
+            Long quantitativeCheckMasterId,
+            String quantitativeCheckMasterName,
+            Long productId,
+            String productName,
+            String productCode,
+            String size,
+            String orientation
+    ) {
+        this.id = id;
+        this.description = description;
+        this.isScan = scan;
+        this.status = status;
+        this.value = value;
+        this.quantitativeCheckMasterId = quantitativeCheckMasterId;
+        this.quantitativeCheckMasterName = quantitativeCheckMasterName;
+        this.productId = productId;
+        this.productName = productName;
+
+    }
+
     public Long getId() {
         return id;
     }
