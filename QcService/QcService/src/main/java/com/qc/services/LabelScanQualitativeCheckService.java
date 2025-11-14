@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -282,6 +283,97 @@ public class LabelScanQualitativeCheckService {
         );
     }
 
+    
+    public LabelScanQuantitativeCheckUpdateResponseDTO updateQuantitativeChecks(
+            LabelScanQuantitativeCheckUpdateRequestDTO request) {
+
+        // Step 1: Validate LabelScanMaster
+        LabelScanMaster labelScanMaster = labelScanMasterRepository.findById(request.getLabelScanMasterId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "LabelScanMaster not found with ID: " + request.getLabelScanMasterId()));
+
+        // Step 2: Validate DeliveryChallan
+        DeliveryChallan deliveryChallan = deliveryChallanRepository.findById(request.getDeliveryChallanId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "DeliveryChallan not found with ID: " + request.getDeliveryChallanId()));
+
+        // Step 3: Validate Product
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Product not found with ID: " + request.getProductId()));
+
+        // Fetch ProductMaster
+        ProductMaster productMaster = product.getProductMaster();
+
+        // Step 4: Extract mfgLifNo & sterileType from request
+        String mfgLifNo = null;
+        String sterileType = null;
+
+        for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
+            switch (dto.getName().toLowerCase()) {
+                case "mfglifno": mfgLifNo = dto.getValue(); break;
+                case "steriletype": sterileType = dto.getValue(); break;
+            }
+        }
+
+        // Step 5: Validate with ProductMaster
+        if (!Objects.equals(productMaster.getMfgLifNo(), mfgLifNo)) {
+            throw new ResourceNotFoundException("mfgLifNo does not match with ProductMaster");
+        }
+
+        if (!Objects.equals(productMaster.getSterileType(), sterileType)) {
+            throw new ResourceNotFoundException("sterileType does not match with ProductMaster");
+        }
+
+        // Step 6: Save Quantitative Checks
+        List<QuantitativeCheck> savedChecks = new ArrayList<>();
+
+        for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
+
+            QuantitativeCheckMaster master = quantitativeCheckMasterRepository
+                    .findById(dto.getQuantitativeCheckMasterId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "QuantitativeCheckMaster not found with ID: " + dto.getQuantitativeCheckMasterId()));
+
+            QuantitativeCheck check = new QuantitativeCheck();
+            check.setDescription(dto.getDescription());
+            check.setScan(dto.getIsScan());
+            check.setStatus(dto.getStatus());
+            check.setValue(dto.getValue());
+            check.setQuantitativeCheckMaster(master);
+            check.setProduct(product);
+
+            savedChecks.add(check);
+        }
+
+        quantitativeCheckRepository.saveAll(savedChecks);
+
+        // Step 7: Prepare Response
+        List<QuantitativeCheckDTOResponse> responseList = savedChecks.stream()
+                .map(c -> new QuantitativeCheckDTOResponse(
+                        c.getId(),
+                        c.getDescription(),
+                        c.getScan(),
+                        c.getStatus(),
+                        c.getValue(),
+                        c.getQuantitativeCheckMaster().getId(),
+                        c.getQuantitativeCheckMaster().getName(),
+                        product.getId(),
+                        product.getName(),
+                        product.getProductCode(),
+                        product.getSize(),
+                        product.getOrientation()
+                ))
+                .collect(Collectors.toList());
+
+        // Return DTO
+        return new LabelScanQuantitativeCheckUpdateResponseDTO(
+                labelScanMaster.getId(),
+                deliveryChallan.getId(),
+                product.getId(),
+                responseList
+        );
+    }
 
 
 }

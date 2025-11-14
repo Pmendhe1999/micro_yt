@@ -57,7 +57,13 @@ public class Product extends AbstractAuditingEntity{
 
     @Column(name = "orientation", length = 255)
     private String orientation;
+    // ✅ Newly added field
+    @Column(name = "mfg_lif_no", length = 255)
+    private String mfgLifNo;
 
+    // ✅ Newly added field
+    @Column(name = "sterile_type", length = 255)
+    private String sterileType;
     // Foreign key to DeliveryChallan
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "delivery_challan_id", nullable = false)
@@ -77,6 +83,22 @@ public class Product extends AbstractAuditingEntity{
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_master_id", nullable = false)
     private ProductMaster productMaster;
+
+    public String getMfgLifNo() {
+        return mfgLifNo;
+    }
+
+    public void setMfgLifNo(String mfgLifNo) {
+        this.mfgLifNo = mfgLifNo;
+    }
+
+    public String getSterileType() {
+        return sterileType;
+    }
+
+    public void setSterileType(String sterileType) {
+        this.sterileType = sterileType;
+    }
 
     public String getSize() {
         return size;

@@ -1,9 +1,6 @@
 package com.qc.controllers;
 
-import com.qc.dto.LabelScanQualitativeCheckRequestDTO;
-import com.qc.dto.LabelScanQuantitativeCheckRequestDTO;
-import com.qc.dto.LabelScanQuantitativeCheckResponseDTO;
-import com.qc.dto.Response;
+import com.qc.dto.*;
 import com.qc.services.LabelScanQualitativeCheckService;
 import com.qc.services.ResponseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,6 +47,21 @@ public class LabelScanQualitativeCheckController {
         return responseService.success(
                 HttpStatus.CREATED.value(),
                 "Quantitative Checks created successfully",
+                dto,
+                dto.getQuantitativeChecks().size()
+        );
+    }
+
+    @PostMapping("/labelScanMaster/quantitativeCheck/update")
+    public ResponseEntity<Response<LabelScanQuantitativeCheckUpdateResponseDTO>> updateQuantitativeChecks(
+            @Valid @RequestBody LabelScanQuantitativeCheckUpdateRequestDTO request) {
+
+        LabelScanQuantitativeCheckUpdateResponseDTO dto =
+                labelScanQualitativeCheckService.updateQuantitativeChecks(request);
+
+        return responseService.success(
+                HttpStatus.OK.value(),
+                "Quantitative Checks updated successfully",
                 dto,
                 dto.getQuantitativeChecks().size()
         );
