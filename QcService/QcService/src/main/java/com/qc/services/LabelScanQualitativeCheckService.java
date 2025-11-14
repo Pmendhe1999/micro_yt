@@ -52,6 +52,8 @@ public class LabelScanQualitativeCheckService {
         // Step 3️⃣ - Extract productName and productCode values from qualitativeChecks
         String productName = null;
         String productCode = null;
+        String size = null;
+        String orientation = null;
 
         for (QualitativeCheckRequestDTO dto : request.getQualitativeChecks()) {
             if ("productName".equalsIgnoreCase(dto.getName())) {
@@ -67,10 +69,12 @@ public class LabelScanQualitativeCheckService {
 
         final String finalProductName = productName;
         final String finalProductCode = productCode;
+        final String finalSize = size;
+        final String finalOrientation = orientation;
 
         // Step 4️⃣ - Fetch ProductMaster by name and productCode
         ProductMaster productMaster = productMasterRepository
-                .findByNameAndProductCode(finalProductName, finalProductCode)
+                .findByNameAndProductCodeAndSizeAndOrientation(finalProductName, finalProductCode,finalSize,finalOrientation)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "ProductMaster not found with name: " + finalProductName + " and code: " + finalProductCode));
 
@@ -143,6 +147,7 @@ public class LabelScanQualitativeCheckService {
     private QuantitativeCheckRepository quantitativeCheckRepository;
     public void createQuantitativeChecks(LabelScanQuantitativeCheckRequestDTO request) {
 
+
         // Step 1️⃣ Validate LabelScanMaster
         LabelScanMaster labelScanMaster =
                 labelScanMasterRepository.findById(request.getLabelScanMasterId())
@@ -155,33 +160,53 @@ public class LabelScanQualitativeCheckService {
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 "DeliveryChallan not found with ID: " + request.getDeliveryChallanId()));
 
-        // Step 3️⃣ Extract productName + productCode
+        // Step 3️⃣ Extract productName + productCode + size + orientation
         String productName = null;
         String productCode = null;
+        String size = null;
+        String orientation = null;
 
         for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
-            if ("productName".equalsIgnoreCase(dto.getName())) productName = dto.getValue();
-            else if ("productCode".equalsIgnoreCase(dto.getName())) productCode = dto.getValue();
+
+            if ("productName".equalsIgnoreCase(dto.getName())) {
+                productName = dto.getValue();
+
+            } else if ("productCode".equalsIgnoreCase(dto.getName())) {
+                productCode = dto.getValue();
+
+            } else if ("size".equalsIgnoreCase(dto.getName())) {
+                size = dto.getValue();
+
+            } else if ("orientation".equalsIgnoreCase(dto.getName())) {
+                orientation = dto.getValue();
+            }
         }
 
-        if (productName == null || productCode == null) {
-            throw new ResourceNotFoundException("Both productName and productCode must be provided");
+        if (productName == null || productCode == null || size == null || orientation == null) {
+            throw new ResourceNotFoundException(
+                    "productName, productCode, size and orientation must all be provided");
         }
 
         final String finalProductName = productName;
         final String finalProductCode = productCode;
+        final String finalSize = size;
+        final String finalOrientation = orientation;
 
-        // Step 4️⃣ Fetch ProductMaster
+        // Step 4️⃣ Fetch ProductMaster using all parameters
         ProductMaster productMaster = productMasterRepository
-                .findByNameAndProductCode(finalProductName, finalProductCode)
+                .findByNameAndProductCodeAndSizeAndOrientation(
+                        finalProductName, finalProductCode, finalSize, finalOrientation)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "ProductMaster not found for name: " + finalProductName + " and code: " + finalProductCode));
-
+                        "ProductMaster not found for name: " + finalProductName
+                                + ", code: " + finalProductCode
+                                + ", size: " + finalSize
+                                + ", orientation: " + finalOrientation));
         // Step 5️⃣ Fetch DeliveryItem
         DeliveryItems deliveryItem = deliveryItemsRepository
                 .findByNameAndProductCode(finalProductName, finalProductCode)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "DeliveryItem not found for name: " + finalProductName + " and code: " + finalProductCode));
+
 
         // Step 6️⃣ Create Product
         Product product = new Product();
@@ -197,6 +222,10 @@ public class LabelScanQualitativeCheckService {
         product.setExpDate(productMaster.getExpDate());
         product.setPublished(productMaster.getPublished());
         product.setStatus(productMaster.getStatus());
+
+        // NEW FIELDS 🔥
+        product.setSize(finalSize);
+        product.setOrientation(finalOrientation);
 
         product.setProductMaster(productMaster);
         product.setDeliveryChallan(deliveryChallan);

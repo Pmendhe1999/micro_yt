@@ -58,6 +58,8 @@ public class ProductController {
             @RequestParam(required = false) Boolean status,
             @RequestParam(required = false) Long deliveryChallanId,
             @RequestParam(required = false) Long deliveryItemId,
+            @RequestParam(required = false) String sizeValue,
+            @RequestParam(required = false) String orientationValue,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir) {
 
@@ -67,7 +69,7 @@ public class ProductController {
         Page<ProductDTOResponse> result = productService.getAllProductsWithFilters(
                 name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price,
                 inStockQuantity, mfgDate, expDate, isPublished, status,
-                deliveryChallanId, deliveryItemId, pageable);
+                deliveryChallanId, deliveryItemId,sizeValue, orientationValue, pageable);
 
         return responseService.success(HttpStatus.OK.value(),
                 "Products fetched successfully", result.getContent(), result.getTotalElements());

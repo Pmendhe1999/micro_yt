@@ -102,18 +102,20 @@ public class ProductMasterController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate mfgDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate expDate,
             @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String sizeValue,
+            @RequestParam(required = false) String orientationValue
     ) {
 
         log.info("Fetching Product Masters with filters: name={}, productCode={}, serialNo={}, orderNo={}, hsnCode={}, unit={}, price={}, quantity={}, isPublished={}, status={}, mfgDate={}, expDate={}",
-                name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity, isPublished, status, mfgDate, expDate);
+                name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity, isPublished, status, mfgDate, expDate, sizeValue, orientationValue);
 
         Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<ProductMasterDTOResponse> result = productMasterService.getAllProductMastersWithFilters(
                 name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity,
-                isPublished, status, mfgDate, expDate, pageable);
+                isPublished, status, mfgDate, expDate,sizeValue, orientationValue, pageable);
 
         return responseService.success(HttpStatus.OK.value(),
                 "Product Masters fetched successfully", result.getContent(), result.getTotalElements());

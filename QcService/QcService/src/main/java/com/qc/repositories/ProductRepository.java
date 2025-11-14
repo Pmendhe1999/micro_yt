@@ -33,7 +33,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "AND (:isPublished IS NULL OR p.isPublished = :isPublished) " +
             "AND (:status IS NULL OR p.status = :status) " +
             "AND (:deliveryChallanId IS NULL OR dc.id = :deliveryChallanId) " +
-            "AND (:deliveryItemId IS NULL OR di.id = :deliveryItemId)")
+            "AND (:deliveryItemId IS NULL OR di.id = :deliveryItemId)"+
+            "AND (:sizeValue IS NULL OR LOWER(p.size) LIKE LOWER(CONCAT('%', :sizeValue, '%'))) " +
+            "AND (:orientationValue IS NULL OR LOWER(p.orientation) LIKE LOWER(CONCAT('%', :orientationValue, '%')))")
     Page<Product> searchProductsAdvanced(
             @Param("name") String name,
             @Param("productCode") String productCode,
@@ -49,6 +51,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             @Param("isPublished") Boolean isPublished,
             @Param("status") Boolean status,
             @Param("deliveryChallanId") Long deliveryChallanId,
+            @Param("sizeValue") String sizeValue,
+            @Param("orientationValue") String orientationValue,
             @Param("deliveryItemId") Long deliveryItemId,
             Pageable pageable);
 

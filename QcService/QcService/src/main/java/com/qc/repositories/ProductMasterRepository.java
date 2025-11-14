@@ -27,7 +27,9 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
             "AND (:isPublished IS NULL OR p.isPublished = :isPublished) " +
             "AND (:status IS NULL OR p.status = :status) " +
             "AND (:mfgDate IS NULL OR p.mfgDate = :mfgDate) " +
-            "AND (:expDate IS NULL OR p.expDate = :expDate)")
+            "AND (:expDate IS NULL OR p.expDate = :expDate)"+
+            "AND (:sizeValue IS NULL OR LOWER(p.size) LIKE LOWER(CONCAT('%', :sizeValue, '%'))) " +
+            "AND (:orientationValue IS NULL OR LOWER(p.orientation) LIKE LOWER(CONCAT('%', :orientationValue, '%')))")
     Page<ProductMaster> searchProductMastersAdvanced(
             @Param("name") String name,
             @Param("productCode") String productCode,
@@ -41,9 +43,12 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
             @Param("status") Boolean status,
             @Param("mfgDate") LocalDate mfgDate,
             @Param("expDate") LocalDate expDate,
+            @Param("sizeValue") String sizeValue,
+            @Param("orientationValue") String orientationValue,
             Pageable pageable);
 
     Optional<ProductMaster> findByName(String name);
-    Optional<ProductMaster> findByNameAndProductCode(String name, String productCode);
+    Optional<ProductMaster> findByNameAndProductCodeAndSizeAndOrientation(String name, String productCode, String size,
+                                                     String orientation);
 
 }

@@ -8,6 +8,12 @@ public class LabelScanQuantitativeCheckRequestDTO {
 
     private List<QuantitativeCheckRequestDTO> quantitativeChecks;
 
+    public LabelScanQuantitativeCheckRequestDTO(Long labelScanMasterId, Long deliveryChallanId, List<QuantitativeCheckRequestDTO> quantitativeChecks) {
+        this.labelScanMasterId = labelScanMasterId;
+        this.deliveryChallanId = deliveryChallanId;
+        this.quantitativeChecks = quantitativeChecks;
+    }
+
     public Long getLabelScanMasterId() {
         return labelScanMasterId;
     }

@@ -52,6 +52,11 @@ public class Product extends AbstractAuditingEntity{
     @Column(name = "unit", length = 255)
     private String unit;
 
+    @Column(name = "size", length = 255)
+    private String size;
+
+    @Column(name = "orientation", length = 255)
+    private String orientation;
 
     // Foreign key to DeliveryChallan
     @ManyToOne(fetch = FetchType.EAGER)
@@ -72,6 +77,22 @@ public class Product extends AbstractAuditingEntity{
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_master_id", nullable = false)
     private ProductMaster productMaster;
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
 
     public DeliveryItems getDeliveryItems() {
         return deliveryItems;

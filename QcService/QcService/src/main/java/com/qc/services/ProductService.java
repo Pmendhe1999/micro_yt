@@ -60,13 +60,14 @@ public class ProductService {
             String name, String productCode, String serialNo, String orderNo,
             String batchNo, String hsnCode, String unit, BigDecimal price, Long inStockQuantity,
             LocalDate mfgDate, LocalDate expDate, Boolean isPublished, Boolean status,
-            Long deliveryChallanId, Long deliveryItemId,
+            Long deliveryChallanId, Long deliveryItemId, String sizeValue,
+            String orientationValue,
             Pageable pageable) {
 
         Page<Product> page = productRepository.searchProductsAdvanced(
                 name, productCode, serialNo, orderNo, batchNo, hsnCode, unit, price,
                 inStockQuantity, mfgDate, expDate, isPublished, status,
-                deliveryChallanId, deliveryItemId, pageable);
+                deliveryChallanId,sizeValue,orientationValue, deliveryItemId, pageable);
 
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Products found");

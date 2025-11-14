@@ -59,6 +59,27 @@ public class ProductMaster extends AbstractAuditingEntity {
 
     @Column(name = "status")
     private Boolean status;
+    @Column(name = "size", length = 255)
+    private String size;
+
+    @Column(name = "orientation", length = 255)
+    private String orientation;
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
 
     // 🔹 One Product can have multiple MediaDetails
     @OneToMany(mappedBy = "productMaster", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

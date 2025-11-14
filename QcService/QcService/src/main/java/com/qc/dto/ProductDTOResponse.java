@@ -27,6 +27,24 @@ public class ProductDTOResponse {
     private String deliveryChallanName;   // Optional for readability
     private Long deliveryItemId;
     private String deliveryItemName;
+    private String orientation;
+    private String size;
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
 
     public Long getDeliveryChallanId() {
         return deliveryChallanId;

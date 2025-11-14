@@ -31,6 +31,24 @@ public class ProductMasterDTOResponse {
 
     private Boolean isPublished;
     private Boolean status;
+    private String size;
+    private String orientation;
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
 
     private List<MediaDetailsDTOResponse> mediaDetailsList;
 

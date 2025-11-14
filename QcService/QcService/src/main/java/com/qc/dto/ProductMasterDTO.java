@@ -24,6 +24,24 @@ public class ProductMasterDTO {
 
     private Boolean isPublished;
     private Boolean status;
+    private String orientation;
+    private String size;
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
 
     public String getName() {
         return name;

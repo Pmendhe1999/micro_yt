@@ -23,9 +23,28 @@ public class ProductDTO {
     private Boolean status;
     private String unit;
 
+    private String orientation;
+    private String size;
+
 
     private Long deliveryChallanId;     // Foreign key
     private Long deliveryItemId;        // Foreign key
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
+    }
+
+    public String getOrientation() {
+        return orientation;
+    }
+
+    public void setOrientation(String orientation) {
+        this.orientation = orientation;
+    }
 
     public Long getDeliveryChallanId() {
         return deliveryChallanId;

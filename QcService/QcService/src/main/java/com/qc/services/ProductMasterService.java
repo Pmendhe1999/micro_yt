@@ -62,11 +62,13 @@ public class ProductMasterService {
             Boolean status,
             LocalDate mfgDate,
             LocalDate expDate,
+            String sizeValue,
+            String orientationValue,
             Pageable pageable) {
 
         Page<ProductMaster> page = productMasterRepository.searchProductMastersAdvanced(
                 name, productCode, serialNo, orderNo, hsnCode, unit, price, quantity,
-                isPublished, status, mfgDate, expDate, pageable);
+                isPublished, status, mfgDate, expDate,sizeValue, orientationValue, pageable);
 
         if (page.isEmpty()) {
             throw new ResourceNotFoundException("No Product Masters found");
