@@ -1,6 +1,7 @@
 package com.qc.controllers;
 
 import com.qc.dto.LabelScanQualitativeCheckRequestDTO;
+import com.qc.dto.LabelScanQuantitativeCheckRequestDTO;
 import com.qc.dto.Response;
 import com.qc.services.LabelScanQualitativeCheckService;
 import com.qc.services.ResponseService;
@@ -38,6 +39,21 @@ public class LabelScanQualitativeCheckController {
                 "Qualitative Checks created successfully", null, 0);
     }
 
+    @Operation(summary = "Create Quantitative Checks for Label Scan Master")
+    @PostMapping("/labelScanMaster/quantitativeCheck")
+    public ResponseEntity<Response<Void>> createQuantitativeChecks(
+            @Valid @RequestBody LabelScanQuantitativeCheckRequestDTO request) {
 
+        log.info("Creating Quantitative Checks for LabelScanMaster ID: {}", request.getLabelScanMasterId());
+
+        labelScanQualitativeCheckService.createQuantitativeChecks(request);
+
+        return responseService.success(
+                HttpStatus.CREATED.value(),
+                "Quantitative Checks created successfully",
+                null,
+                0
+        );
+    }
 
 }

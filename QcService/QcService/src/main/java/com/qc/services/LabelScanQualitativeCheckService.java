@@ -1,7 +1,9 @@
 package com.qc.services;
 
 import com.qc.dto.LabelScanQualitativeCheckRequestDTO;
+import com.qc.dto.LabelScanQuantitativeCheckRequestDTO;
 import com.qc.dto.QualitativeCheckRequestDTO;
+import com.qc.dto.QuantitativeCheckRequestDTO;
 import com.qc.entities.*;
 import com.qc.exception.ResourceNotFoundException;
 import com.qc.repositories.*;
@@ -111,6 +113,7 @@ public class LabelScanQualitativeCheckService {
         productRepository.save(product);
 
         // Step 8️⃣ - Create and save QualitativeCheck records for each qualitative check DTO
+        //Quantitative aahe he
         List<QualitativeCheck> qualitativeChecks = new ArrayList<>();
 
         for (QualitativeCheckRequestDTO dto : request.getQualitativeChecks()) {
@@ -122,7 +125,7 @@ public class LabelScanQualitativeCheckService {
             QualitativeCheck check = new QualitativeCheck();
             check.setDescription(dto.getDescription());
             check.setScan(dto.getScan());
-            check.setStatus(dto.getStatus());
+            check.setStatus(dto.getStatus());// true or false
             check.setValue(dto.getValue());
             check.setQualitativeCheckMaster(master);
             check.setProduct(product); // ✅ link to saved Product
@@ -133,6 +136,98 @@ public class LabelScanQualitativeCheckService {
         qualitativeCheckRepository.saveAll(qualitativeChecks);
 
     }
+
+    @Autowired
+    private QuantitativeCheckMasterRepository quantitativeCheckMasterRepository;
+    @Autowired
+    private QuantitativeCheckRepository quantitativeCheckRepository;
+    public void createQuantitativeChecks(LabelScanQuantitativeCheckRequestDTO request) {
+
+        // Step 1️⃣ Validate LabelScanMaster
+        LabelScanMaster labelScanMaster =
+                labelScanMasterRepository.findById(request.getLabelScanMasterId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "LabelScanMaster not found with ID: " + request.getLabelScanMasterId()));
+
+        // Step 2️⃣ Validate DeliveryChallan
+        DeliveryChallan deliveryChallan =
+                deliveryChallanRepository.findById(request.getDeliveryChallanId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "DeliveryChallan not found with ID: " + request.getDeliveryChallanId()));
+
+        // Step 3️⃣ Extract productName + productCode
+        String productName = null;
+        String productCode = null;
+
+        for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
+            if ("productName".equalsIgnoreCase(dto.getName())) productName = dto.getValue();
+            else if ("productCode".equalsIgnoreCase(dto.getName())) productCode = dto.getValue();
+        }
+
+        if (productName == null || productCode == null) {
+            throw new ResourceNotFoundException("Both productName and productCode must be provided");
+        }
+
+        final String finalProductName = productName;
+        final String finalProductCode = productCode;
+
+        // Step 4️⃣ Fetch ProductMaster
+        ProductMaster productMaster = productMasterRepository
+                .findByNameAndProductCode(finalProductName, finalProductCode)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "ProductMaster not found for name: " + finalProductName + " and code: " + finalProductCode));
+
+        // Step 5️⃣ Fetch DeliveryItem
+        DeliveryItems deliveryItem = deliveryItemsRepository
+                .findByNameAndProductCode(finalProductName, finalProductCode)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "DeliveryItem not found for name: " + finalProductName + " and code: " + finalProductCode));
+
+        // Step 6️⃣ Create Product
+        Product product = new Product();
+        product.setName(productMaster.getName());
+        product.setProductCode(productMaster.getProductCode());
+        product.setSerialNo(productMaster.getSerialNo());
+        product.setOrderNo(productMaster.getOrderNo());
+        product.setHsnCode(productMaster.getHsnCode());
+        product.setUnit(productMaster.getUnit());
+        product.setPrice(productMaster.getPrice());
+        product.setInStockQuantity(productMaster.getInStockQuantity());
+        product.setMfgDate(productMaster.getMfgDate());
+        product.setExpDate(productMaster.getExpDate());
+        product.setPublished(productMaster.getPublished());
+        product.setStatus(productMaster.getStatus());
+
+        product.setProductMaster(productMaster);
+        product.setDeliveryChallan(deliveryChallan);
+        product.setDeliveryItems(deliveryItem);
+
+        productRepository.save(product);
+
+        // Step 7️⃣ Save Quantitative Checks
+        List<QuantitativeCheck> quantitativeChecks = new ArrayList<>();
+
+        for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
+
+            QuantitativeCheckMaster master = quantitativeCheckMasterRepository
+                    .findById(dto.getQuantitativeCheckMasterId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "QuantitativeCheckMaster not found with ID: " + dto.getQuantitativeCheckMasterId()));
+
+            QuantitativeCheck check = new QuantitativeCheck();
+            check.setDescription(dto.getDescription());
+            check.setScan(dto.getIsScan());
+            check.setStatus(dto.getStatus());
+            check.setValue(dto.getValue());
+            check.setQuantitativeCheckMaster(master);
+            check.setProduct(product);
+
+            quantitativeChecks.add(check);
+        }
+
+        quantitativeCheckRepository.saveAll(quantitativeChecks);
+    }
+
 
 
 }
