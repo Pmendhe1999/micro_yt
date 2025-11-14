@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -108,6 +109,28 @@ public class LabelScanQualitativeCheckService {
 
         // Save Product
         productRepository.save(product);
+
+        // Step 8️⃣ - Create and save QualitativeCheck records for each qualitative check DTO
+        List<QualitativeCheck> qualitativeChecks = new ArrayList<>();
+
+        for (QualitativeCheckRequestDTO dto : request.getQualitativeChecks()) {
+            QualitativeCheckMaster master = qualitativeCheckMasterRepository
+                    .findById(dto.getQualitativeCheckMasterId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "QualitativeCheckMaster not found with ID: " + dto.getQualitativeCheckMasterId()));
+
+            QualitativeCheck check = new QualitativeCheck();
+            check.setDescription(dto.getDescription());
+            check.setScan(dto.getScan());
+            check.setStatus(dto.getStatus());
+            check.setValue(dto.getValue());
+            check.setQualitativeCheckMaster(master);
+            check.setProduct(product); // ✅ link to saved Product
+
+            qualitativeChecks.add(check);
+        }
+
+        qualitativeCheckRepository.saveAll(qualitativeChecks);
 
     }
 
