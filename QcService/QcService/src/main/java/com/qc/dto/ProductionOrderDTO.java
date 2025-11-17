@@ -1,11 +1,26 @@
 package com.qc.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 public class ProductionOrderDTO {
-    private String name;
-    private String description;
-    private Boolean status;
-    private Long priority;
+    private LocalDate productionOrderDate;
     private String productionOrderNo;
+    private String batchNo;
+    private BigDecimal orderQuantity;
+    private String currentWorkCenter;
+    private String activityNumber;
+    private String operation;
+    private Long priority;
+    private String priorityRemark;
+
+    public LocalDate getProductionOrderDate() {
+        return productionOrderDate;
+    }
+
+    public void setProductionOrderDate(LocalDate productionOrderDate) {
+        this.productionOrderDate = productionOrderDate;
+    }
 
     public String getProductionOrderNo() {
         return productionOrderNo;
@@ -13,6 +28,46 @@ public class ProductionOrderDTO {
 
     public void setProductionOrderNo(String productionOrderNo) {
         this.productionOrderNo = productionOrderNo;
+    }
+
+    public String getBatchNo() {
+        return batchNo;
+    }
+
+    public void setBatchNo(String batchNo) {
+        this.batchNo = batchNo;
+    }
+
+    public BigDecimal getOrderQuantity() {
+        return orderQuantity;
+    }
+
+    public void setOrderQuantity(BigDecimal orderQuantity) {
+        this.orderQuantity = orderQuantity;
+    }
+
+    public String getCurrentWorkCenter() {
+        return currentWorkCenter;
+    }
+
+    public void setCurrentWorkCenter(String currentWorkCenter) {
+        this.currentWorkCenter = currentWorkCenter;
+    }
+
+    public String getActivityNumber() {
+        return activityNumber;
+    }
+
+    public void setActivityNumber(String activityNumber) {
+        this.activityNumber = activityNumber;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
     }
 
     public Long getPriority() {
@@ -23,27 +78,11 @@ public class ProductionOrderDTO {
         this.priority = priority;
     }
 
-    public Boolean getStatus() {
-        return status;
+    public String getPriorityRemark() {
+        return priorityRemark;
     }
 
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setPriorityRemark(String priorityRemark) {
+        this.priorityRemark = priorityRemark;
     }
 }

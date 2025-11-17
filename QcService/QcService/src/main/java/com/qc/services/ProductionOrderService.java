@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,11 +27,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProductionOrderService {
 
-    @Autowired
-    private ProductionOrderRepository productionOrderRepository;
-
-    @Autowired
-    private ProductionOrderMapper productionOrderMapper;
+    private final ProductionOrderRepository productionOrderRepository;
+    private final ProductionOrderMapper productionOrderMapper;
 
     public void createAllProductionOrders(List<ProductionOrderDTO> dtoList) {
         List<ProductionOrder> entities = productionOrderMapper.toEntityList(dtoList);
@@ -41,89 +40,116 @@ public class ProductionOrderService {
         productionOrderRepository.save(entity);
     }
 
-    public Page<ProductionOrderDTOResponse> getAllProductionOrdersWithFilters(
-            String name, String description, Boolean status,
-            Long priority, String productionOrderNo, Pageable pageable) {
+    public Page<ProductionOrderDTOResponse> getAll(
+            String productionOrderNo,
+            String batchNo,
+            String currentWorkCenter,
+            String activityNumber,
+            String operation,
+            Long priority,
+            Pageable pageable) {
 
-        Page<ProductionOrder> page = productionOrderRepository.searchProductionOrders(
-                name, description, status, priority, productionOrderNo, pageable);
+        Page<ProductionOrder> page = productionOrderRepository.search(
+                productionOrderNo, batchNo, currentWorkCenter, activityNumber, operation, priority, pageable);
 
-        if (page.isEmpty()) {
-            throw new ResourceNotFoundException("No Production Orders found");
-        }
+        List<ProductionOrderDTOResponse> list = productionOrderMapper.toDtoList(page.getContent());
 
-        List<ProductionOrderDTOResponse> dtoList = productionOrderMapper.toDtoList(page.getContent());
-        return new PageImpl<>(dtoList, pageable, page.getTotalElements());
+        return new PageImpl<>(list, pageable, page.getTotalElements());
     }
 
-    public ProductionOrderDTOResponse getProductionOrderById(Long id) {
+    public ProductionOrderDTOResponse getById(Long id) {
         ProductionOrder order = productionOrderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id " + id));
 
         return productionOrderMapper.toDto(order);
     }
 
-    public ProductionOrderDTOResponse updateProductionOrder(Long id, ProductionOrderDTO dto) {
-        ProductionOrder existing = productionOrderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id: " + id));
+    public ProductionOrderDTOResponse update(Long id, ProductionOrderDTO dto) {
 
-        existing.setName(dto.getName());
-        existing.setDescription(dto.getDescription());
-        existing.setStatus(dto.getStatus());
-        existing.setPriority(dto.getPriority());
+        ProductionOrder existing = productionOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id " + id));
+
+        existing.setProductionOrderDate(dto.getProductionOrderDate());
         existing.setProductionOrderNo(dto.getProductionOrderNo());
+        existing.setBatchNo(dto.getBatchNo());
+        existing.setOrderQuantity(dto.getOrderQuantity());
+        existing.setCurrentWorkCenter(dto.getCurrentWorkCenter());
+        existing.setActivityNumber(dto.getActivityNumber());
+        existing.setOperation(dto.getOperation());
+        existing.setPriority(dto.getPriority());
+        existing.setPriorityRemark(dto.getPriorityRemark());
 
         ProductionOrder saved = productionOrderRepository.save(existing);
         return productionOrderMapper.toDto(saved);
     }
 
-    public ProductionOrderDTOResponse patchProductionOrder(Long id, ProductionOrderDTO dto) {
-        ProductionOrder existing = productionOrderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id: " + id));
+    public ProductionOrderDTOResponse patch(Long id, ProductionOrderDTO dto) {
 
-        if (dto.getName() != null) existing.setName(dto.getName());
-        if (dto.getDescription() != null) existing.setDescription(dto.getDescription());
-        if (dto.getStatus() != null) existing.setStatus(dto.getStatus());
-        if (dto.getPriority() != null) existing.setPriority(dto.getPriority());
+        ProductionOrder existing = productionOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id " + id));
+
+        if (dto.getProductionOrderDate() != null) existing.setProductionOrderDate(dto.getProductionOrderDate());
         if (dto.getProductionOrderNo() != null) existing.setProductionOrderNo(dto.getProductionOrderNo());
+        if (dto.getBatchNo() != null) existing.setBatchNo(dto.getBatchNo());
+        if (dto.getOrderQuantity() != null) existing.setOrderQuantity(dto.getOrderQuantity());
+        if (dto.getCurrentWorkCenter() != null) existing.setCurrentWorkCenter(dto.getCurrentWorkCenter());
+        if (dto.getActivityNumber() != null) existing.setActivityNumber(dto.getActivityNumber());
+        if (dto.getOperation() != null) existing.setOperation(dto.getOperation());
+        if (dto.getPriority() != null) existing.setPriority(dto.getPriority());
+        if (dto.getPriorityRemark() != null) existing.setPriorityRemark(dto.getPriorityRemark());
 
         ProductionOrder saved = productionOrderRepository.save(existing);
         return productionOrderMapper.toDto(saved);
     }
 
-    public void deleteProductionOrder(Long id) {
+    public void delete(Long id) {
         ProductionOrder existing = productionOrderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Production Order not found with id " + id));
 
         productionOrderRepository.delete(existing);
     }
 
     public List<ProductionOrder> uploadProductionOrdersFromExcel(MultipartFile file, String token) {
+
         List<ProductionOrder> orders = new ArrayList<>();
 
-        try (InputStream is = file.getInputStream(); Workbook workbook = WorkbookFactory.create(is)) {
-            Sheet sheet = workbook.getSheetAt(0);
+        try (InputStream is = file.getInputStream();
+             Workbook workbook = WorkbookFactory.create(is)) {
 
-            // Skip header row
+            Sheet sheet = workbook.getSheetAt(0);
+            // ❗ First delete all existing records
+            productionOrderRepository.deleteAll();
+            // Skip header row (row 0)
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
+
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                String name = getCellValue(row.getCell(0));
-                String description = getCellValue(row.getCell(1));
-                String statusStr = getCellValue(row.getCell(2));
-                String priorityStr = getCellValue(row.getCell(3));
-                String productionOrderNo = getCellValue(row.getCell(4));
+                String dateStr = getCellValue(row.getCell(0));
+                String productionOrderNo = getCellValue(row.getCell(1));
+                String batchNo = getCellValue(row.getCell(2));
+                String orderQuantityStr = getCellValue(row.getCell(3));
+                String currentWorkCenter = getCellValue(row.getCell(4));
+                String activityNumber = getCellValue(row.getCell(5));
+                String operation = getCellValue(row.getCell(6));
+                String priorityStr = getCellValue(row.getCell(7));
+                String priorityRemark = getCellValue(row.getCell(8));
 
                 // Skip empty rows
-                if (name == null || name.trim().isEmpty()) continue;
+                if (productionOrderNo == null || productionOrderNo.trim().isEmpty())
+                    continue;
 
                 ProductionOrder order = new ProductionOrder();
-                order.setName(name);
-                order.setDescription(description);
-                order.setStatus(Boolean.parseBoolean(statusStr));
-                order.setPriority(parseLongValue(priorityStr));
+
+                order.setProductionOrderDate(parseLocalDate(dateStr));
                 order.setProductionOrderNo(productionOrderNo);
+                order.setBatchNo(batchNo);
+                order.setOrderQuantity(parseBigDecimal(orderQuantityStr));
+                order.setCurrentWorkCenter(currentWorkCenter);
+                order.setActivityNumber(activityNumber);
+                order.setOperation(operation);
+                order.setPriority(parseLong(priorityStr));
+                order.setPriorityRemark(priorityRemark);
 
                 orders.add(order);
             }
@@ -136,35 +162,48 @@ public class ProductionOrderService {
         }
     }
 
-    // ---------- Helper Methods ----------
-
     private String getCellValue(Cell cell) {
         if (cell == null) return null;
-        switch (cell.getCellType()) {
-            case STRING:
-                return cell.getStringCellValue().trim();
-            case NUMERIC:
+
+        return switch (cell.getCellType()) {
+            case STRING -> cell.getStringCellValue().trim();
+            case NUMERIC -> {
                 if (DateUtil.isCellDateFormatted(cell)) {
-                    return cell.getLocalDateTimeCellValue().toLocalDate().toString();
+                    yield cell.getLocalDateTimeCellValue().toLocalDate().toString();
                 }
-                double numericValue = cell.getNumericCellValue();
-                if (numericValue == Math.floor(numericValue)) {
-                    return String.valueOf((long) numericValue);
-                }
-                return String.valueOf(numericValue);
-            case BOOLEAN:
-                return String.valueOf(cell.getBooleanCellValue());
-            default:
-                return null;
+                double num = cell.getNumericCellValue();
+                if (num == Math.floor(num)) yield String.valueOf((long) num);
+                else yield String.valueOf(num);
+            }
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            default -> null;
+        };
+    }
+
+    private LocalDate parseLocalDate(String value) {
+        try {
+            return (value == null || value.isEmpty()) ? null : LocalDate.parse(value);
+        } catch (Exception e) {
+            return null;
         }
     }
 
-    private Long parseLongValue(String value) {
-        if (value == null || value.trim().isEmpty()) return null;
+    private BigDecimal parseBigDecimal(String value) {
         try {
-            return (long) Double.parseDouble(value.trim());
-        } catch (NumberFormatException e) {
+            return (value == null || value.isEmpty()) ? null : new BigDecimal(value.trim());
+        } catch (Exception e) {
             return null;
         }
+    }
+
+    private Long parseLong(String value) {
+        try {
+            return (value == null || value.isEmpty()) ? null : Long.parseLong(value.trim());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    public List<String> getDistinctCurrentWorkCenters() {
+        return productionOrderRepository.findDistinctCurrentWorkCenters();
     }
 }

@@ -26,94 +26,85 @@ import java.util.List;
 @RequestMapping("/qc")
 @Slf4j
 public class ProductionOrderController {
-
     @Autowired
     private ResponseService responseService;
 
     @Autowired
     private ProductionOrderService productionOrderService;
 
-    @Operation(summary = "Create a List of Production Orders")
     @PostMapping("/productionOrder/all")
     public ResponseEntity<Response<Void>> createAll(
             @Validated @RequestBody List<ProductionOrderDTO> dtoList) {
-        log.info("Request to create list of Production Orders");
+
         productionOrderService.createAllProductionOrders(dtoList);
-        return responseService.success(HttpStatus.CREATED.value(), "Production Orders created successfully", null, 0);
+        return responseService.success(201, "Production Orders created successfully", null, 0);
     }
 
-    @Operation(summary = "Create a single Production Order")
     @PostMapping("/productionOrder")
     public ResponseEntity<Response<Void>> create(
             @Validated @RequestBody ProductionOrderDTO dto) {
-        log.info("Request to create Production Order: {}", dto.getName());
+
         productionOrderService.createProductionOrder(dto);
-        return responseService.success(HttpStatus.CREATED.value(), "Production Order created successfully", null, 0);
+        return responseService.success(201, "Production Order created successfully", null, 0);
     }
 
-    @Operation(summary = "Update Production Order by ID")
+    @GetMapping("/productionOrder")
+    public ResponseEntity<Response<List<ProductionOrderDTOResponse>>> getAll(
+            @RequestParam(required = false) String productionOrderNo,
+            @RequestParam(required = false) String batchNo,
+            @RequestParam(required = false) String currentWorkCenter,
+            @RequestParam(required = false) String activityNumber,
+            @RequestParam(required = false) String operation,
+            @RequestParam(required = false) Long priority,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+
+        Pageable pageable = PageRequest.of(page - 1, size,
+                sortDir.equals("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending());
+
+        Page<ProductionOrderDTOResponse> result =
+                productionOrderService.getAll(productionOrderNo, batchNo, currentWorkCenter,
+                        activityNumber, operation, priority, pageable);
+
+        return responseService.success(200, "Production Orders fetched successfully",
+                result.getContent(), result.getTotalElements());
+    }
+
+    @GetMapping("/productionOrder/{id}")
+    public ResponseEntity<Response<ProductionOrderDTOResponse>> getById(@PathVariable Long id) {
+
+        ProductionOrderDTOResponse res = productionOrderService.getById(id);
+
+        return responseService.success(200, "Production Order fetched successfully", res, 1);
+    }
+
     @PutMapping("/productionOrder/{id}")
     public ResponseEntity<Response<ProductionOrderDTOResponse>> update(
             @PathVariable Long id, @Validated @RequestBody ProductionOrderDTO dto) {
 
-        log.info("Request to update Production Order with ID: {}", id);
-        ProductionOrderDTOResponse updated = productionOrderService.updateProductionOrder(id, dto);
-        return responseService.success(HttpStatus.OK.value(), "Production Order updated successfully", updated, 1);
+        ProductionOrderDTOResponse res = productionOrderService.update(id, dto);
+
+        return responseService.success(200, "Production Order updated successfully", res, 1);
     }
 
-    @Operation(summary = "Partially update Production Order by ID")
     @PatchMapping("/productionOrder/{id}")
     public ResponseEntity<Response<ProductionOrderDTOResponse>> patch(
             @PathVariable Long id, @RequestBody ProductionOrderDTO dto) {
 
-        log.info("Request to patch Production Order with ID: {}", id);
-        ProductionOrderDTOResponse updated = productionOrderService.patchProductionOrder(id, dto);
-        return responseService.success(HttpStatus.OK.value(), "Production Order updated successfully", updated, 1);
+        ProductionOrderDTOResponse res = productionOrderService.patch(id, dto);
+
+        return responseService.success(200, "Production Order patched successfully", res, 1);
     }
 
-    @Operation(summary = "Get all Production Orders with filters, pagination, and sorting")
-    @GetMapping("/productionOrder")
-    public ResponseEntity<Response<List<ProductionOrderDTOResponse>>> getAll(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) Boolean status,
-            @RequestParam(required = false) Long priority,
-            @RequestParam(required = false) String productionOrderNo,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
-
-        log.info("Fetching Production Orders with filters: name={}, description={}, status={}, priority={}, productionOrderNo={}",
-                name, description, status, priority, productionOrderNo);
-
-        Sort sort = sortDir.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-        Page<ProductionOrderDTOResponse> result =
-                productionOrderService.getAllProductionOrdersWithFilters(name, description, status, priority, productionOrderNo, pageable);
-
-        return responseService.success(HttpStatus.OK.value(), "Production Orders fetched successfully",
-                result.getContent(), result.getTotalElements());
-    }
-
-    @Operation(summary = "Get Production Order by ID")
-    @GetMapping("/productionOrder/{id}")
-    public ResponseEntity<Response<ProductionOrderDTOResponse>> getById(@PathVariable Long id) {
-        log.info("Fetching Production Order with ID: {}", id);
-        ProductionOrderDTOResponse result = productionOrderService.getProductionOrderById(id);
-        return responseService.success(HttpStatus.OK.value(), "Production Order fetched successfully", result, 1);
-    }
-
-    @Operation(summary = "Delete Production Order by ID")
     @DeleteMapping("/productionOrder/{id}")
     public ResponseEntity<Response<Void>> delete(@PathVariable Long id) {
-        log.info("Deleting Production Order with ID: {}", id);
-        productionOrderService.deleteProductionOrder(id);
-        return responseService.success(HttpStatus.OK.value(), "Production Order deleted successfully", null, 0);
+
+        productionOrderService.delete(id);
+        return responseService.success(200, "Production Order deleted successfully", null, 0);
     }
 
-    @Operation(summary = "Upload Production Orders via Excel")
     @PostMapping("/productionOrderUpload")
     public ResponseEntity<ResponceData> uploadProductionOrders(
             @RequestParam("file") MultipartFile file,
@@ -127,15 +118,31 @@ public class ProductionOrderController {
                         .body(new ResponceData("fail", 400, "File is empty", null, 0));
             }
 
-            List<ProductionOrder> savedOrders = productionOrderService.uploadProductionOrdersFromExcel(file, token);
+            List<ProductionOrder> saved = productionOrderService.uploadProductionOrdersFromExcel(file, token);
 
-            return ResponseEntity.ok(new ResponceData(
-                    "success", 200, "Production Orders uploaded successfully", savedOrders, savedOrders.size()));
+            return ResponseEntity.ok(
+                    new ResponceData("success", 200, "Production orders uploaded", saved, saved.size())
+            );
 
         } catch (Exception e) {
-            log.error("Error uploading Production Orders: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponceData("error", 500, "Unexpected error: " + e.getMessage(), null, 0));
+                    .body(new ResponceData("error", 500, e.getMessage(), null, 0));
         }
+    }
+
+    @GetMapping("/distinct/currentWorkCenters")
+    public ResponseEntity<Response<List<String>>> getDistinctCurrentWorkCenters() {
+
+        List<String> workCenters = productionOrderService.getDistinctCurrentWorkCenters();
+
+        return ResponseEntity.ok(
+                new Response<>(
+                        "success",
+                        200,
+                        "Distinct current work centers fetched successfully",
+                        workCenters,
+                        workCenters.size()
+                )
+        );
     }
 }

@@ -8,19 +8,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ProductionOrderRepository extends JpaRepository<ProductionOrder, Long> {
     @Query("SELECT p FROM ProductionOrder p " +
-            "WHERE (:name IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))) " +
-            "AND (:description IS NULL OR LOWER(p.description) LIKE LOWER(CONCAT('%', :description, '%'))) " +
-            "AND (:status IS NULL OR p.status = :status) " +
-            "AND (:priority IS NULL OR p.priority = :priority) " +
-            "AND (:productionOrderNo IS NULL OR LOWER(p.productionOrderNo) LIKE LOWER(CONCAT('%', :productionOrderNo, '%')))")
-    Page<ProductionOrder> searchProductionOrders(
-            @Param("name") String name,
-            @Param("description") String description,
-            @Param("status") Boolean status,
-            @Param("priority") Long priority,
+            "WHERE (:productionOrderNo IS NULL OR LOWER(p.productionOrderNo) LIKE LOWER(CONCAT('%', :productionOrderNo, '%'))) " +
+            "AND (:batchNo IS NULL OR LOWER(p.batchNo) LIKE LOWER(CONCAT('%', :batchNo, '%'))) " +
+            "AND (:currentWorkCenter IS NULL OR LOWER(p.currentWorkCenter) LIKE LOWER(CONCAT('%', :currentWorkCenter, '%'))) " +
+            "AND (:activityNumber IS NULL OR LOWER(p.activityNumber) LIKE LOWER(CONCAT('%', :activityNumber, '%'))) " +
+            "AND (:operation IS NULL OR LOWER(p.operation) LIKE LOWER(CONCAT('%', :operation, '%'))) " +
+            "AND (:priority IS NULL OR p.priority = :priority)")
+    Page<ProductionOrder> search(
             @Param("productionOrderNo") String productionOrderNo,
+            @Param("batchNo") String batchNo,
+            @Param("currentWorkCenter") String currentWorkCenter,
+            @Param("activityNumber") String activityNumber,
+            @Param("operation") String operation,
+            @Param("priority") Long priority,
             Pageable pageable);
+
+    @Query("SELECT DISTINCT p.currentWorkCenter FROM ProductionOrder p WHERE p.currentWorkCenter IS NOT NULL")
+    List<String> findDistinctCurrentWorkCenters();
 }

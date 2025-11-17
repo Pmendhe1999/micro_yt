@@ -2,6 +2,9 @@ package com.qc.entities;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "production_order")
 public class ProductionOrder extends AbstractAuditingEntity{
@@ -9,20 +12,32 @@ public class ProductionOrder extends AbstractAuditingEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 255)
-    private String name;
+    @Column(name = "production_order_date")
+    private LocalDate productionOrderDate;
 
-    @Column(name = "description", length = 500)
-    private String description;
+    @Column(name = "production_order_no", length = 255)
+    private String productionOrderNo;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Column(name = "batch_no", length = 255)
+    private String batchNo;
+
+    @Column(name = "order_quantity")
+    private BigDecimal orderQuantity;
+
+    @Column(name = "current_work_center", length = 255)
+    private String currentWorkCenter;
+
+    @Column(name = "activity_number", length = 100)
+    private String activityNumber;
+
+    @Column(name = "operation", length = 255)
+    private String operation;
 
     @Column(name = "priority")
     private Long priority;
 
-    @Column(name = "production_order_no", length = 255)
-    private String productionOrderNo;
+    @Column(name = "priority_remark", length = 500)
+    private String priorityRemark;
 
     public Long getId() {
         return id;
@@ -32,28 +47,60 @@ public class ProductionOrder extends AbstractAuditingEntity{
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public LocalDate getProductionOrderDate() {
+        return productionOrderDate;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProductionOrderDate(LocalDate productionOrderDate) {
+        this.productionOrderDate = productionOrderDate;
     }
 
-    public String getDescription() {
-        return description;
+    public String getProductionOrderNo() {
+        return productionOrderNo;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setProductionOrderNo(String productionOrderNo) {
+        this.productionOrderNo = productionOrderNo;
     }
 
-    public Boolean getStatus() {
-        return status;
+    public String getBatchNo() {
+        return batchNo;
     }
 
-    public void setStatus(Boolean status) {
-        this.status = status;
+    public void setBatchNo(String batchNo) {
+        this.batchNo = batchNo;
+    }
+
+    public BigDecimal  getOrderQuantity() {
+        return orderQuantity;
+    }
+
+    public void setOrderQuantity(BigDecimal orderQuantity) {
+        this.orderQuantity = orderQuantity;
+    }
+
+    public String getCurrentWorkCenter() {
+        return currentWorkCenter;
+    }
+
+    public void setCurrentWorkCenter(String currentWorkCenter) {
+        this.currentWorkCenter = currentWorkCenter;
+    }
+
+    public String getActivityNumber() {
+        return activityNumber;
+    }
+
+    public void setActivityNumber(String activityNumber) {
+        this.activityNumber = activityNumber;
+    }
+
+    public String getOperation() {
+        return operation;
+    }
+
+    public void setOperation(String operation) {
+        this.operation = operation;
     }
 
     public Long getPriority() {
@@ -64,11 +111,11 @@ public class ProductionOrder extends AbstractAuditingEntity{
         this.priority = priority;
     }
 
-    public String getProductionOrderNo() {
-        return productionOrderNo;
+    public String getPriorityRemark() {
+        return priorityRemark;
     }
 
-    public void setProductionOrderNo(String productionOrderNo) {
-        this.productionOrderNo = productionOrderNo;
+    public void setPriorityRemark(String priorityRemark) {
+        this.priorityRemark = priorityRemark;
     }
 }
