@@ -30,6 +30,19 @@ public class QualitativeCheck extends AbstractAuditingEntity{
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    // NEW FIELD → Link image
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "media_id")
+    private Media media;
+
+    public Media getMedia() {
+        return media;
+    }
+
+    public void setMedia(Media media) {
+        this.media = media;
+    }
+
     public Long getId() {
         return id;
     }

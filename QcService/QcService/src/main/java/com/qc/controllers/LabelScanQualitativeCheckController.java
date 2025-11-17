@@ -81,5 +81,18 @@ public class LabelScanQualitativeCheckController {
                 dto.getQuantitativeChecks().size()
         );
     }
+    @PostMapping("/labelScanMaster/qualitativeCheck/update")
+    public ResponseEntity<Response<LabelScanQualitativeCheckUpdateResponseDTO>> updateQualitativeChecks(
+            @Valid @RequestBody LabelScanQualitativeCheckUpdateRequestDTO request) {
 
+        LabelScanQualitativeCheckUpdateResponseDTO dto =
+                labelScanQualitativeCheckService.updateQualitativeChecks(request);
+
+        return responseService.success(
+                HttpStatus.OK.value(),
+                "Qualitative Checks updated successfully",
+                dto,
+                dto.getQualitativeChecks().size()
+        );
+    }
 }

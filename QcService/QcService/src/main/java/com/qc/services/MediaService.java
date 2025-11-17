@@ -26,10 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -223,5 +220,60 @@ public class MediaService {
             throw new RuntimeException("No media found for ProductMaster ID: " + productId);
         }
         return mediaList;
+    }
+
+    @Transactional
+    public Map<String, Object> uploadQualitativeMedia(
+            MultipartFile file, String description, String mediaFor, String token) {
+
+        try {
+            String folderName = "frontend/qualitative_images/";
+            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String fileKey = folderName + fileName;
+
+            // Convert file
+            File convertedFile = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
+            try (FileOutputStream fos = new FileOutputStream(convertedFile)) {
+                fos.write(file.getBytes());
+            }
+
+            // Upload to S3
+            s3Client.putObject(new PutObjectRequest(bucketName, fileKey, convertedFile));
+            convertedFile.delete();
+
+            Map<String, Object> authData = identityClient.validateToken(token);
+            String uploadedBy = (String) authData.get("username");
+
+            // 1️⃣ Create Media
+            Media media = new Media();
+            media.setName(fileName);
+            media.setBaseImageUrl(fileKey);
+            media.setDescription(description);
+            media.setType(file.getContentType());
+            media.setStatus("ACTIVE");
+            media.setUploadedBy(uploadedBy);
+            mediaRepository.save(media);
+
+            // 2️⃣ Create MediaDetails
+            MediaDetails mediaDetails = new MediaDetails();
+            mediaDetails.setMedia(media);
+            mediaDetails.setName(fileName);
+            mediaDetails.setDescription(description);
+            mediaDetails.setMediaFor(mediaFor);
+            mediaDetails.setType(file.getContentType());
+            mediaDetails.setUploadedBy(uploadedBy);
+            mediaDetailsRepository.save(mediaDetails);
+
+            // 3️⃣ Response
+            Map<String, Object> result = new HashMap<>();
+            result.put("media", media);
+            result.put("mediaDetails", mediaDetails);
+
+            return result;
+
+        } catch (Exception e) {
+            log.error("Error uploading qualitative media: {}", e.getMessage(), e);
+            throw new RuntimeException("Upload failed: " + e.getMessage());
+        }
     }
 }

@@ -8,12 +8,22 @@ public class LabelScanQuantitativeCheckResponseDTO {
     private Long deliveryChallanId;
 
     private List<QuantitativeCheckDTOResponse> quantitativeChecks;
+    private List<MediaDetailsDTO> mediaDetails;   // ★ NEW
 
-    public LabelScanQuantitativeCheckResponseDTO(Long productId,Long labelScanMasterId, Long deliveryChallanId, List<QuantitativeCheckDTOResponse> quantitativeChecks) {
-        this.productId=productId;
+    public LabelScanQuantitativeCheckResponseDTO(Long productId, Long labelScanMasterId, Long deliveryChallanId, List<QuantitativeCheckDTOResponse> quantitativeChecks, List<MediaDetailsDTO> mediaDetails) {
+        this.productId = productId;
         this.labelScanMasterId = labelScanMasterId;
         this.deliveryChallanId = deliveryChallanId;
         this.quantitativeChecks = quantitativeChecks;
+        this.mediaDetails = mediaDetails;
+    }
+
+    public List<MediaDetailsDTO> getMediaDetails() {
+        return mediaDetails;
+    }
+
+    public void setMediaDetails(List<MediaDetailsDTO> mediaDetails) {
+        this.mediaDetails = mediaDetails;
     }
 
     public Long getProductId() {

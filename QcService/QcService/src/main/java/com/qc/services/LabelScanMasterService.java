@@ -1,9 +1,7 @@
 package com.qc.services;
 
 import com.qc.dto.*;
-import com.qc.entities.LabelScanMaster;
-import com.qc.entities.QualitativeCheckMaster;
-import com.qc.entities.QuantitativeCheckMaster;
+import com.qc.entities.*;
 import com.qc.exception.ResourceNotFoundException;
 import com.qc.mapper.LabelScanMasterMapper;
 import com.qc.mapper.QualitativeCheckMasterMapper;
@@ -18,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -177,4 +176,6 @@ public class LabelScanMasterService {
 
         }).collect(Collectors.toList());
     }
+
+
 }

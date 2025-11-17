@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/qc")
@@ -125,5 +126,16 @@ public class MediaController {
     public ResponseEntity<List<MediaMaster>> getMediaByProductMasterId(@PathVariable Long productId) {
         List<MediaMaster> mediaList = mediaService.getAllMediaByProductMasterId(productId);
         return ResponseEntity.ok(mediaList);
+    }
+
+    @PostMapping("/upload/qualitative-media")
+    public ResponseEntity<Map<String, Object>> uploadQualitativeMedia(
+            @RequestParam MultipartFile file,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) String mediaFor,
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.replace("Bearer ", "");
+        return ResponseEntity.ok(mediaService.uploadQualitativeMedia(file, description, mediaFor, token));
     }
 }

@@ -36,6 +36,12 @@ public class LabelScanQualitativeCheckService {
     @Autowired
     private DeliveryItemsRepository deliveryItemsRepository;
 
+    @Autowired
+    private MediaRepository mediaRepository;
+
+    @Autowired
+    private MediaDetailsRepository mediaDetailsRepository;
+
     public void createQualitativeChecks(LabelScanQualitativeCheckRequestDTO request) {
 
         // Step 1️⃣ - Validate LabelScanMaster
@@ -274,12 +280,25 @@ public class LabelScanQualitativeCheckService {
                 ))
                 .collect(Collectors.toList());
 
+        // ⭐ Step 9 - Fetch MediaDetails for ProductMaster
+        List<MediaDetails> mediaDetailsList =
+                mediaDetailsRepository.findByProductMaster(productMaster);
+
+        List<MediaDetailsDTO> mediaDetailsDTOs = mediaDetailsList.stream()
+                .map(md -> new MediaDetailsDTO(
+                        md.getId(),
+                        md.getMediaFor(),
+                        md.getName()
+                ))
+                .collect(Collectors.toList());
+
 
         return new LabelScanQuantitativeCheckResponseDTO(
                 finalProduct.getId(),
                 labelScanMaster.getId(),
                 deliveryChallan.getId(),
-                responseList
+                responseList,
+                mediaDetailsDTOs
         );
     }
 
@@ -469,6 +488,69 @@ public class LabelScanQualitativeCheckService {
                 .collect(Collectors.toList());
 
         return new LabelScanBarIinCheckResponseDTO(
+                labelScanMaster.getId(),
+                deliveryChallan.getId(),
+                product.getId(),
+                responseList
+        );
+    }
+    @Transactional
+    public LabelScanQualitativeCheckUpdateResponseDTO updateQualitativeChecks(
+            LabelScanQualitativeCheckUpdateRequestDTO request) {
+
+        // 1️⃣ Fetch Required Entities (only ID validation)
+        LabelScanMaster labelScanMaster = labelScanMasterRepository.findById(request.getLabelScanMasterId())
+                .orElseThrow(() -> new ResourceNotFoundException("LabelScanMaster not found"));
+
+        DeliveryChallan deliveryChallan = deliveryChallanRepository.findById(request.getDeliveryChallanId())
+                .orElseThrow(() -> new ResourceNotFoundException("DeliveryChallan not found"));
+
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        Media media = mediaRepository.findById(request.getMediaId())
+                .orElseThrow(() -> new ResourceNotFoundException("Media not found"));
+
+        // 2️⃣ Save qualitative checks
+        List<QualitativeCheck> savedChecks = new ArrayList<>();
+
+        for (QualitativeCheckRequestDTO dto : request.getQualitativeChecks()) {
+
+            QualitativeCheckMaster master = qualitativeCheckMasterRepository.findById(dto.getQualitativeCheckMasterId())
+                    .orElseThrow(() -> new ResourceNotFoundException("QualitativeCheckMaster not found"));
+
+            QualitativeCheck check = new QualitativeCheck();
+            check.setDescription(dto.getDescription());
+            check.setScan(dto.getScan());
+            check.setStatus(dto.getStatus());
+            check.setValue(dto.getValue());
+            check.setProduct(product);
+            check.setQualitativeCheckMaster(master);
+            check.setMedia(media); // SET MEDIA HERE
+
+            savedChecks.add(check);
+        }
+
+        qualitativeCheckRepository.saveAll(savedChecks);
+
+        // 3️⃣ Prepare Response
+        List<QualitativeCheckDTOResponse> responseList = savedChecks.stream()
+                .map(c -> new QualitativeCheckDTOResponse(
+                        c.getId(),
+                        c.getDescription(),
+                        c.getScan(),
+                        c.getStatus(),
+                        c.getValue(),
+                        c.getQualitativeCheckMaster().getId(),
+                        c.getQualitativeCheckMaster().getName(),
+                        product.getId(),
+                        product.getName()
+
+                ))
+                .collect(Collectors.toList());
+
+        // 4️⃣ Return DTO
+        return new LabelScanQualitativeCheckUpdateResponseDTO(
                 labelScanMaster.getId(),
                 deliveryChallan.getId(),
                 product.getId(),

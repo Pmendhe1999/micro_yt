@@ -14,6 +14,13 @@ public class MediaDetailsDTO {
 
     private String type;
 
+
+    public MediaDetailsDTO(Long mediaId,String mediaFor,  String name) {
+        this.mediaId = mediaId;
+        this.mediaFor = mediaFor;
+        this.name = name;
+    }
+
     public String getDescription() {
         return description;
     }
