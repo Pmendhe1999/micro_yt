@@ -165,6 +165,26 @@ public class LabelScanQualitativeCheckService {
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 "DeliveryChallan not found with ID: " + request.getDeliveryChallanId()));
 
+        // Extract productCode from the request
+        String requestedProductCode = request.getQuantitativeChecks().stream()
+                .filter(dto -> "productcode".equalsIgnoreCase(dto.getName()))
+                .map(QuantitativeCheckRequestDTO::getValue)
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("productCode is missing in quantitativeChecks"));
+
+// Fetch all items for the given challan
+        List<DeliveryItems> itemsForChallan =
+                deliveryItemsRepository.findByChallan(deliveryChallan);
+
+// Check if product exists
+        boolean productExists = itemsForChallan.stream()
+                .anyMatch(item -> requestedProductCode.equalsIgnoreCase(item.getProductCode()));
+
+        if (!productExists) {
+            throw new ResourceNotFoundException(
+                    "Product code " + requestedProductCode +
+                            " not found in DeliveryChallan ID: " + request.getDeliveryChallanId());
+        }
 
         // Step 3 - Extract required product fields
         String productName = null;

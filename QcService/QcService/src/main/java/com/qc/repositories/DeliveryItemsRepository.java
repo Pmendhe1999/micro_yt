@@ -1,5 +1,6 @@
 package com.qc.repositories;
 
+import com.qc.entities.DeliveryChallan;
 import com.qc.entities.DeliveryItems;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,4 +40,5 @@ public interface DeliveryItemsRepository extends JpaRepository<DeliveryItems, Lo
 
     Optional<DeliveryItems> findByNameAndProductCode(String name, String productCode);
     Optional<DeliveryItems> findByBatchNo(String batchNo);
+    List<DeliveryItems> findByChallan(DeliveryChallan challan);
 }
