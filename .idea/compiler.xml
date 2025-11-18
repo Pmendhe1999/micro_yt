@@ -10,6 +10,7 @@
         <module name="QuizService" />
         <module name="ServiceRegistry" />
         <module name="ApiGateway" />
+        <module name="ProductionOrder" />
       </profile>
       <profile name="Annotation profile for identity-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
@@ -29,6 +30,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ApiGateway" options="-parameters" />
+      <module name="ProductionOrder" options="-parameters" />
       <module name="QcService" options="-parameters" />
       <module name="QuestionService" options="-parameters" />
       <module name="QuizService" options="-parameters" />
