@@ -20,7 +20,16 @@ public class ProductionOrderDTOResponse {
     private Long priority;
     private String priorityRemark;
 
-    private Instant createdDate; // ✅ ADD THIS
+    private Instant createdDate;          // ADD THIS
+    private Instant lastModifiedDate;     // ADD THIS
+
+    public void setLastModifiedDate(Instant lastModifiedDate) {
+        this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public Instant getLastModifiedDate() {
+        return lastModifiedDate;
+    }
 
     public Instant getCreatedDate() {
         return createdDate;
