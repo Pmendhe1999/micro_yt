@@ -29,6 +29,33 @@ public class ProductDTOResponse {
     private String deliveryItemName;
     private String orientation;
     private String size;
+    private Boolean qualitativeStatus;
+    private Boolean quantitativeStatus;
+    private Boolean overallStatus;
+
+    public Boolean getQualitativeStatus() {
+        return qualitativeStatus;
+    }
+
+    public void setQualitativeStatus(Boolean qualitativeStatus) {
+        this.qualitativeStatus = qualitativeStatus;
+    }
+
+    public Boolean getQuantitativeStatus() {
+        return quantitativeStatus;
+    }
+
+    public void setQuantitativeStatus(Boolean quantitativeStatus) {
+        this.quantitativeStatus = quantitativeStatus;
+    }
+
+    public Boolean getOverallStatus() {
+        return overallStatus;
+    }
+
+    public void setOverallStatus(Boolean overallStatus) {
+        this.overallStatus = overallStatus;
+    }
 
     public String getOrientation() {
         return orientation;

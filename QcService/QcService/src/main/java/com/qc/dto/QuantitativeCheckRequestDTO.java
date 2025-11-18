@@ -5,7 +5,7 @@ public class QuantitativeCheckRequestDTO {
     private String name;
     private String description;
     private Boolean isScan;
-    private String status;
+    private Boolean status;
     private String value;
 
     public Long getQuantitativeCheckMasterId() {
@@ -31,10 +31,10 @@ public class QuantitativeCheckRequestDTO {
     }
     public void setIsScan(Boolean isScan) { this.isScan = isScan; }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(Boolean status) { this.status = status; }
 
     public String getValue() {
         return value;

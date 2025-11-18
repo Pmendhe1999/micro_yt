@@ -9,7 +9,7 @@ public class QuantitativeCheckDTOResponse {
     private Long id;
     private String description;
     private Boolean isScan;
-    private String status;
+    private Boolean status;
     private String value;
     private Long quantitativeCheckMasterId;
     private String quantitativeCheckMasterName; // optional if you want to show master name
@@ -21,7 +21,7 @@ public class QuantitativeCheckDTOResponse {
             Long id,
             String description,
             Boolean scan,
-            String status,
+            Boolean status,
             String value,
             Long quantitativeCheckMasterId,
             String quantitativeCheckMasterName,
@@ -67,11 +67,11 @@ public class QuantitativeCheckDTOResponse {
         isScan = scan;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 

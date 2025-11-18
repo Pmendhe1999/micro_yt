@@ -57,7 +57,7 @@ public class QuantitativeCheckController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) Boolean isScan,
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean status,
             @RequestParam(required = false) String value,
             @RequestParam(required = false) List<Long> quantitativeCheckMasterIds,
             @RequestParam(required = false) List<Long> productIds, // ✅ new filter

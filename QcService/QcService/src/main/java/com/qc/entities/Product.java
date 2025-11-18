@@ -91,6 +91,39 @@ public class Product extends AbstractAuditingEntity{
     @Column(name = "iin_no", length = 255)
     private String iinNo;
 
+    @Column(name = "qualitative_status", length = 50)
+    private Boolean qualitativeStatus;
+
+    @Column(name = "quantitative_status", length = 50)
+    private Boolean quantitativeStatus;
+
+    @Column(name = "overall_status", length = 50)
+    private Boolean overallStatus;
+
+    public Boolean getQualitativeStatus() {
+        return qualitativeStatus;
+    }
+
+    public void setQualitativeStatus(Boolean qualitativeStatus) {
+        this.qualitativeStatus = qualitativeStatus;
+    }
+
+    public Boolean getQuantitativeStatus() {
+        return quantitativeStatus;
+    }
+
+    public void setQuantitativeStatus(Boolean quantitativeStatus) {
+        this.quantitativeStatus = quantitativeStatus;
+    }
+
+    public Boolean getOverallStatus() {
+        return overallStatus;
+    }
+
+    public void setOverallStatus(Boolean overallStatus) {
+        this.overallStatus = overallStatus;
+    }
+
     public String getBarCodeNo() {
         return barCodeNo;
     }

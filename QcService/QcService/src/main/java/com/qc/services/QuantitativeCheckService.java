@@ -38,7 +38,7 @@ public class QuantitativeCheckService {
     public Page<QuantitativeCheckDTOResponse> getAllQuantitativeChecksWithFilters(
             String description,
             Boolean isScan,
-            String status,
+            Boolean status,
             String value,
             List<Long> quantitativeCheckMasterIds,
             List<Long> productIds,

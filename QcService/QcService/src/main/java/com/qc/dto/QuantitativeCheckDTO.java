@@ -3,7 +3,7 @@ package com.qc.dto;
 public class QuantitativeCheckDTO {
     private String description;
     private Boolean isScan;
-    private String status;
+    private Boolean status;
     private String value;
     private Long quantitativeCheckMasterId;
     private Long productId;
@@ -23,11 +23,11 @@ public class QuantitativeCheckDTO {
         isScan = scan;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 

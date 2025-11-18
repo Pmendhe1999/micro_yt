@@ -17,7 +17,7 @@ public class QuantitativeCheck extends AbstractAuditingEntity {
     private Boolean isScan;
 
     @Column(name = "status", length = 255)
-    private String status;
+    private Boolean status;
 
     @Column(name = "value", length = 255)
     private String value;
@@ -56,11 +56,11 @@ public class QuantitativeCheck extends AbstractAuditingEntity {
         isScan = scan;
     }
 
-    public String getStatus() {
+    public Boolean getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Boolean status) {
         this.status = status;
     }
 
