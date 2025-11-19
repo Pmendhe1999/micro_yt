@@ -27,6 +27,43 @@ public class ProductMasterDTO {
     private String orientation;
     private String size;
 
+    private String mfgLifNo;
+    private String sterileType;
+    private String barCodeNo;
+    private String iinNo;
+
+    public String getMfgLifNo() {
+        return mfgLifNo;
+    }
+
+    public void setMfgLifNo(String mfgLifNo) {
+        this.mfgLifNo = mfgLifNo;
+    }
+
+    public String getSterileType() {
+        return sterileType;
+    }
+
+    public void setSterileType(String sterileType) {
+        this.sterileType = sterileType;
+    }
+
+    public String getBarCodeNo() {
+        return barCodeNo;
+    }
+
+    public void setBarCodeNo(String barCodeNo) {
+        this.barCodeNo = barCodeNo;
+    }
+
+    public String getIinNo() {
+        return iinNo;
+    }
+
+    public void setIinNo(String iinNo) {
+        this.iinNo = iinNo;
+    }
+
     public String getOrientation() {
         return orientation;
     }
