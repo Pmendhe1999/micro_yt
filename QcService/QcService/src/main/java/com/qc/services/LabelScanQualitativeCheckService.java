@@ -165,28 +165,7 @@ public class LabelScanQualitativeCheckService {
                         .orElseThrow(() -> new ResourceNotFoundException(
                                 "DeliveryChallan not found with ID: " + request.getDeliveryChallanId()));
 
-        // Extract productCode from the request
-        String requestedProductCode = request.getQuantitativeChecks().stream()
-                .filter(dto -> "productcode".equalsIgnoreCase(dto.getName()))
-                .map(QuantitativeCheckRequestDTO::getValue)
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("productCode is missing in quantitativeChecks"));
-
-// Fetch all items for the given challan
-        List<DeliveryItems> itemsForChallan =
-                deliveryItemsRepository.findByChallan(deliveryChallan);
-
-// Check if product exists
-        boolean productExists = itemsForChallan.stream()
-                .anyMatch(item -> requestedProductCode.equalsIgnoreCase(item.getProductCode()));
-
-        if (!productExists) {
-            throw new ResourceNotFoundException(
-                    "Product code " + requestedProductCode +
-                            " not found in DeliveryChallan ID: " + request.getDeliveryChallanId());
-        }
-
-        // Step 3 - Extract required product fields
+        // Step 3 - Extract fields
         String productName = null;
         String productCode = null;
         String size = null;
@@ -205,32 +184,41 @@ public class LabelScanQualitativeCheckService {
             throw new ResourceNotFoundException("productName, productCode, size, orientation all required");
         }
 
-        // FINAL VARIABLES for lambda usage
         final String finalProductName = productName;
         final String finalProductCode = productCode;
         final String finalSize = size;
         final String finalOrientation = orientation;
 
+        // Step 4 - ProductMaster by name
+        List<ProductMaster> masters = productMasterRepository.findByName(finalProductName);
 
-        // Step 4 - Fetch ProductMaster
-        ProductMaster productMaster = productMasterRepository
-                .findByNameAndProductCodeAndSizeAndOrientation(
-                        finalProductName, finalProductCode, finalSize, finalOrientation)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "ProductMaster not found for: " + finalProductName +
-                                " | " + finalProductCode + " | " + finalSize + " | " + finalOrientation));
+        if (masters == null || masters.isEmpty()) {
+            throw new ResourceNotFoundException("ProductMaster not found for productName: " + finalProductName);
+        }
 
+        ProductMaster productMaster = masters.get(0);
 
-        // Step 5 - Fetch DeliveryItem
-        DeliveryItems deliveryItem = deliveryItemsRepository
-                .findByNameAndProductCode(finalProductName, finalProductCode)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "DeliveryItem not found for name: " + finalProductName + " and code: " + finalProductCode));
+        boolean sizeMatches = finalSize.equalsIgnoreCase(productMaster.getSize());
+        boolean orientationMatches = finalOrientation.equalsIgnoreCase(productMaster.getOrientation());
 
+        boolean productNameMatches = finalProductName.equalsIgnoreCase(productMaster.getName());
+
+        // Step 5 - DeliveryItems match
+        List<DeliveryItems> deliveryItemsForChallan =
+                deliveryItemsRepository.findByChallan(deliveryChallan);
+
+        boolean deliveryItemMatchFlag = deliveryItemsForChallan.stream()
+                .anyMatch(item -> item.getProductCode() != null &&
+                        item.getProductCode().equalsIgnoreCase(finalProductCode));
+
+        DeliveryItems deliveryItem = deliveryItemsForChallan.stream()
+                .filter(item -> item.getProductCode() != null &&
+                        item.getProductCode().equalsIgnoreCase(finalProductCode))
+                .findFirst()
+                .orElse(null);
 
         // Step 6 - Create Product
         Product product = new Product();
-
         product.setName(productMaster.getName());
         product.setProductCode(productMaster.getProductCode());
         product.setSerialNo(productMaster.getSerialNo());
@@ -253,8 +241,8 @@ public class LabelScanQualitativeCheckService {
 
         productRepository.save(product);
 
+        // ⭐⭐⭐ UPDATED STEP 7 — AUTO-CALCULATE STATUS ⭐⭐⭐
 
-        // Step 7 - Save Quantitative Checks
         List<QuantitativeCheck> savedChecks = new ArrayList<>();
 
         for (QuantitativeCheckRequestDTO dto : request.getQuantitativeChecks()) {
@@ -268,19 +256,42 @@ public class LabelScanQualitativeCheckService {
 
             check.setDescription(dto.getDescription());
             check.setScan(dto.getIsScan());
-            check.setStatus(dto.getStatus());
             check.setValue(dto.getValue());
             check.setQuantitativeCheckMaster(master);
             check.setProduct(product);
+
+            // ⭐ INDIVIDUAL FIELD MATCH LOGIC
+            switch (dto.getName().toLowerCase()) {
+
+                case "productname":
+                    check.setStatus(productNameMatches ? true : false);
+                    break;
+
+                case "productcode":
+                    check.setStatus(deliveryItemMatchFlag ? true : false);
+                    break;
+
+                case "size":
+                    check.setStatus(sizeMatches ? true : false);
+                    break;
+
+                case "orientation":
+                    check.setStatus(orientationMatches ? true : false);
+                    break;
+
+                default:
+                    // For other fields → use the status provided in payload
+                    check.setStatus(dto.getStatus());
+                    break;
+            }
 
             savedChecks.add(check);
         }
 
         quantitativeCheckRepository.saveAll(savedChecks);
 
-
-        // Step 8 - Map to Response DTO
-        final Product finalProduct = product;  // <-- for lambda
+        // Step 8 - Response DTO
+        final Product finalProduct = product;
 
         List<QuantitativeCheckDTOResponse> responseList = savedChecks.stream()
                 .map(check -> new QuantitativeCheckDTOResponse(
@@ -288,7 +299,6 @@ public class LabelScanQualitativeCheckService {
                         check.getDescription(),
                         check.getScan(),
                         check.getStatus(),
-
                         check.getValue(),
                         check.getQuantitativeCheckMaster().getId(),
                         check.getQuantitativeCheckMaster().getName(),
@@ -300,7 +310,6 @@ public class LabelScanQualitativeCheckService {
                 ))
                 .collect(Collectors.toList());
 
-        // ⭐ Step 9 - Fetch MediaDetails for ProductMaster
         List<MediaDetails> mediaDetailsList =
                 mediaDetailsRepository.findByProductMaster(productMaster);
 
@@ -312,7 +321,6 @@ public class LabelScanQualitativeCheckService {
                 ))
                 .collect(Collectors.toList());
 
-
         return new LabelScanQuantitativeCheckResponseDTO(
                 finalProduct.getId(),
                 labelScanMaster.getId(),
@@ -322,7 +330,8 @@ public class LabelScanQualitativeCheckService {
         );
     }
 
-    
+
+
     public LabelScanQuantitativeCheckUpdateResponseDTO updateQuantitativeChecks(
             LabelScanQuantitativeCheckUpdateRequestDTO request) {
 

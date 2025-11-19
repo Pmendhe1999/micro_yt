@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface ProductMasterRepository extends JpaRepository<ProductMaster, Long> {
@@ -47,7 +48,7 @@ public interface ProductMasterRepository extends JpaRepository<ProductMaster, Lo
             @Param("orientationValue") String orientationValue,
             Pageable pageable);
 
-    Optional<ProductMaster> findByName(String name);
+    List<ProductMaster> findByName(String name);
     Optional<ProductMaster> findByNameAndProductCodeAndSizeAndOrientation(String name, String productCode, String size,
                                                      String orientation);
 

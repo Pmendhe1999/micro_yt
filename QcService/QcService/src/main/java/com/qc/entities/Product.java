@@ -66,7 +66,7 @@ public class Product extends AbstractAuditingEntity{
     private String sterileType;
     // Foreign key to DeliveryChallan
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "delivery_challan_id", nullable = false)
+    @JoinColumn(name = "delivery_challan_id", nullable = true)
     private DeliveryChallan deliveryChallan;
 
     // Foreign key to DeliveryItemsMaster
@@ -76,12 +76,12 @@ public class Product extends AbstractAuditingEntity{
 
     // Foreign key to DeliveryItemsMaster
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "delivery_items_id", nullable = false)
+    @JoinColumn(name = "delivery_items_id", nullable = true)
     private DeliveryItems deliveryItems;
 
     // 🔹 Foreign key to ProductMaster
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_master_id", nullable = false)
+    @JoinColumn(name = "product_master_id", nullable = true)
     private ProductMaster productMaster;
 
     // ✅ Newly Added Fields
