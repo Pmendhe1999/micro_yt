@@ -22,6 +22,24 @@ public class ProductionOrderDTOResponse {
 
     private Instant createdDate;          // ADD THIS
     private Instant lastModifiedDate;     // ADD THIS
+    private String productCode;
+    private String productDescription;
+
+    public String getProductCode() {
+        return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
+    }
+
+    public String getProductDescription() {
+        return productDescription;
+    }
+
+    public void setProductDescription(String productDescription) {
+        this.productDescription = productDescription;
+    }
 
     public void setLastModifiedDate(Instant lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;

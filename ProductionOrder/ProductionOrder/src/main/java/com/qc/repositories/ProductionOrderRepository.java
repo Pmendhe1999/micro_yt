@@ -18,7 +18,9 @@ public interface ProductionOrderRepository extends JpaRepository<ProductionOrder
             "AND (:currentWorkCenter IS NULL OR LOWER(p.currentWorkCenter) LIKE LOWER(CONCAT('%', :currentWorkCenter, '%'))) " +
             "AND (:activityNumber IS NULL OR LOWER(p.activityNumber) LIKE LOWER(CONCAT('%', :activityNumber, '%'))) " +
             "AND (:operation IS NULL OR LOWER(p.operation) LIKE LOWER(CONCAT('%', :operation, '%'))) " +
-            "AND (:priority IS NULL OR p.priority = :priority)")
+            "AND (:priority IS NULL OR p.priority = :priority) " +
+            "AND (:productCode IS NULL OR LOWER(p.productCode) LIKE LOWER(CONCAT('%', :productCode, '%'))) " +
+            "AND (:productDescription IS NULL OR LOWER(p.productDescription) LIKE LOWER(CONCAT('%', :productDescription, '%')))")
     Page<ProductionOrder> search(
             @Param("productionOrderNo") String productionOrderNo,
             @Param("batchNo") String batchNo,
@@ -26,6 +28,8 @@ public interface ProductionOrderRepository extends JpaRepository<ProductionOrder
             @Param("activityNumber") String activityNumber,
             @Param("operation") String operation,
             @Param("priority") Long priority,
+            @Param("productCode") String productCode,
+            @Param("productDescription") String productDescription,
             Pageable pageable);
 
     @Query("SELECT DISTINCT p.currentWorkCenter FROM ProductionOrder p WHERE p.currentWorkCenter IS NOT NULL")

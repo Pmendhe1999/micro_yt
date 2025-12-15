@@ -56,6 +56,8 @@ public class ProductionOrderController {
             @RequestParam(required = false) String activityNumber,
             @RequestParam(required = false) String operation,
             @RequestParam(required = false) Long priority,
+            @RequestParam(required = false) String productCode,
+            @RequestParam(required = false) String productDescription,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -66,7 +68,8 @@ public class ProductionOrderController {
 
         Page<ProductionOrderDTOResponse> result =
                 productionOrderService.getAll(productionOrderNo, batchNo, currentWorkCenter,
-                        activityNumber, operation, priority, pageable);
+                        activityNumber, operation, priority,     productCode,
+                        productDescription,pageable);
 
         return responseService.success(200, "Production Orders fetched successfully",
                 result.getContent(), result.getTotalElements());

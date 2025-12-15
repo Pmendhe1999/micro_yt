@@ -47,10 +47,12 @@ public class ProductionOrderService {
             String activityNumber,
             String operation,
             Long priority,
+            String productCode,
+            String productDescription,
             Pageable pageable) {
 
         Page<ProductionOrder> page = productionOrderRepository.search(
-                productionOrderNo, batchNo, currentWorkCenter, activityNumber, operation, priority, pageable);
+                productionOrderNo, batchNo, currentWorkCenter, activityNumber, operation, priority,productCode,productDescription, pageable);
 
         List<ProductionOrderDTOResponse> list = productionOrderMapper.toDtoList(page.getContent());
 
@@ -78,7 +80,8 @@ public class ProductionOrderService {
         existing.setOperation(dto.getOperation());
         existing.setPriority(dto.getPriority());
         existing.setPriorityRemark(dto.getPriorityRemark());
-
+        existing.setProductCode(dto.getProductCode());
+        existing.setProductDescription(dto.getProductDescription());
         ProductionOrder saved = productionOrderRepository.save(existing);
         return productionOrderMapper.toDto(saved);
     }
@@ -97,7 +100,11 @@ public class ProductionOrderService {
         if (dto.getOperation() != null) existing.setOperation(dto.getOperation());
         if (dto.getPriority() != null) existing.setPriority(dto.getPriority());
         if (dto.getPriorityRemark() != null) existing.setPriorityRemark(dto.getPriorityRemark());
+        if (dto.getProductCode() != null)
+            existing.setProductCode(dto.getProductCode());
 
+        if (dto.getProductDescription() != null)
+            existing.setProductDescription(dto.getProductDescription());
         ProductionOrder saved = productionOrderRepository.save(existing);
         return productionOrderMapper.toDto(saved);
     }
@@ -134,7 +141,8 @@ public class ProductionOrderService {
                 String operation = getCellValue(row.getCell(6));
                 String priorityStr = getCellValue(row.getCell(7));
                 String priorityRemark = getCellValue(row.getCell(8));
-
+                String productCode = getCellValue(row.getCell(9));
+                String productDescription = getCellValue(row.getCell(10));
                 // Skip empty rows
                 if (productionOrderNo == null || productionOrderNo.trim().isEmpty())
                     continue;
@@ -150,7 +158,8 @@ public class ProductionOrderService {
                 order.setOperation(operation);
                 order.setPriority(parseLong(priorityStr));
                 order.setPriorityRemark(priorityRemark);
-
+                order.setProductCode(productCode);
+                order.setProductDescription(productDescription);
                 orders.add(order);
             }
 
